@@ -8,7 +8,8 @@
     "dev:clean": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "vercel-install": "npm install --legacy-peer-deps"
   },
   "author": "Alberto Sorno",
   "license": "MIT",
