@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
+import { requireCronAuth } from '@/lib/security/cron';
 
 /**
  * CRON JOB: Execute Draw for LotteryTestingUltraSimple
@@ -63,16 +64,10 @@ const LOTTERY_ABI = [
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. Verify CRON_SECRET
-    const authHeader = request.headers.get('authorization');
-    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
-
-    if (authHeader !== expectedAuth) {
-      console.error('❌ Unauthorized: Invalid CRON_SECRET');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // 1. Verify CRON authentication (Vercel Cron)
+    const authResponse = requireCronAuth(request);
+    if (authResponse) {
+      return authResponse; // Unauthorized
     }
 
     console.log('🎯 CRON JOB: Execute Draw - Starting...');

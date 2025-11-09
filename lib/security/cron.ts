@@ -99,56 +99,54 @@ export function validateCronRequest(request: NextRequest): {
 } {
   const ip = extractIP(request);
 
-  // 1. Check Authorization header
+  // 1. Check for Vercel CRON header first (takes precedence)
+  const cronHeader = request.headers.get('x-vercel-cron');
+  const isVercelCron = cronHeader === '1';
+
+  // 2. Check Authorization header (for manual triggers or non-Vercel crons)
   const authHeader = request.headers.get('authorization');
   const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+  const hasValidAuth = authHeader === expectedAuth;
 
-  if (!authHeader || authHeader !== expectedAuth) {
-    logger.security('CRON request with invalid authorization', {
+  // Require EITHER Vercel cron header OR valid Bearer token
+  if (!isVercelCron && !hasValidAuth) {
+    logger.security('CRON request with invalid authentication', {
       ip,
       path: request.nextUrl.pathname,
       hasAuth: !!authHeader,
+      hasVercelHeader: !!cronHeader,
     });
     return {
       valid: false,
-      error: 'Invalid authorization',
+      error: 'Invalid authentication - missing Vercel CRON header or valid Bearer token',
       ip,
     };
   }
 
-  // 2. Check IP whitelist (skip in development)
-  if (process.env.NODE_ENV !== 'development') {
+  // 3. If Vercel cron header is present, trust it (Vercel's infrastructure)
+  // Skip IP check for Vercel crons - they come from Vercel's infrastructure
+  if (isVercelCron) {
+    logger.info('CRON request authenticated via x-vercel-cron header', {
+      ip,
+      path: request.nextUrl.pathname,
+    });
+  } else if (process.env.NODE_ENV !== 'development') {
+    // 4. Check IP whitelist for non-Vercel crons (manual triggers with Bearer token)
     if (!isIPWhitelisted(ip)) {
-      logger.security('CRON request from non-whitelisted IP', {
-        ip,
-        path: request.nextUrl.pathname,
-      });
-      return {
-        valid: false,
-        error: 'IP not whitelisted',
-        ip,
-      };
-    }
-  }
-
-  // 3. Check Vercel CRON header (skip in development)
-  if (process.env.NODE_ENV !== 'development') {
-    const cronHeader = request.headers.get('x-vercel-cron');
-    if (cronHeader !== '1') {
-      logger.security('CRON request missing x-vercel-cron header', {
+      logger.security('CRON request from non-whitelisted IP without Vercel header', {
         ip,
         path: request.nextUrl.pathname,
         cronHeader,
       });
       return {
         valid: false,
-        error: 'Missing Vercel CRON header',
+        error: 'IP not whitelisted and missing Vercel CRON header',
         ip,
       };
     }
   }
 
-  // 4. Optional: Check timestamp to prevent replay attacks
+  // 5. Optional: Check timestamp to prevent replay attacks
   // Vercel CRON jobs should be recent (within last 5 minutes)
   const timestampHeader = request.headers.get('x-vercel-timestamp');
   if (timestampHeader) {
