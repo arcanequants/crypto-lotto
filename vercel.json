@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/finalize-vote",
-      "schedule": "59 23 L * *"
+      "schedule": "59 23 28 * *"
     },
     {
       "path": "/api/cron/calculate-fees",
