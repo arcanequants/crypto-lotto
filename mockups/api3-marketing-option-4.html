@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option 4: Side Panel - Home Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --darker: #0a0e27;
+            --dark: #151932;
+            --primary: #00f0ff;
+            --secondary: #0066ff;
+            --accent: #ffd700;
+            --light: #e0e6ed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #000 100%);
+            color: var(--light);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: var(--light);
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Two Column Layout */
+        .two-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* Main Content (Left) */
+        .main-content {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95));
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .main-content h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .main-content p {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .buy-button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 15px;
+            padding: 18px 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        /* API3 Side Panel - Opción 4 */
+        .api3-side-panel {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 102, 255, 0.1));
+            border: 3px solid var(--primary);
+            border-radius: 25px;
+            padding: 35px;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.3);
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .quantum-sphere {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.8);
+            animation: orbit 4s linear infinite;
+            position: relative;
+        }
+
+        @keyframes orbit {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quantum-sphere::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px dashed var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: orbit-reverse 6s linear infinite;
+        }
+
+        @keyframes orbit-reverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        .panel-badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.2);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .panel-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            color: white;
+            margin: 15px 0 10px;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .panel-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: 25px 0;
+        }
+
+        .panel-content {
+            text-align: left;
+        }
+
+        .benefit-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 240, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .benefit-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .benefit-text h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .benefit-text p {
+            font-size: 13px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .learn-more-btn {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 102, 255, 0.2));
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .learn-more-btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 8px;
+            font-size: 14px;
+            grid-column: 1 / -1;
+        }
+
+        .location-note strong {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column-layout {
+                grid-template-columns: 1fr;
+            }
+            .api3-side-panel {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">📍 OPCIÓN 4: SIDE PANEL - HOME PAGE</div>
+    <div class="mockup-subtitle">Panel lateral sticky | Siempre visible mientras scroll | Máxima exposición</div>
+
+    <div class="container">
+        <div class="two-column-layout">
+            <!-- Main Content (Left) -->
+            <div class="main-content">
+                <h1>Win Big with Crypto</h1>
+                <p>Blockchain-powered lottery with transparent, verifiable draws</p>
+                <button class="buy-button">Buy Tickets Now</button>
+
+                <div style="margin-top: 50px; opacity: 0.5;">
+                    <p style="font-size: 14px;">[More content here...]</p>
+                    <p style="font-size: 14px; margin-top: 20px;">[Prize pools, draws, etc...]</p>
+                </div>
+            </div>
+
+            <!-- API3 Side Panel (Right) -->
+            <div class="api3-side-panel">
+                <div class="panel-header">
+                    <div class="quantum-sphere">⚛️</div>
+                    <div class="panel-badge">🔬 Quantum Technology</div>
+                    <h2>API3 QRNG</h2>
+                    <p class="panel-subtitle">
+                        True quantum randomness powered by Australian National University
+                    </p>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="panel-content">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🏛️</div>
+                        <div class="benefit-text">
+                            <h4>Government Backed</h4>
+                            <p>Operated by the Australian National University</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">⚛️</div>
+                        <div class="benefit-text">
+                            <h4>Quantum Physics</h4>
+                            <p>Real quantum measurements, not pseudo-random algorithms</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🔍</div>
+                        <div class="benefit-text">
+                            <h4>100% Auditable</h4>
+                            <p>Every draw verifiable on-chain with cryptographic proof</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🛡️</div>
+                        <div class="benefit-text">
+                            <h4>Impossible to Predict</h4>
+                            <p>Quantum uncertainty guarantees true randomness</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🆓</div>
+                        <div class="benefit-text">
+                            <h4>Zero Oracle Fees</h4>
+                            <p>More money goes directly to prize pools</p>
+                        </div>
+                    </div>
+
+                    <button class="learn-more-btn">Learn How It Works →</button>
+                </div>
+            </div>
+
+            <div class="location-note">
+                <strong>📍 Why This Location:</strong> Sticky side panel on home page. Always visible
+                as user scrolls down. Can't be missed. Educates users about technology while they
+                browse. Works great on desktop (collapses to bottom on mobile). Maximum real estate
+                for detailed explanation.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

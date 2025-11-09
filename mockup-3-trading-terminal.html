@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCKUP 3: Trading Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: #0a0f1a;
+      color: #0f0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Matrix rain effect */
+    .matrix-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, #0a0f1a 0%, #000 100%);
+      z-index: 0;
+    }
+
+    .matrix-bg::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px);
+      animation: scan 8s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(100px); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Terminal Header */
+    .terminal-header {
+      background: rgba(0, 20, 0, 0.8);
+      border: 2px solid #0f0;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-family: 'Orbitron', monospace;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .terminal-header h1 {
+      font-size: 24px;
+      color: #0f0;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #0f0;
+    }
+
+    .terminal-stats {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #0f0;
+    }
+
+    .stat-item {
+      padding: 5px 15px;
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #0f0;
+    }
+
+    .stat-live {
+      color: #f00;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    /* Voting Power Banner */
+    .voting-power {
+      background: rgba(0, 40, 0, 0.6);
+      border: 2px solid #0f0;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    }
+
+    .voting-power-title {
+      font-size: 14px;
+      color: #0f0;
+      margin-bottom: 5px;
+    }
+
+    .voting-power-amount {
+      font-size: 24px;
+      color: #0f0;
+      font-weight: 700;
+      text-shadow: 0 0 10px #0f0;
+    }
+
+    /* Trading Table */
+    .trading-table {
+      background: rgba(0, 20, 0, 0.9);
+      border: 2px solid #0f0;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+    }
+
+    .table-header {
+      background: rgba(0, 40, 0, 0.8);
+      border-bottom: 2px solid #0f0;
+      padding: 15px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 2fr 1fr 2fr;
+      gap: 15px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f0;
+    }
+
+    .table-row {
+      padding: 20px 15px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 2fr 1fr 2fr;
+      gap: 15px;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .table-row:hover {
+      background: rgba(0, 255, 0, 0.1);
+      border-left: 4px solid #0f0;
+    }
+
+    .table-row.leading {
+      background: rgba(0, 255, 0, 0.15);
+      border-left: 4px solid #0f0;
+    }
+
+    .token-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .token-emoji {
+      font-size: 24px;
+    }
+
+    .votes-cell {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f0;
+    }
+
+    .percentage-cell {
+      font-size: 16px;
+      color: #0f0;
+    }
+
+    .chart-cell {
+      font-family: monospace;
+      font-size: 14px;
+      color: #0f0;
+    }
+
+    .change-cell {
+      font-size: 14px;
+    }
+
+    .change-positive {
+      color: #0f0;
+    }
+
+    .change-neutral {
+      color: #666;
+    }
+
+    .action-cell button {
+      padding: 8px 20px;
+      background: transparent;
+      border: 2px solid #0f0;
+      color: #0f0;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+
+    .action-cell button:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 15px #0f0;
+    }
+
+    /* Execute Button */
+    .execute-section {
+      background: rgba(0, 40, 0, 0.6);
+      border-top: 2px solid #0f0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .execute-btn {
+      padding: 15px 60px;
+      background: transparent;
+      border: 3px solid #0f0;
+      color: #0f0;
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .execute-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: #0f0;
+      transition: left 0.5s;
+      z-index: -1;
+    }
+
+    .execute-btn:hover::before {
+      left: 0;
+    }
+
+    .execute-btn:hover {
+      color: #000;
+      box-shadow: 0 0 30px #0f0;
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 0, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      z-index: 1000;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <div class="mockup-label">MOCKUP 3: TRADING TERMINAL</div>
+
+  <div class="container">
+    <div class="terminal-header">
+      <h1>CRYPTO LOTTO • GOVERNANCE TERMINAL</h1>
+      <div class="terminal-stats">
+        <div class="stat-item">OCT 2025</div>
+        <div class="stat-item">22 TOTAL VOTES</div>
+        <div class="stat-item">⏱️ 8 DAYS LEFT</div>
+        <div class="stat-item stat-live">🔴 LIVE</div>
+      </div>
+    </div>
+
+    <div class="voting-power">
+      <div class="voting-power-title">💼 YOUR VOTING POWER:</div>
+      <div class="voting-power-amount">15 VOTES</div>
+      <div style="font-size: 11px; color: #0f0; margin-top: 5px;">
+        Deploy all votes to maximize your governance impact
+      </div>
+    </div>
+
+    <div class="trading-table">
+      <div class="table-header">
+        <div>TOKEN</div>
+        <div>VOTES</div>
+        <div>%</div>
+        <div>CHART</div>
+        <div>24H Δ</div>
+        <div>ACTION</div>
+      </div>
+
+      <div class="table-row leading">
+        <div class="token-cell">
+          <span class="token-emoji">🪐</span>
+          <span>JUPITER</span>
+        </div>
+        <div class="votes-cell">19</div>
+        <div class="percentage-cell">86.4%</div>
+        <div class="chart-cell">████████░░</div>
+        <div class="change-cell change-positive">+5 votes</div>
+        <div class="action-cell">
+          <button>VOTE</button>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="token-cell">
+          <span class="token-emoji">🐶</span>
+          <span>BONK</span>
+        </div>
+        <div class="votes-cell">3</div>
+        <div class="percentage-cell">13.6%</div>
+        <div class="chart-cell">█░░░░░░░░░</div>
+        <div class="change-cell change-positive">+3 votes</div>
+        <div class="action-cell">
+          <button>VOTE</button>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="token-cell">
+          <span class="token-emoji">₿</span>
+          <span>BITCOIN</span>
+        </div>
+        <div class="votes-cell">0</div>
+        <div class="percentage-cell">0.0%</div>
+        <div class="chart-cell">░░░░░░░░░░</div>
+        <div class="change-cell change-neutral">-</div>
+        <div class="action-cell">
+          <button>VOTE</button>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="token-cell">
+          <span class="token-emoji">🐋</span>
+          <span>ORCA</span>
+        </div>
+        <div class="votes-cell">0</div>
+        <div class="percentage-cell">0.0%</div>
+        <div class="chart-cell">░░░░░░░░░░</div>
+        <div class="change-cell change-neutral">-</div>
+        <div class="action-cell">
+          <button>VOTE</button>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="token-cell">
+          <span class="token-emoji">💵</span>
+          <span>USDC</span>
+        </div>
+        <div class="votes-cell">0</div>
+        <div class="percentage-cell">0.0%</div>
+        <div class="chart-cell">░░░░░░░░░░</div>
+        <div class="change-cell change-neutral">-</div>
+        <div class="action-cell">
+          <button>VOTE</button>
+        </div>
+      </div>
+
+      <div class="execute-section">
+        <button class="execute-btn">Execute Vote</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

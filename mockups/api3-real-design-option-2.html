@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Design Option 2: Full Info Card with 4 Pills</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e1a;
+            color: #e0e6ed;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: #e0e6ed;
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .draws-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .draw-section {
+            background: linear-gradient(135deg, #0f1629 0%, #0a0e1a 100%);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .draw-section.daily {
+            border: 2px solid rgba(0, 240, 255, 0.4);
+        }
+
+        .draw-section.weekly {
+            border: 2px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .draw-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .jackpot-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .jackpot-label.daily { color: #00f0ff; }
+        .jackpot-label.weekly { color: #ffd700; }
+
+        .winning-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .winning-title.daily {
+            background: linear-gradient(135deg, #00f0ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .winning-title.weekly {
+            background: linear-gradient(135deg, #ffd700, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-id {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .numbers-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .number-ball {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .number-ball.daily {
+            background: linear-gradient(135deg, #00f0ff, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+        }
+
+        .number-ball.weekly {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #0a0e1a;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .number-ball.power {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+
+        .plus-symbol {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0 8px;
+        }
+
+        .plus-symbol.daily { color: #00f0ff; }
+        .plus-symbol.weekly { color: #ffd700; }
+
+        /* API3 FULL INFO CARD - OPTION 2: Like image #3, full explanation */
+        .api3-full-card {
+            border-radius: 18px;
+            padding: 28px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 22px;
+            align-items: start;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .api3-full-card.daily {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 102, 255, 0.1));
+            border: 2px solid rgba(0, 240, 255, 0.5);
+        }
+
+        .api3-full-card.weekly {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+
+        /* Animated top border */
+        .api3-full-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            animation: shimmer 3s linear infinite;
+            background-size: 200%;
+        }
+
+        .api3-full-card.daily::before {
+            background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+        }
+
+        .api3-full-card.weekly::before {
+            background: linear-gradient(90deg, transparent, #ffd700, transparent);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .quantum-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            animation: rotate3d 6s ease-in-out infinite;
+        }
+
+        .quantum-logo.daily {
+            background: linear-gradient(135deg, #00f0ff, #0066ff);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .quantum-logo.weekly {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes rotate3d {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tech-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .tech-label.daily {
+            background: rgba(0, 240, 255, 0.2);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #00f0ff;
+        }
+
+        .tech-label.weekly {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+        }
+
+        .card-main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .card-description {
+            font-size: 13px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .feature-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .feature-pill.daily {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .feature-pill.weekly {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .feature-pill:hover {
+            transform: translateY(-2px);
+        }
+
+        .feature-pill.daily:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: #00f0ff;
+        }
+
+        .feature-pill.weekly:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .feature-icon {
+            font-size: 16px;
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid #00f0ff;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: #00f0ff;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .draws-grid {
+                grid-template-columns: 1fr;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">🎨 PROPUESTA 2: FULL INFO CARD WITH 4 PILLS</div>
+    <div class="mockup-subtitle">Completa | Card con toda la info como en imagen #3 | Educativa</div>
+
+    <div class="container">
+        <div class="draws-grid">
+            <!-- DAILY DRAW -->
+            <div class="draw-section daily">
+                <div class="draw-header">
+                    <div class="jackpot-label daily">🎯 DAILY JACKPOT</div>
+                    <h1 class="winning-title daily">🎉 WINNING NUMBERS</h1>
+                    <div class="draw-id">Draw #1</div>
+                </div>
+
+                <div class="numbers-row">
+                    <div class="number-ball daily">05</div>
+                    <div class="number-ball daily">07</div>
+                    <div class="number-ball daily">08</div>
+                    <div class="number-ball daily">17</div>
+                    <div class="number-ball daily">38</div>
+                    <span class="plus-symbol daily">+</span>
+                    <div class="number-ball daily power">03</div>
+                </div>
+
+                <!-- API3 Full Info Card -->
+                <div class="api3-full-card daily">
+                    <div class="quantum-logo daily">⚛️</div>
+
+                    <div class="card-info">
+                        <div class="tech-label daily">🔬 QUANTUM TECHNOLOGY</div>
+                        <div class="card-main-title">Verified by API3 QRNG</div>
+                        <p class="card-description">
+                            Numbers generated using quantum randomness from Australian National University. 100% verifiable on-chain.
+                        </p>
+
+                        <div class="features-grid">
+                            <div class="feature-pill daily">
+                                <span class="feature-icon">🏛️</span>
+                                <span>Government Backed</span>
+                            </div>
+                            <div class="feature-pill daily">
+                                <span class="feature-icon">🔍</span>
+                                <span>100% Auditable</span>
+                            </div>
+                            <div class="feature-pill daily">
+                                <span class="feature-icon">🛡️</span>
+                                <span>Unpredictable</span>
+                            </div>
+                            <div class="feature-pill daily">
+                                <span class="feature-icon">⚡</span>
+                                <span>Instant Verify</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEEKLY DRAW -->
+            <div class="draw-section weekly">
+                <div class="draw-header">
+                    <div class="jackpot-label weekly">🏆 WEEKLY JACKPOT</div>
+                    <h1 class="winning-title weekly">🎉 WINNING NUMBERS</h1>
+                    <div class="draw-id">Draw #1</div>
+                </div>
+
+                <div class="numbers-row">
+                    <div class="number-ball weekly">02</div>
+                    <div class="number-ball weekly">07</div>
+                    <div class="number-ball weekly">15</div>
+                    <div class="number-ball weekly">21</div>
+                    <div class="number-ball weekly">48</div>
+                    <span class="plus-symbol weekly">+</span>
+                    <div class="number-ball weekly power">14</div>
+                </div>
+
+                <!-- API3 Full Info Card -->
+                <div class="api3-full-card weekly">
+                    <div class="quantum-logo weekly">⚛️</div>
+
+                    <div class="card-info">
+                        <div class="tech-label weekly">🔬 QUANTUM TECHNOLOGY</div>
+                        <div class="card-main-title">Verified by API3 QRNG</div>
+                        <p class="card-description">
+                            Numbers generated using quantum randomness from Australian National University. 100% verifiable on-chain.
+                        </p>
+
+                        <div class="features-grid">
+                            <div class="feature-pill weekly">
+                                <span class="feature-icon">🏛️</span>
+                                <span>Government Backed</span>
+                            </div>
+                            <div class="feature-pill weekly">
+                                <span class="feature-icon">🔍</span>
+                                <span>100% Auditable</span>
+                            </div>
+                            <div class="feature-pill weekly">
+                                <span class="feature-icon">🛡️</span>
+                                <span>Unpredictable</span>
+                            </div>
+                            <div class="feature-pill weekly">
+                                <span class="feature-icon">⚡</span>
+                                <span>Instant Verify</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>📍 PROPUESTA 2 - FULL INFO CARD:</strong>
+            <br><br>
+            <strong>✨ Diseño:</strong> Card completa como imagen #3. Quantum logo 3D rotando + Badge tech + Título + Descripción + 4 feature pills en grid 2x2. Shimmer effect en borde superior.
+            <br><br>
+            <strong>✅ Ventajas:</strong> Máxima info educativa. Transmite seguridad avanzada. Pills interactivas. Perfecto para usuarios que quieren entender la tecnología.
+            <br><br>
+            <strong>🎯 Visibilidad:</strong> Muy Alta | Máximo contexto
+        </div>
+    </div>
+</body>
+</html>

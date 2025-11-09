@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compact Propuesta 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #050811 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .title h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .title p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      justify-content: center;
+    }
+
+    .tab {
+      padding: 10px 30px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab.active.daily {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: #00f0ff;
+      color: #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+
+    .tab.active.weekly {
+      background: rgba(255, 215, 0, 0.1);
+      border-color: #ffd700;
+      color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .lottery-card {
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95));
+      border-radius: 20px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lottery-card.daily {
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      box-shadow: 0 15px 40px rgba(0, 240, 255, 0.2);
+    }
+
+    .lottery-card.weekly {
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+    }
+
+    .shimmer {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+      animation: shimmer 3s infinite;
+      pointer-events: none;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lottery-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .daily .lottery-number {
+      color: #00f0ff;
+    }
+
+    .weekly .lottery-number {
+      color: #ffd700;
+    }
+
+    .live-badge {
+      padding: 6px 15px;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid #4ade80;
+      border-radius: 20px;
+      color: #4ade80;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      animation: pulse 2s ease-in-out infinite;
+      letter-spacing: 1px;
+    }
+
+    .prize-section {
+      text-align: center;
+      margin: 25px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .prize-label {
+      font-size: 11px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .countdown-item {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 15px 8px;
+      text-align: center;
+    }
+
+    .daily .countdown-item {
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .weekly .countdown-item {
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .countdown-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff, #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .countdown-label {
+      font-size: 10px;
+      opacity: 0.6;
+      text-transform: uppercase;
+    }
+
+    .draw-date {
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      margin: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .crypto-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .crypto-item {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .crypto-item.btc {
+      border: 1px solid rgba(247, 147, 26, 0.3);
+    }
+
+    .crypto-item.eth {
+      border: 1px solid rgba(98, 126, 234, 0.3);
+    }
+
+    .crypto-item.sol {
+      border: 1px solid rgba(0, 255, 163, 0.3);
+    }
+
+    .crypto-item:hover {
+      transform: translateY(-3px);
+    }
+
+    .crypto-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .crypto-symbol {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .crypto-item.btc .crypto-symbol {
+      color: #f7931a;
+    }
+
+    .crypto-item.eth .crypto-symbol {
+      color: #627eea;
+    }
+
+    .crypto-item.sol .crypto-symbol {
+      color: #00ffa3;
+    }
+
+    .crypto-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .crypto-usd {
+      font-size: 13px;
+      color: #ffd700;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-around;
+      font-size: 11px;
+      margin: 15px 0;
+      position: relative;
+      z-index: 1;
+      opacity: 0.7;
+    }
+
+    .info-item {
+      text-align: center;
+    }
+
+    .info-value {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .daily .info-value {
+      color: #00f0ff;
+    }
+
+    .weekly .info-value {
+      color: #ffd700;
+    }
+
+    .cta-button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      margin-top: 20px;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">
+      <h1>🎨 COMPACT: Redesign #2</h1>
+      <p>Card único compacto con tabs</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active daily" onclick="switchTab('daily')">🎯 Daily</div>
+      <div class="tab weekly" onclick="switchTab('weekly')">🏆 Weekly</div>
+    </div>
+
+    <!-- DAILY TAB -->
+    <div id="daily-content" class="tab-content active">
+      <div class="lottery-card daily">
+        <div class="shimmer"></div>
+
+        <div class="header">
+          <div class="lottery-number">LOTTERY #001</div>
+          <div class="live-badge">● LIVE</div>
+        </div>
+
+        <div class="prize-section">
+          <div class="prize-amount">$26,096</div>
+          <div class="prize-label">Total Prize Pool</div>
+        </div>
+
+        <div class="countdown">
+          <div class="countdown-item">
+            <div class="countdown-value">00</div>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-value">15</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-value">23</div>
+            <div class="countdown-label">Mins</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-value">42</div>
+            <div class="countdown-label">Secs</div>
+          </div>
+        </div>
+
+        <div class="draw-date">Today at 08:00 PM</div>
+
+        <div class="divider"></div>
+
+        <div class="crypto-grid">
+          <div class="crypto-item btc">
+            <div class="crypto-icon">🟠</div>
+            <div class="crypto-symbol">BTC</div>
+            <div class="crypto-amount">0.0500</div>
+            <div class="crypto-usd">$5,479</div>
+          </div>
+
+          <div class="crypto-item eth">
+            <div class="crypto-icon">🔷</div>
+            <div class="crypto-symbol">ETH</div>
+            <div class="crypto-amount">0.5000</div>
+            <div class="crypto-usd">$1,968</div>
+          </div>
+
+          <div class="crypto-item sol">
+            <div class="crypto-icon">⚡</div>
+            <div class="crypto-symbol">SOL</div>
+            <div class="crypto-amount">100.00</div>
+            <div class="crypto-usd">$648</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-item">
+            <div class="info-value">1,250</div>
+            <div>Tickets</div>
+          </div>
+          <div class="info-item">
+            <div class="info-value">8:54 PM</div>
+            <div>Updated</div>
+          </div>
+        </div>
+
+        <button class="cta-button">🏆 View Results</button>
+      </div>
+    </div>
+
+    <!-- WEEKLY TAB -->
+    <div id="weekly-content" class="tab-content">
+      <div class="lottery-card weekly">
+        <div class="shimmer"></div>
+
+        <div class="header">
+          <div class="lottery-number">LOTTERY #001</div>
+          <div class="live-badge">● LIVE</div>
+        </div>
+
+        <div class="prize-section">
+          <div class="prize-amount">$207,888</div>
+          <div class="prize-label">Total Prize Pool</div>
+        </div>
+
+        <div class="countdown">
+          <div class="countdown-item">
+            <div class="countdown-value">05</div>
+            <div class="countdown-label">Days</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-value">23</div>
+            <div class="countdown-label">Hours</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-value">05</div>
+            <div class="countdown-label">Mins</div>
+          </div>
+          <div class="countdown-item">
+            <div class="countdown-value">15</div>
+            <div class="countdown-label">Secs</div>
+          </div>
+        </div>
+
+        <div class="draw-date">Sunday, October 26, 2025 at 08:00 PM</div>
+
+        <div class="divider"></div>
+
+        <div class="crypto-grid">
+          <div class="crypto-item btc">
+            <div class="crypto-icon">🟠</div>
+            <div class="crypto-symbol">BTC</div>
+            <div class="crypto-amount">0.3500</div>
+            <div class="crypto-usd">$38,356</div>
+          </div>
+
+          <div class="crypto-item eth">
+            <div class="crypto-icon">🔷</div>
+            <div class="crypto-symbol">ETH</div>
+            <div class="crypto-amount">2.8000</div>
+            <div class="crypto-usd">$11,023</div>
+          </div>
+
+          <div class="crypto-item sol">
+            <div class="crypto-icon">⚡</div>
+            <div class="crypto-symbol">SOL</div>
+            <div class="crypto-amount">850.00</div>
+            <div class="crypto-usd">$5,508</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-item">
+            <div class="info-value">0</div>
+            <div>Tickets</div>
+          </div>
+          <div class="info-item">
+            <div class="info-value">8:54 PM</div>
+            <div>Updated</div>
+          </div>
+        </div>
+
+        <button class="cta-button">🏆 View Results</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(type) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      const activeTab = type === 'daily'
+        ? document.querySelector('.tab.daily')
+        : document.querySelector('.tab.weekly');
+      activeTab.classList.add('active');
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      document.getElementById(`${type}-content`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

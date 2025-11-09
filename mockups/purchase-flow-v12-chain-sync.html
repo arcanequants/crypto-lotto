@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V12: Chain Sync - Network Connection</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=Orbitron:wght@700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Space Mono', monospace;
+      background: #000814;
+      color: #00d9ff;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Network background */
+    .network-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%,
+        rgba(0, 217, 255, 0.1) 0%,
+        transparent 50%);
+      animation: network-pulse 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes network-pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Network nodes */
+    .node {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: #00d9ff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #00d9ff;
+      animation: node-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes node-pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    /* Connection lines */
+    .connection-line {
+      position: fixed;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00d9ff, transparent);
+      transform-origin: left center;
+      animation: data-flow 3s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes data-flow {
+      0% { opacity: 0; }
+      50% { opacity: 0.6; }
+      100% { opacity: 0; }
+    }
+
+    .modal {
+      max-width: 450px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(0, 8, 20, 0.98), rgba(0, 20, 30, 0.98));
+      border-radius: 16px;
+      padding: 26px;
+      border: 2px solid #00d9ff;
+      box-shadow:
+        0 0 50px rgba(0, 217, 255, 0.3),
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        inset 0 0 50px rgba(0, 217, 255, 0.05);
+      position: relative;
+      animation: modal-sync 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modal-sync {
+      0% { opacity: 0; transform: scale(0.8) translateY(-50px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Sync indicator corners */
+    .sync-corner {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+    }
+
+    .sync-corner::before,
+    .sync-corner::after {
+      content: '';
+      position: absolute;
+      background: #00d9ff;
+      box-shadow: 0 0 8px #00d9ff;
+    }
+
+    .sync-corner.tl { top: -2px; left: -2px; }
+    .sync-corner.tl::before { width: 25px; height: 2px; top: 0; left: 0; }
+    .sync-corner.tl::after { width: 2px; height: 25px; top: 0; left: 0; }
+
+    .sync-corner.tr { top: -2px; right: -2px; }
+    .sync-corner.tr::before { width: 25px; height: 2px; top: 0; right: 0; }
+    .sync-corner.tr::after { width: 2px; height: 25px; top: 0; right: 0; }
+
+    .sync-corner.bl { bottom: -2px; left: -2px; }
+    .sync-corner.bl::before { width: 25px; height: 2px; bottom: 0; left: 0; }
+    .sync-corner.bl::after { width: 2px; height: 25px; bottom: 0; left: 0; }
+
+    .sync-corner.br { bottom: -2px; right: -2px; }
+    .sync-corner.br::before { width: 25px; height: 2px; bottom: 0; right: 0; }
+    .sync-corner.br::after { width: 2px; height: 25px; bottom: 0; right: 0; }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(0, 217, 255, 0.3);
+      padding-bottom: 12px;
+    }
+
+    .chain-icon {
+      font-size: 48px;
+      display: inline-block;
+      animation: chain-link 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px #00d9ff);
+    }
+
+    @keyframes chain-link {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #00d9ff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 8px;
+      text-shadow: 0 0 15px rgba(0, 217, 255, 0.8);
+    }
+
+    .sync-status {
+      font-size: 10px;
+      color: #00d9ff;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-top: 6px;
+      opacity: 0.8;
+    }
+
+    /* Network info */
+    .network-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .info-card {
+      background: rgba(0, 217, 255, 0.05);
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 9px;
+      color: rgba(0, 217, 255, 0.6);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .info-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #00d9ff;
+      text-shadow: 0 0 10px rgba(0, 217, 255, 0.6);
+    }
+
+    /* Chain nodes visualization */
+    .chain-nodes {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 0 20px;
+    }
+
+    .chain-node {
+      width: 50px;
+      height: 50px;
+      border: 2px solid rgba(0, 217, 255, 0.5);
+      border-radius: 50%;
+      background: rgba(0, 217, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .chain-node.synced {
+      border-color: #00d9ff;
+      background: rgba(0, 217, 255, 0.15);
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+    }
+
+    .chain-node.syncing {
+      animation: node-sync 1.5s ease-in-out infinite;
+    }
+
+    @keyframes node-sync {
+      0%, 100% {
+        border-color: #00d9ff;
+        box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+        transform: scale(1);
+      }
+      50% {
+        border-color: #00ffff;
+        box-shadow: 0 0 30px rgba(0, 217, 255, 1);
+        transform: scale(1.15);
+      }
+    }
+
+    .node-connector {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg,
+        rgba(0, 217, 255, 0.3),
+        rgba(0, 217, 255, 0.6),
+        rgba(0, 217, 255, 0.3)
+      );
+      position: relative;
+    }
+
+    .node-connector.active::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 4px;
+      background: #00d9ff;
+      box-shadow: 0 0 10px #00d9ff;
+      top: -1px;
+      animation: data-transfer 2s linear infinite;
+    }
+
+    @keyframes data-transfer {
+      0% { left: 0; }
+      100% { left: 100%; }
+    }
+
+    /* Sync progress */
+    .sync-progress {
+      margin-bottom: 16px;
+    }
+
+    .sync-label {
+      font-size: 10px;
+      color: rgba(0, 217, 255, 0.7);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 35px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(0, 217, 255, 0.4);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg,
+        rgba(0, 217, 255, 0.4),
+        rgba(0, 217, 255, 0.7),
+        rgba(0, 255, 255, 0.9)
+      );
+      background-size: 200% 100%;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+      transition: width 0.3s ease;
+      animation: sync-shimmer 2s linear infinite;
+      position: relative;
+    }
+
+    @keyframes sync-shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .progress-fill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+      );
+      animation: progress-scan 1.5s linear infinite;
+    }
+
+    @keyframes progress-scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-percent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      z-index: 1;
+    }
+
+    /* Status indicators */
+    .status-indicators {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .indicator {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .indicator.done {
+      border-color: #00d9ff;
+      background: rgba(0, 217, 255, 0.1);
+      box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+    }
+
+    .indicator.active {
+      border-color: #00ffff;
+      background: rgba(0, 217, 255, 0.2);
+      animation: indicator-active 1.5s ease-in-out infinite;
+    }
+
+    @keyframes indicator-active {
+      0%, 100% { box-shadow: 0 0 15px rgba(0, 217, 255, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.8); }
+    }
+
+    .indicator-icon {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .indicator-text {
+      font-size: 9px;
+      color: rgba(0, 217, 255, 0.7);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .indicator.active .indicator-text {
+      color: #00ffff;
+    }
+
+    /* Time display */
+    .time-info {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0, 217, 255, 0.05);
+      border: 2px solid rgba(0, 217, 255, 0.3);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+
+    .time-unit {
+      text-align: center;
+    }
+
+    .time-label {
+      font-size: 9px;
+      color: rgba(0, 217, 255, 0.6);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .time-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #00d9ff;
+      text-shadow: 0 0 10px rgba(0, 217, 255, 0.6);
+    }
+
+    /* Sync button */
+    .sync-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 255, 0.3));
+      border: 2px solid #00d9ff;
+      border-radius: 10px;
+      color: #00ffff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 5px 25px rgba(0, 217, 255, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sync-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.4), transparent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .sync-btn:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+
+    .sync-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(0, 217, 255, 0.7);
+      border-color: #00ffff;
+    }
+
+    .version {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 9px;
+      color: rgba(0, 217, 255, 0.4);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="network-bg"></div>
+
+  <!-- Network nodes -->
+  <div class="node" style="top: 15%; left: 20%; animation-delay: 0s;"></div>
+  <div class="node" style="top: 25%; right: 25%; animation-delay: 1s;"></div>
+  <div class="node" style="bottom: 20%; left: 30%; animation-delay: 2s;"></div>
+  <div class="node" style="bottom: 30%; right: 20%; animation-delay: 1.5s;"></div>
+
+  <div class="modal">
+    <div class="sync-corner tl"></div>
+    <div class="sync-corner tr"></div>
+    <div class="sync-corner bl"></div>
+    <div class="sync-corner br"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="chain-icon">🔗</div>
+      <h1>Chain Sync</h1>
+      <div class="sync-status">SYNCHRONIZING WITH BASE NETWORK</div>
+    </div>
+
+    <!-- Network info -->
+    <div class="network-info">
+      <div class="info-card">
+        <div class="info-label">Tickets</div>
+        <div class="info-value">3.2K</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Value</div>
+        <div class="info-value">$800</div>
+      </div>
+    </div>
+
+    <!-- Chain nodes -->
+    <div class="chain-nodes">
+      <div class="chain-node synced">✓</div>
+      <div class="node-connector active"></div>
+      <div class="chain-node syncing">◉</div>
+      <div class="node-connector"></div>
+      <div class="chain-node">○</div>
+    </div>
+
+    <!-- Progress -->
+    <div class="sync-progress">
+      <div class="sync-label">
+        <span>SYNC_PROGRESS</span>
+        <span id="syncPercent12">82%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="syncFill12" style="width: 82%"></div>
+        <div class="progress-percent" id="syncText12">82%</div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-indicators">
+      <div class="indicator done">
+        <div class="indicator-icon">✓</div>
+        <div class="indicator-text">Sign</div>
+      </div>
+      <div class="indicator active">
+        <div class="indicator-icon">⟲</div>
+        <div class="indicator-text">Sync</div>
+      </div>
+      <div class="indicator">
+        <div class="indicator-icon">○</div>
+        <div class="indicator-text">Done</div>
+      </div>
+    </div>
+
+    <!-- Time -->
+    <div class="time-info">
+      <div class="time-unit">
+        <div class="time-label">Elapsed</div>
+        <div class="time-value">0:49</div>
+      </div>
+      <div class="time-unit">
+        <div class="time-label">Remaining</div>
+        <div class="time-value" id="remaining12">0:11</div>
+      </div>
+    </div>
+
+    <button class="sync-btn" onclick="simulate12()">
+      <span style="position: relative; z-index: 1;">🔗 SIMULATE SYNC 🔗</span>
+    </button>
+    <div class="version">V12: CHAIN_SYNC</div>
+  </div>
+
+  <script>
+    let interval12;
+    function simulate12() {
+      let progress = 82;
+      let time = 11;
+      clearInterval(interval12);
+
+      const indicators = document.querySelectorAll('.indicator');
+      const nodes = document.querySelectorAll('.chain-node');
+
+      interval12 = setInterval(() => {
+        progress += 2;
+        time -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          time = 0;
+          clearInterval(interval12);
+          indicators[1].classList.remove('active');
+          indicators[1].classList.add('done');
+          indicators[2].classList.add('active');
+          nodes[1].classList.remove('syncing');
+          nodes[1].classList.add('synced');
+          setTimeout(() => {
+            indicators[2].classList.remove('active');
+            indicators[2].classList.add('done');
+            nodes[2].classList.add('synced');
+          }, 1000);
+        }
+
+        document.getElementById('syncFill12').style.width = progress + '%';
+        document.getElementById('syncText12').textContent = progress + '%';
+        document.getElementById('syncPercent12').textContent = progress + '%';
+        document.getElementById('remaining12').textContent = '0:' + String(time).padStart(2, '0');
+      }, 550);
+    }
+  </script>
+</body>
+</html>

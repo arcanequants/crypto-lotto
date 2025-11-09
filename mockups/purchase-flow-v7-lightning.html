@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V7: Lightning Speed - Compact & Electric</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Electric background */
+    .electric-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.15), transparent 70%);
+      animation: electric-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes electric-pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+
+    /* Lightning bolts */
+    .lightning {
+      position: fixed;
+      font-size: 40px;
+      opacity: 0;
+      animation: lightning-strike 4s ease-in-out infinite;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px #ffd700);
+    }
+
+    @keyframes lightning-strike {
+      0%, 90%, 100% { opacity: 0; }
+      91%, 93%, 95% { opacity: 1; }
+      92%, 94% { opacity: 0; }
+    }
+
+    .modal {
+      max-width: 460px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(20, 20, 20, 0.95));
+      border-radius: 20px;
+      padding: 28px;
+      border: 2px solid #ffd700;
+      box-shadow:
+        0 0 60px rgba(255, 215, 0, 0.4),
+        0 20px 50px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 215, 0, 0.3);
+      position: relative;
+      animation: modal-zap 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes modal-zap {
+      0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+      50% { transform: scale(1.05) rotate(2deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    /* Electric corners */
+    .corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffd700;
+      animation: corner-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes corner-glow {
+      0%, 100% { box-shadow: 0 0 5px #ffd700; }
+      50% { box-shadow: 0 0 15px #ffd700, 0 0 25px #ffd700; }
+    }
+
+    .corner-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+    .corner-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+    .corner-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+    .corner-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+    /* Header with lightning */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .lightning-icon {
+      font-size: 50px;
+      display: inline-block;
+      animation: zap-pulse 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px #ffd700);
+    }
+
+    @keyframes zap-pulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(-10deg); }
+      75% { transform: scale(1.1) rotate(10deg); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffd700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      text-shadow:
+        0 0 10px #ffd700,
+        0 0 20px #ffd700,
+        0 0 30px #ff8c00;
+      animation: text-flicker 0.15s infinite;
+    }
+
+    @keyframes text-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.95; }
+    }
+
+    .status {
+      font-size: 12px;
+      color: #ffd700;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    /* Compact info bar */
+    .info-bar {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+    }
+
+    .info-item {
+      text-align: center;
+      flex: 1;
+    }
+
+    .info-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 10px #ffd700;
+    }
+
+    /* Speed meter style progress */
+    .speed-meter {
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .meter-bg {
+      width: 100%;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 25px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg,
+        #ff6b00 0%,
+        #ffd700 50%,
+        #ffff00 100%
+      );
+      border-radius: 25px;
+      transition: width 0.3s ease;
+      box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.3);
+      position: relative;
+      animation: energy-flow 1.5s linear infinite;
+    }
+
+    @keyframes energy-flow {
+      0% { filter: hue-rotate(0deg) brightness(1.2); }
+      50% { filter: hue-rotate(20deg) brightness(1.4); }
+      100% { filter: hue-rotate(0deg) brightness(1.2); }
+    }
+
+    .meter-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+      animation: speed-sweep 1s linear infinite;
+    }
+
+    @keyframes speed-sweep {
+      0% { left: -100%; }
+      100% { left: 150%; }
+    }
+
+    .meter-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #000;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+      z-index: 1;
+    }
+
+    /* Compact status indicators */
+    .status-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .status-indicator {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .status-indicator.completed {
+      background: rgba(0, 255, 100, 0.1);
+      border-color: #00ff64;
+    }
+
+    .status-indicator.active {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: #ffd700;
+      animation: indicator-flash 1s ease-in-out infinite;
+    }
+
+    @keyframes indicator-flash {
+      0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+    }
+
+    .indicator-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .indicator-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-indicator.active .indicator-label {
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    /* Time display */
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 215, 0, 0.2));
+      border: 2px solid #ffd700;
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 18px;
+    }
+
+    .time-item {
+      text-align: center;
+    }
+
+    .time-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 2px;
+    }
+
+    .time-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 10px #ffd700;
+      animation: time-blink 2s ease-in-out infinite;
+    }
+
+    @keyframes time-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Zap button */
+    .zap-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ff6b00, #ffd700, #ffff00);
+      background-size: 200% 100%;
+      border: 2px solid #ffff00;
+      border-radius: 12px;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 5px 25px rgba(255, 215, 0, 0.6);
+      transition: all 0.3s ease;
+      animation: btn-glow 2s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes btn-glow {
+      0%, 100% { box-shadow: 0 5px 25px rgba(255, 215, 0, 0.6); background-position: 0% 50%; }
+      50% { box-shadow: 0 10px 40px rgba(255, 215, 0, 1); background-position: 100% 50%; }
+    }
+
+    .zap-btn::before {
+      content: '⚡';
+      position: absolute;
+      left: -30px;
+      font-size: 20px;
+      animation: zap-slide 2s linear infinite;
+    }
+
+    @keyframes zap-slide {
+      0% { left: -30px; }
+      100% { left: calc(100% + 30px); }
+    }
+
+    .zap-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 15px 50px rgba(255, 215, 0, 1);
+    }
+
+    .version-tag {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Electric background -->
+  <div class="electric-bg"></div>
+
+  <!-- Random lightning -->
+  <div class="lightning" style="top: 10%; left: 20%; animation-delay: 0s;">⚡</div>
+  <div class="lightning" style="top: 70%; right: 15%; animation-delay: 1.5s;">⚡</div>
+  <div class="lightning" style="top: 30%; right: 35%; animation-delay: 3s;">⚡</div>
+
+  <div class="modal">
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="lightning-icon">⚡</div>
+      <h1>High Speed TX</h1>
+      <div class="status">PROCESSING AT LIGHTSPEED</div>
+    </div>
+
+    <!-- Info bar -->
+    <div class="info-bar">
+      <div class="info-item">
+        <div class="info-label">Tickets</div>
+        <div class="info-value" id="tickets7">5K</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Value</div>
+        <div class="info-value" id="value7">$1.25K</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Speed</div>
+        <div class="info-value">⚡⚡⚡</div>
+      </div>
+    </div>
+
+    <!-- Speed meter -->
+    <div class="speed-meter">
+      <div class="meter-bg">
+        <div class="meter-fill" id="meterFill7" style="width: 72%"></div>
+        <div class="meter-label" id="meterLabel7">72%</div>
+      </div>
+    </div>
+
+    <!-- Status indicators -->
+    <div class="status-row">
+      <div class="status-indicator completed">
+        <div class="indicator-icon">✓</div>
+        <div class="indicator-label">Signed</div>
+      </div>
+      <div class="status-indicator active">
+        <div class="indicator-icon">⚡</div>
+        <div class="indicator-label">Mining</div>
+      </div>
+      <div class="status-indicator">
+        <div class="indicator-icon">○</div>
+        <div class="indicator-label">Complete</div>
+      </div>
+    </div>
+
+    <!-- Time -->
+    <div class="time-display">
+      <div class="time-item">
+        <div class="time-label">ELAPSED</div>
+        <div class="time-value">1:12</div>
+      </div>
+      <div class="time-item">
+        <div class="time-label">REMAINING</div>
+        <div class="time-value" id="remaining7">0:18</div>
+      </div>
+    </div>
+
+    <button class="zap-btn" onclick="simulate7()">⚡ ZAP TO SIMULATE ⚡</button>
+    <div class="version-tag">V7: LIGHTNING SPEED</div>
+  </div>
+
+  <script>
+    let interval7;
+    function simulate7() {
+      let progress = 72;
+      let time = 18;
+      clearInterval(interval7);
+
+      const indicators = document.querySelectorAll('.status-indicator');
+
+      interval7 = setInterval(() => {
+        progress += 2;
+        time -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          time = 0;
+          clearInterval(interval7);
+          indicators[1].classList.remove('active');
+          indicators[1].classList.add('completed');
+          indicators[2].classList.add('active');
+          setTimeout(() => {
+            indicators[2].classList.remove('active');
+            indicators[2].classList.add('completed');
+          }, 1000);
+        }
+
+        document.getElementById('meterFill7').style.width = progress + '%';
+        document.getElementById('meterLabel7').textContent = progress + '%';
+        document.getElementById('remaining7').textContent = '0:' + String(time).padStart(2, '0');
+      }, 650);
+    }
+  </script>
+</body>
+</html>

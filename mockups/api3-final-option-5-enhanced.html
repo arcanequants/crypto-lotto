@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Option 5 ENHANCED: Premium Badge with Extended Info</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --darker: #0a0e27;
+            --dark: #151932;
+            --primary: #00f0ff;
+            --secondary: #0066ff;
+            --accent: #ffd700;
+            --light: #e0e6ed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #000 100%);
+            color: var(--light);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: var(--light);
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .two-draws {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .draw-container {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95));
+            border-radius: 30px;
+            padding: 40px;
+        }
+
+        .draw-container.daily {
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.2);
+        }
+
+        .draw-container.weekly {
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.2);
+        }
+
+        .draw-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .draw-label {
+            font-size: 14px;
+            fontFamily: "'Orbitron', sans-serif";
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .draw-label.daily { color: var(--primary); }
+        .draw-label.weekly { color: var(--accent); }
+
+        .draw-title {
+            fontFamily: "'Orbitron', sans-serif";
+            font-size: 32px;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .draw-title.daily {
+            background: linear-gradient(135deg, var(--primary), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-title.weekly {
+            background: linear-gradient(135deg, var(--accent), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-number {
+            font-size: 12px;
+            fontFamily: "'Inter', sans-serif";
+            color: var(--light);
+            opacity: 0.6;
+        }
+
+        /* API3 PREMIUM BADGE ENHANCED */
+        .api3-premium-enhanced {
+            border-radius: 25px;
+            padding: 30px 35px;
+            margin: 0 auto 35px;
+            max-width: 100%;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .api3-premium-enhanced.daily {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(0, 102, 255, 0.12));
+            border: 3px solid var(--primary);
+            box-shadow: 0 15px 50px rgba(0, 240, 255, 0.3);
+        }
+
+        .api3-premium-enhanced.weekly {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 165, 0, 0.12));
+            border: 3px solid var(--accent);
+            box-shadow: 0 15px 50px rgba(255, 215, 0, 0.3);
+        }
+
+        .api3-premium-enhanced:hover {
+            transform: translateY(-5px);
+        }
+
+        .api3-premium-enhanced.daily:hover {
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.5);
+        }
+
+        .api3-premium-enhanced.weekly:hover {
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Animated border */
+        .api3-premium-enhanced::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 25px;
+            padding: 3px;
+            opacity: 0.5;
+            animation: rotate-border 4s linear infinite;
+            z-index: 0;
+        }
+
+        .api3-premium-enhanced.daily::before {
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--primary));
+        }
+
+        .api3-premium-enhanced.weekly::before {
+            background: linear-gradient(45deg, var(--accent), var(--primary), var(--accent));
+        }
+
+        @keyframes rotate-border {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        /* Main row: Icon + Content + Seal */
+        .badge-main-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 25px;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quantum-orb-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            position: relative;
+            animation: float-rotate 6s ease-in-out infinite;
+        }
+
+        .quantum-orb-large.daily {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 40px rgba(0, 240, 255, 1);
+        }
+
+        .quantum-orb-large.weekly {
+            background: linear-gradient(135deg, var(--accent), #ffa500);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 1);
+        }
+
+        @keyframes float-rotate {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(180deg);
+            }
+        }
+
+        .badge-content {
+            text-align: left;
+        }
+
+        .premium-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            padding: 5px 14px;
+            border-radius: 50px;
+        }
+
+        .premium-label.daily {
+            background: rgba(0, 240, 255, 0.25);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .premium-label.weekly {
+            background: rgba(255, 215, 0, 0.25);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .badge-main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .badge-subtitle {
+            font-size: 12px;
+            opacity: 0.85;
+            line-height: 1.4;
+        }
+
+        .verified-seal {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
+            animation: pulse-seal 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-seal {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 10px 35px rgba(0, 255, 136, 0.8);
+            }
+        }
+
+        .verified-text {
+            font-size: 8px;
+            font-weight: 700;
+            color: white;
+            margin-top: -2px;
+        }
+
+        /* NEW: Info Section Below */
+        .badge-info-section {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+
+        .info-highlight {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .info-highlight-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-highlight-title.daily { color: var(--primary); }
+        .info-highlight-title.weekly { color: var(--accent); }
+
+        .info-highlight-text {
+            font-size: 12px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box.daily {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .stat-box.weekly {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-box.daily:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .stat-box.weekly:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--accent);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-label.daily { color: var(--primary); }
+        .stat-label.weekly { color: var(--accent); }
+
+        .stat-value {
+            font-size: 11px;
+            opacity: 0.85;
+            line-height: 1.3;
+        }
+
+        /* Numbers */
+        .numbers-display {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .number.daily {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.6);
+        }
+
+        .number.weekly {
+            background: linear-gradient(135deg, var(--accent), #ffa500);
+            color: var(--darker);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .number.power {
+            width: 70px;
+            height: 70px;
+            font-size: 28px;
+        }
+
+        .plus-sign {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .plus-sign.daily { color: var(--primary); }
+        .plus-sign.weekly { color: var(--accent); }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .two-draws {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">🎨 OPTION 5 ENHANCED: PREMIUM BADGE + EXTENDED INFO</div>
+    <div class="mockup-subtitle">Máxima credibilidad | Info completa sobre lo revolucionario de API3 QRNG</div>
+
+    <div class="container">
+        <div class="two-draws">
+            <!-- DAILY DRAW -->
+            <div class="draw-container daily">
+                <div class="draw-header">
+                    <div class="draw-label daily">🎯 DAILY JACKPOT</div>
+                    <h2 class="draw-title daily">🎉 WINNING NUMBERS</h2>
+                    <div class="draw-number">Draw #127</div>
+                </div>
+
+                <!-- API3 Premium Badge Enhanced -->
+                <div class="api3-premium-enhanced daily">
+                    <div class="badge-main-row">
+                        <div class="quantum-orb-large daily">⚛️</div>
+
+                        <div class="badge-content">
+                            <div class="premium-label daily">
+                                <span>⚡</span>
+                                <span>Quantum Technology</span>
+                            </div>
+                            <div class="badge-main-title">API3 QRNG</div>
+                            <div class="badge-subtitle">
+                                Powered by Australian National University Quantum RNG • 100% On-Chain Verification
+                            </div>
+                        </div>
+
+                        <div class="verified-seal">
+                            <span>✓</span>
+                            <div class="verified-text">VERIFIED</div>
+                        </div>
+                    </div>
+
+                    <!-- Extended Info Section -->
+                    <div class="badge-info-section">
+                        <div class="info-highlight">
+                            <div class="info-highlight-title daily">
+                                <span>🔬</span>
+                                <span>Why Quantum Randomness is Revolutionary</span>
+                            </div>
+                            <div class="info-highlight-text">
+                                Unlike traditional lotteries that use pseudo-random algorithms, we leverage
+                                <strong>true quantum randomness</strong> from atomic decay measured in real-time
+                                at one of the world's leading research institutions. This makes our draws
+                                <strong>mathematically impossible to predict or manipulate</strong>.
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box daily">
+                                <div class="stat-icon">🏛️</div>
+                                <div class="stat-label daily">Gov Backed</div>
+                                <div class="stat-value">Australian National University</div>
+                            </div>
+                            <div class="stat-box daily">
+                                <div class="stat-icon">⚛️</div>
+                                <div class="stat-label daily">Quantum Physics</div>
+                                <div class="stat-value">Real atomic measurements</div>
+                            </div>
+                            <div class="stat-box daily">
+                                <div class="stat-icon">🔗</div>
+                                <div class="stat-label daily">100% On-Chain</div>
+                                <div class="stat-value">Fully auditable & transparent</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Numbers -->
+                <div class="numbers-display">
+                    <div class="number daily">07</div>
+                    <div class="number daily">14</div>
+                    <div class="number daily">21</div>
+                    <div class="number daily">35</div>
+                    <div class="number daily">42</div>
+                    <span class="plus-sign daily">+</span>
+                    <div class="number daily power">09</div>
+                </div>
+            </div>
+
+            <!-- WEEKLY DRAW -->
+            <div class="draw-container weekly">
+                <div class="draw-header">
+                    <div class="draw-label weekly">🏆 WEEKLY JACKPOT</div>
+                    <h2 class="draw-title weekly">🎉 WINNING NUMBERS</h2>
+                    <div class="draw-number">Draw #18</div>
+                </div>
+
+                <!-- API3 Premium Badge Enhanced -->
+                <div class="api3-premium-enhanced weekly">
+                    <div class="badge-main-row">
+                        <div class="quantum-orb-large weekly">⚛️</div>
+
+                        <div class="badge-content">
+                            <div class="premium-label weekly">
+                                <span>⚡</span>
+                                <span>Quantum Technology</span>
+                            </div>
+                            <div class="badge-main-title">API3 QRNG</div>
+                            <div class="badge-subtitle">
+                                Powered by Australian National University Quantum RNG • 100% On-Chain Verification
+                            </div>
+                        </div>
+
+                        <div class="verified-seal">
+                            <span>✓</span>
+                            <div class="verified-text">VERIFIED</div>
+                        </div>
+                    </div>
+
+                    <!-- Extended Info Section -->
+                    <div class="badge-info-section">
+                        <div class="info-highlight">
+                            <div class="info-highlight-title weekly">
+                                <span>🔬</span>
+                                <span>Why Quantum Randomness is Revolutionary</span>
+                            </div>
+                            <div class="info-highlight-text">
+                                Unlike traditional lotteries that use pseudo-random algorithms, we leverage
+                                <strong>true quantum randomness</strong> from atomic decay measured in real-time
+                                at one of the world's leading research institutions. This makes our draws
+                                <strong>mathematically impossible to predict or manipulate</strong>.
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box weekly">
+                                <div class="stat-icon">🏛️</div>
+                                <div class="stat-label weekly">Gov Backed</div>
+                                <div class="stat-value">Australian National University</div>
+                            </div>
+                            <div class="stat-box weekly">
+                                <div class="stat-icon">⚛️</div>
+                                <div class="stat-label weekly">Quantum Physics</div>
+                                <div class="stat-value">Real atomic measurements</div>
+                            </div>
+                            <div class="stat-box weekly">
+                                <div class="stat-icon">🔗</div>
+                                <div class="stat-label weekly">100% On-Chain</div>
+                                <div class="stat-value">Fully auditable & transparent</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Numbers -->
+                <div class="numbers-display">
+                    <div class="number weekly">03</div>
+                    <div class="number weekly">12</div>
+                    <div class="number weekly">28</div>
+                    <div class="number weekly">39</div>
+                    <div class="number weekly">47</div>
+                    <span class="plus-sign weekly">+</span>
+                    <div class="number weekly power">15</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>🎯 OPCIÓN 5 ENHANCED - PREMIUM + EXTENDED INFO:</strong>
+            <br><br>
+            <strong>✨ Diseño:</strong> Badge premium de 3 columnas (igual que antes) + Nueva sección informativa debajo con:
+            <br>
+            • Highlight box explicando por qué quantum randomness es revolucionario
+            <br>
+            • 3 stat boxes con info clave (Gov Backed, Quantum Physics, On-Chain)
+            <br><br>
+            <strong>✅ Ventajas:</strong>
+            <br>
+            • Máxima credibilidad visual (premium look mantiene confianza)
+            <br>
+            • Educación completa (usuarios entienden POR QUÉ es superior)
+            <br>
+            • Info destacada: "mathematically impossible to predict or manipulate"
+            <br>
+            • Stat boxes interactivas refuerzan mensaje
+            <br><br>
+            <strong>🔐 Seguridad Transmitida:</strong> MÁXIMA - El diseño grita "tecnología de vanguardia, imposible de hackear"
+            <br><br>
+            <strong>👁️ Visibilidad:</strong> Muy Alta - Premium badge + Info section = Doble impacto
+        </div>
+    </div>
+</body>
+</html>

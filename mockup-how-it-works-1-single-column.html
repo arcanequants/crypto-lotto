@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup 1 - Single Column Wide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050811;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Background Effects */
+    .bg-animated {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    /* Content */
+    .content {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 80px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00f0ff 0%, #ff00ff 30%, #ffd700 65%, #fff 85%, #00f0ff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #d1d5db;
+    }
+
+    /* Single Wide Section */
+    .section {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(139, 43, 226, 0.2) 50%, rgba(0, 0, 0, 0.9) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 30px;
+      padding: 60px;
+      backdrop-filter: blur(30px);
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    /* Grid Layout - 3 columns for prize, 4 columns for rules */
+    .prize-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .prize-card {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .prize-percentage {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 72px;
+      font-weight: 900;
+      color: #ffd700;
+      margin-bottom: 15px;
+    }
+
+    .prize-name {
+      font-size: 20px;
+      color: #d1d5db;
+      margin-bottom: 10px;
+    }
+
+    .prize-note {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    /* Rules Grid */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 25px;
+      margin-bottom: 50px;
+    }
+
+    .rule-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .rule-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .rule-text {
+      font-size: 16px;
+      color: #d1d5db;
+    }
+
+    /* FAQ Section */
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+    }
+
+    .faq-card {
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+    }
+
+    .faq-q {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      color: #00f0ff;
+      margin-bottom: 15px;
+    }
+
+    .faq-a {
+      font-size: 16px;
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+
+    /* CTA Buttons */
+    .cta-section {
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      color: #000;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      margin: 10px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+      transition: transform 0.3s;
+    }
+
+    .cta-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #ffd700;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: #ffd700;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animated"></div>
+  <div class="grid-bg"></div>
+  <div class="mockup-label">MOCKUP 1: Single Column Wide</div>
+
+  <div class="content">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">📊 How It Works</h1>
+      <p class="subtitle">Everything you need to know about our community voting system</p>
+    </div>
+
+    <!-- Main Section -->
+    <div class="section">
+      <h2 class="section-title">🗳️ Community Governance</h2>
+
+      <p style="text-align: center; font-size: 20px; color: #d1d5db; margin-bottom: 50px;">
+        Every month, our community decides which cryptocurrency joins the prize pool alongside Bitcoin and Ethereum.
+      </p>
+
+      <!-- Prize Distribution -->
+      <div class="prize-grid">
+        <div class="prize-card">
+          <div class="prize-percentage">70%</div>
+          <div class="prize-name">Bitcoin (BTC)</div>
+          <div class="prize-note">Always included</div>
+        </div>
+        <div class="prize-card">
+          <div class="prize-percentage">25%</div>
+          <div class="prize-name">Ethereum (ETH)</div>
+          <div class="prize-note">Always included</div>
+        </div>
+        <div class="prize-card">
+          <div class="prize-percentage">5%</div>
+          <div class="prize-name">Monthly Token</div>
+          <div class="prize-note">Community voted</div>
+        </div>
+      </div>
+
+      <!-- Voting Rules -->
+      <h3 style="font-family: 'Orbitron', sans-serif; font-size: 32px; text-align: center; margin-bottom: 30px;">⚡ Voting Rules</h3>
+      <div class="rules-grid">
+        <div class="rule-card">
+          <div class="rule-icon">🎫</div>
+          <div class="rule-text">Each ticket = 1 vote</div>
+        </div>
+        <div class="rule-card">
+          <div class="rule-icon">📅</div>
+          <div class="rule-text">Opens 1st of month</div>
+        </div>
+        <div class="rule-card">
+          <div class="rule-icon">⏰</div>
+          <div class="rule-text">Closes last day</div>
+        </div>
+        <div class="rule-card">
+          <div class="rule-icon">🏆</div>
+          <div class="rule-text">Winner announced</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="section">
+      <h2 class="section-title">❓ FAQ</h2>
+      <div class="faq-grid">
+        <div class="faq-card">
+          <div class="faq-q">→ Can I change my vote?</div>
+          <div class="faq-a">No, once you vote, it's final for that month. Choose carefully! Your votes are permanent.</div>
+        </div>
+        <div class="faq-card">
+          <div class="faq-q">→ What happens if there's a tie?</div>
+          <div class="faq-a">In the unlikely event of a tie, Bitcoin (BTC) wins by default as the house token.</div>
+        </div>
+        <div class="faq-card">
+          <div class="faq-q">→ Can I vote multiple times?</div>
+          <div class="faq-a">Yes! If you buy more tickets after voting, you can vote again with your new tickets.</div>
+        </div>
+        <div class="faq-card">
+          <div class="faq-q">→ Are all tokens always available?</div>
+          <div class="faq-a">Bitcoin is ALWAYS available. Other tokens rotate fairly using our tier-based bracket system.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <a href="#" class="cta-btn">← BACK TO VOTING 🗳️</a>
+      <a href="#" class="cta-btn">🎫 BUY TICKETS TO GET VOTING POWER</a>
+    </div>
+  </div>
+</body>
+</html>

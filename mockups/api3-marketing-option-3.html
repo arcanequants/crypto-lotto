@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option 3: Info Card Below Numbers - Results Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --darker: #0a0e27;
+            --dark: #151932;
+            --primary: #00f0ff;
+            --secondary: #0066ff;
+            --accent: #ffd700;
+            --light: #e0e6ed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #000 100%);
+            color: var(--light);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: var(--light);
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .results-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .winning-numbers-section {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95));
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .numbers-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .number {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.6);
+        }
+
+        /* API3 Info Card - Opción 3 */
+        .api3-info-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(0, 102, 255, 0.08));
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 25px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .api3-info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+
+        .quantum-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+            animation: rotate 6s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .info-content {
+            text-align: left;
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 50px;
+            padding: 6px 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        .info-content h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .info-content p {
+            font-size: 15px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .info-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .feature-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .feature-pill:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 18px;
+        }
+
+        .verify-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .verify-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">📍 OPCIÓN 3: INFO CARD BELOW NUMBERS - RESULTS PAGE</div>
+    <div class="mockup-subtitle">Card informativa justo debajo de números ganadores | Máximo contexto educativo</div>
+
+    <div class="container">
+        <div class="results-header">
+            <h1>🎉 WINNING NUMBERS</h1>
+        </div>
+
+        <div class="winning-numbers-section">
+            <div class="numbers-display">
+                <div class="number">07</div>
+                <div class="number">14</div>
+                <div class="number">21</div>
+                <div class="number">35</div>
+                <div class="number">42</div>
+                <span style="font-size: 40px; color: var(--primary);">+</span>
+                <div class="number" style="width: 80px; height: 80px; font-size: 32px;">09</div>
+            </div>
+
+            <!-- API3 Info Card -->
+            <div class="api3-info-card">
+                <div class="quantum-logo">⚛️</div>
+
+                <div class="info-content">
+                    <div class="info-badge">🔬 Quantum Technology</div>
+                    <h3>Verified by API3 QRNG</h3>
+                    <p>
+                        These winning numbers were generated using <strong>quantum randomness</strong>
+                        from the Australian National University. Not algorithms. Not pseudo-random.
+                        Real quantum physics measured in real-time and delivered on-chain.
+                    </p>
+
+                    <div class="info-features">
+                        <div class="feature-pill">
+                            <span class="feature-icon">🏛️</span>
+                            <span>Government Backed</span>
+                        </div>
+                        <div class="feature-pill">
+                            <span class="feature-icon">🔍</span>
+                            <span>100% Auditable</span>
+                        </div>
+                        <div class="feature-pill">
+                            <span class="feature-icon">🛡️</span>
+                            <span>Impossible to Predict</span>
+                        </div>
+                        <div class="feature-pill">
+                            <span class="feature-icon">⚡</span>
+                            <span>Instant Verification</span>
+                        </div>
+                    </div>
+
+                    <a href="#" class="verify-link">
+                        <span>Verify This Draw On-Chain</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>📍 Why This Location:</strong> Positioned immediately below winning numbers
+            on Results page. Users naturally read down after seeing numbers, perfect for education.
+            Provides detailed explanation with call-to-action to verify on blockchain.
+            Maximum trust-building at decision moment.
+        </div>
+    </div>
+</body>
+</html>

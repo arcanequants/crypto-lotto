@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V8: Neon Pulse - Cyberpunk Energy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Neon grid background */
+    .neon-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(rgba(255, 0, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: grid-move 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes grid-move {
+      0% { transform: perspective(500px) rotateX(60deg) translateZ(0); }
+      100% { transform: perspective(500px) rotateX(60deg) translateZ(200px); }
+    }
+
+    /* Neon particles */
+    .neon-particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: #0ff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+      animation: particle-float 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes particle-float {
+      0%, 100% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10%, 90% { opacity: 1; }
+      50% { transform: translateY(-20vh) translateX(50px); }
+    }
+
+    .modal {
+      max-width: 450px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(0, 10, 20, 0.95), rgba(10, 0, 20, 0.95));
+      border-radius: 20px;
+      padding: 25px;
+      border: 2px solid;
+      border-image: linear-gradient(135deg, #0ff, #f0f, #0ff) 1;
+      box-shadow:
+        0 0 40px rgba(0, 255, 255, 0.4),
+        0 0 60px rgba(255, 0, 255, 0.3),
+        inset 0 0 40px rgba(0, 255, 255, 0.1);
+      position: relative;
+      animation: modal-neon 0.5s ease-out;
+    }
+
+    @keyframes modal-neon {
+      0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
+    /* Pulsing corners */
+    .pulse-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #0ff;
+      animation: corner-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes corner-pulse {
+      0%, 100% { box-shadow: 0 0 5px #0ff, inset 0 0 5px #0ff; }
+      50% { box-shadow: 0 0 20px #0ff, 0 0 30px #f0f, inset 0 0 10px #0ff; }
+    }
+
+    .pulse-corner.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+    .pulse-corner.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+    .pulse-corner.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+    .pulse-corner.br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .neon-icon {
+      font-size: 48px;
+      display: inline-block;
+      animation: neon-flicker 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px #0ff) drop-shadow(0 0 40px #f0f);
+    }
+
+    @keyframes neon-flicker {
+      0%, 100% { opacity: 1; }
+      10%, 30%, 50%, 70%, 90% { opacity: 0.95; }
+      20%, 40%, 60%, 80% { opacity: 0.85; }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 8px;
+      background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: neon-shift 3s linear infinite;
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+
+    @keyframes neon-shift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .status-tag {
+      font-size: 11px;
+      color: #0ff;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* Info cards */
+    .info-cards {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .info-card {
+      flex: 1;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+    }
+
+    .info-card-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .info-card-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #0ff, #f0f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Neon progress ring */
+    .progress-ring {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      position: relative;
+      height: 120px;
+    }
+
+    .ring-svg {
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: rgba(0, 255, 255, 0.1);
+      stroke-width: 8;
+    }
+
+    .ring-fill {
+      fill: none;
+      stroke: url(#neonGradient);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.3s ease;
+      filter: drop-shadow(0 0 8px #0ff);
+      animation: ring-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes ring-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px #0ff); }
+      50% { filter: drop-shadow(0 0 15px #0ff) drop-shadow(0 0 20px #f0f); }
+    }
+
+    .ring-center {
+      position: absolute;
+      text-align: center;
+    }
+
+    .ring-percent {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #0ff, #f0f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .ring-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Compact status bar */
+    .status-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .status-step {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .status-step.completed {
+      background: rgba(0, 255, 136, 0.15);
+      border-color: #0f8;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    }
+
+    .status-step.active {
+      background: rgba(0, 255, 255, 0.2);
+      border-color: #0ff;
+      animation: status-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(0, 255, 255, 1), 0 0 30px rgba(255, 0, 255, 0.5); }
+    }
+
+    .step-emoji {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .step-text {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-step.active .step-text {
+      color: #0ff;
+    }
+
+    /* Time panel */
+    .time-panel {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.15));
+      border: 2px solid;
+      border-image: linear-gradient(135deg, #0ff, #f0f) 1;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .time-block {
+      text-align: center;
+    }
+
+    .time-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .time-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #0ff, #f0f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: time-flicker 2s ease-in-out infinite;
+    }
+
+    @keyframes time-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Neon button */
+    .neon-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+      border: 2px solid;
+      border-image: linear-gradient(135deg, #0ff, #f0f, #0ff) 1;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .neon-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+      animation: btn-scan 3s linear infinite;
+    }
+
+    @keyframes btn-scan {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .neon-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 50px rgba(255, 0, 255, 0.5);
+    }
+
+    .version {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background effects -->
+  <div class="neon-grid"></div>
+  <div class="neon-particle" style="left: 20%; animation-delay: 0s;"></div>
+  <div class="neon-particle" style="left: 50%; animation-delay: 2s;"></div>
+  <div class="neon-particle" style="left: 80%; animation-delay: 4s;"></div>
+
+  <div class="modal">
+    <div class="pulse-corner tl"></div>
+    <div class="pulse-corner tr"></div>
+    <div class="pulse-corner bl"></div>
+    <div class="pulse-corner br"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="neon-icon">⚡</div>
+      <h1>Neon Processing</h1>
+      <div class="status-tag">CYBERPUNK MODE ACTIVE</div>
+    </div>
+
+    <!-- Info cards -->
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-label">Tickets</div>
+        <div class="info-card-value">500</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Value</div>
+        <div class="info-card-value">$125</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Network</div>
+        <div class="info-card-value">BASE</div>
+      </div>
+    </div>
+
+    <!-- Progress ring -->
+    <div class="progress-ring">
+      <svg width="120" height="120" class="ring-svg">
+        <defs>
+          <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0ff;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#f0f;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0ff;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="60" cy="60" r="52" />
+        <circle class="ring-fill" id="ringFill8" cx="60" cy="60" r="52"
+                stroke-dasharray="326.73" stroke-dashoffset="98.02" />
+      </svg>
+      <div class="ring-center">
+        <div class="ring-percent" id="ringPercent8">70%</div>
+        <div class="ring-label">Complete</div>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="status-step completed">
+        <div class="step-emoji">✓</div>
+        <div class="step-text">Sign</div>
+      </div>
+      <div class="status-step active">
+        <div class="step-emoji">◉</div>
+        <div class="step-text">Mine</div>
+      </div>
+      <div class="status-step">
+        <div class="step-emoji">○</div>
+        <div class="step-text">Done</div>
+      </div>
+    </div>
+
+    <!-- Time panel -->
+    <div class="time-panel">
+      <div class="time-block">
+        <div class="time-label">Elapsed</div>
+        <div class="time-value">0:28</div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Remaining</div>
+        <div class="time-value" id="remaining8">0:12</div>
+      </div>
+    </div>
+
+    <button class="neon-btn" onclick="simulate8()">
+      <span style="position: relative; z-index: 1;">⚡ PULSE SIMULATION ⚡</span>
+    </button>
+    <div class="version">V8: NEON PULSE</div>
+  </div>
+
+  <script>
+    let interval8;
+    function simulate8() {
+      let progress = 70;
+      let time = 12;
+      clearInterval(interval8);
+
+      const circumference = 326.73;
+      const steps = document.querySelectorAll('.status-step');
+
+      interval8 = setInterval(() => {
+        progress += 2;
+        time -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          time = 0;
+          clearInterval(interval8);
+          steps[1].classList.remove('active');
+          steps[1].classList.add('completed');
+          steps[2].classList.add('active');
+          setTimeout(() => {
+            steps[2].classList.remove('active');
+            steps[2].classList.add('completed');
+          }, 1000);
+        }
+
+        const offset = circumference - (progress / 100) * circumference;
+        document.getElementById('ringFill8').style.strokeDashoffset = offset;
+        document.getElementById('ringPercent8').textContent = progress + '%';
+        document.getElementById('remaining8').textContent = '0:' + String(time).padStart(2, '0');
+      }, 600);
+    }
+  </script>
+</body>
+</html>

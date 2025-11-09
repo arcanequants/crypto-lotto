@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup 4 - Minimal & Clean</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050811;
+      color: white;
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Background Effects */
+    .bg-animated {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    /* Content */
+    .content {
+      position: relative;
+      z-index: 10;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    /* Header */
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 100px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00f0ff 0%, #ff00ff 30%, #ffd700 65%, #fff 85%, #00f0ff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 30px;
+      filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.6));
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .subtitle {
+      font-size: 28px;
+      color: #d1d5db;
+      margin-bottom: 80px;
+    }
+
+    /* Main Content - Simple 3-section layout */
+    .sections {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 50px;
+      margin-bottom: 80px;
+    }
+
+    .section {
+      background: rgba(0, 0, 0, 0.5);
+      border: 3px solid;
+      border-radius: 30px;
+      padding: 60px 40px;
+      backdrop-filter: blur(30px);
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .section.governance {
+      border-color: rgba(255, 215, 0, 0.4);
+    }
+
+    .section.rules {
+      border-color: rgba(139, 43, 226, 0.4);
+    }
+
+    .section.faq {
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .section-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      margin-bottom: 40px;
+    }
+
+    .section.governance .section-title { color: #ffd700; }
+    .section.rules .section-title { color: #8b5cf6; }
+    .section.faq .section-title { color: #00f0ff; }
+
+    /* Prize Display - Big & Bold */
+    .prizes {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-bottom: 50px;
+    }
+
+    .prize {
+      text-align: center;
+    }
+
+    .prize-percent {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 80px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+
+    .prize-token {
+      font-size: 24px;
+      color: #d1d5db;
+      margin-top: 10px;
+    }
+
+    /* Rules List */
+    .rules-list {
+      text-align: left;
+    }
+
+    .rule-item {
+      font-size: 20px;
+      color: #d1d5db;
+      margin-bottom: 25px;
+      padding-left: 50px;
+      position: relative;
+    }
+
+    .rule-item::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 0;
+      font-size: 32px;
+    }
+
+    /* FAQ Simple */
+    .faq-list {
+      text-align: left;
+    }
+
+    .faq-item {
+      margin-bottom: 30px;
+    }
+
+    .faq-q {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      color: #00f0ff;
+      margin-bottom: 10px;
+    }
+
+    .faq-a {
+      font-size: 16px;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    /* Bottom CTA */
+    .cta {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .cta-btn {
+      padding: 25px 50px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #000;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+      transition: transform 0.3s;
+    }
+
+    .cta-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #ffd700;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: #ffd700;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animated"></div>
+  <div class="grid-bg"></div>
+  <div class="mockup-label">MOCKUP 4: Minimal & Clean</div>
+
+  <div class="content">
+    <!-- Header -->
+    <h1 class="title">📊 How It Works</h1>
+    <p class="subtitle">Community voting. Real power. Fair prizes.</p>
+
+    <!-- 3 Main Sections -->
+    <div class="sections">
+      <!-- Governance Section -->
+      <div class="section governance">
+        <div>
+          <div class="section-icon">🗳️</div>
+          <h2 class="section-title">Community Governance</h2>
+          <p style="font-size: 18px; color: #d1d5db; margin-bottom: 40px;">
+            Every month, you decide which crypto joins the prize pool.
+          </p>
+        </div>
+        <div class="prizes" style="flex-direction: column; gap: 30px;">
+          <div class="prize">
+            <div class="prize-percent">70%</div>
+            <div class="prize-token">Bitcoin</div>
+          </div>
+          <div class="prize">
+            <div class="prize-percent">25%</div>
+            <div class="prize-token">Ethereum</div>
+          </div>
+          <div class="prize">
+            <div class="prize-percent">5%</div>
+            <div class="prize-token">Your Choice</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rules Section -->
+      <div class="section rules">
+        <div>
+          <div class="section-icon">⚡</div>
+          <h2 class="section-title">Voting Rules</h2>
+        </div>
+        <div class="rules-list">
+          <div class="rule-item" data-icon="🎫">1 ticket = 1 vote</div>
+          <div class="rule-item" data-icon="📅">Opens 1st of month</div>
+          <div class="rule-item" data-icon="⏰">Closes last day</div>
+          <div class="rule-item" data-icon="🏆">Winner auto-announced</div>
+          <div class="rule-item" data-icon="🔒">Votes are final</div>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="section faq">
+        <div>
+          <div class="section-icon">❓</div>
+          <h2 class="section-title">Quick FAQ</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <div class="faq-q">Can I change my vote?</div>
+            <div class="faq-a">No, votes are final.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">What if there's a tie?</div>
+            <div class="faq-a">Bitcoin wins by default.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Vote multiple times?</div>
+            <div class="faq-a">Yes! Buy more tickets.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">All tokens available?</div>
+            <div class="faq-a">Bitcoin always. Others rotate.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <a href="#" class="cta-btn">← BACK TO VOTING</a>
+      <a href="#" class="cta-btn">🎫 BUY TICKETS</a>
+    </div>
+  </div>
+</body>
+</html>

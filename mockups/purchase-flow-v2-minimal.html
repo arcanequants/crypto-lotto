@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V2: Minimal Elegant - Purchase Flow</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050811;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 10%, rgba(255, 215, 0, 0.08) 0%, transparent 50%);
+      animation: gradient-shift 15s ease infinite;
+      pointer-events: none;
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .modal {
+      max-width: 550px;
+      width: 100%;
+      background: rgba(10, 14, 39, 0.85);
+      backdrop-filter: blur(40px);
+      border-radius: 28px;
+      padding: 45px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.6),
+        0 0 100px rgba(0, 240, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      animation: modal-enter 0.4s ease-out;
+    }
+
+    @keyframes modal-enter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Subtle glow effect on top */
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+      box-shadow: 0 0 20px #00f0ff;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: #00f0ff;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .amount-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin: 25px 0;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(138, 43, 226, 0.05));
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ticket-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .cost-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cost-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Timeline Progress */
+    .timeline {
+      margin: 35px 0;
+      position: relative;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      position: relative;
+      padding-bottom: 35px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      width: 2px;
+      height: calc(100% - 40px);
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.3), transparent);
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-item.completed .timeline-icon {
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    .timeline-item.active .timeline-icon {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 128, 255, 0.1));
+      border-color: #00f0ff;
+      color: #00f0ff;
+      animation: pulse-ring 2s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7);
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7);
+      }
+      50% {
+        box-shadow: 0 0 0 15px rgba(0, 240, 255, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
+      }
+    }
+
+    .timeline-content {
+      flex: 1;
+      padding-top: 8px;
+    }
+
+    .timeline-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .timeline-item.active .timeline-title {
+      color: #00f0ff;
+    }
+
+    .timeline-item.completed .timeline-title {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .timeline-description {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.5;
+    }
+
+    /* Sleek Progress Bar */
+    .progress-container {
+      margin: 30px 0;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .progress-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+    }
+
+    .progress-percentage {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: #00f0ff;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00f0ff 0%, #0080ff 50%, #8a2be2 100%);
+      border-radius: 10px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer-progress 2s infinite;
+    }
+
+    @keyframes shimmer-progress {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .time-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .time-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .time-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    /* Info Card */
+    .info-card {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 165, 0, 0.04));
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 25px;
+    }
+
+    .info-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    .info-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .version-tag {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 2px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Demo Button */
+    .demo-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 25px;
+      background: linear-gradient(135deg, #00f0ff, #0080ff);
+      border: none;
+      border-radius: 12px;
+      color: #0a0e27;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .demo-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 240, 255, 0.5);
+    }
+
+    .demo-btn:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <div class="header">
+      <div class="step-badge">STEP 2 OF 2</div>
+      <h1>Processing Your Purchase</h1>
+    </div>
+
+    <div class="amount-display">
+      <div class="ticket-number" id="ticketCount2">5,000</div>
+      <div class="cost-label">Lottery Tickets</div>
+      <div class="cost-value" id="totalCost2">$1,250.00</div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item completed">
+        <div class="timeline-icon">✓</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Wallet Signature</div>
+          <div class="timeline-description">Transaction signed and submitted</div>
+        </div>
+      </div>
+
+      <div class="timeline-item active">
+        <div class="timeline-icon">◉</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Network Confirmation</div>
+          <div class="timeline-description">Your transaction is being validated by the BASE network...</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-icon">○</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Finalization</div>
+          <div class="timeline-description">Recording tickets and updating your account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-header">
+        <span class="progress-label">Overall Progress</span>
+        <span class="progress-percentage" id="progressPercent2">62%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressBar2" style="width: 62%"></div>
+      </div>
+      <div class="time-info">
+        <span class="time-label">Estimated Time Remaining</span>
+        <span class="time-value" id="timeRemaining2">~28s</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-header">
+        <span>💡</span>
+        <span>Why Does This Take Time?</span>
+      </div>
+      <div class="info-text">
+        Blockchain transactions are processed by network validators to ensure security and permanence.
+        Large purchases like yours (<span id="ticketCountInfo2">5,000 tickets</span>) require additional processing time but guarantee transparency and fairness.
+      </div>
+    </div>
+
+    <button class="demo-btn" onclick="simulateProgress2()">▶ Simulate Progress</button>
+
+    <div class="version-tag">VERSION 2: MINIMAL ELEGANT</div>
+  </div>
+
+  <script>
+    function calculateEstimatedTime(ticketCount) {
+      if (ticketCount <= 10) return { min: 15, max: 25, text: '15-25 seconds' };
+      if (ticketCount <= 100) return { min: 25, max: 35, text: '25-35 seconds' };
+      if (ticketCount <= 1000) return { min: 40, max: 60, text: '40-60 seconds' };
+      if (ticketCount <= 5000) return { min: 60, max: 90, text: '60-90 seconds' };
+      return { min: 90, max: 120, text: '90-120 seconds' };
+    }
+
+    let progressInterval2;
+    function simulateProgress2() {
+      const ticketCount = 5000;
+      const timeEst = calculateEstimatedTime(ticketCount);
+      const totalTime = (timeEst.min + timeEst.max) / 2;
+
+      let progress = 62;
+      let timeLeft = Math.floor(totalTime * 0.38);
+
+      clearInterval(progressInterval2);
+
+      const timeline = document.querySelectorAll('.timeline-item');
+
+      progressInterval2 = setInterval(() => {
+        progress += 1;
+        timeLeft -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          timeLeft = 0;
+          clearInterval(progressInterval2);
+
+          // Complete second step
+          timeline[1].classList.remove('active');
+          timeline[1].classList.add('completed');
+          timeline[2].classList.add('active');
+
+          setTimeout(() => {
+            timeline[2].classList.remove('active');
+            timeline[2].classList.add('completed');
+          }, 2000);
+        }
+
+        document.getElementById('progressBar2').style.width = progress + '%';
+        document.getElementById('progressPercent2').textContent = progress + '%';
+        document.getElementById('timeRemaining2').textContent = timeLeft > 0 ? `~${timeLeft}s` : 'Done!';
+
+        // Update description
+        if (progress >= 85 && progress < 100) {
+          timeline[1].querySelector('.timeline-description').textContent =
+            'Transaction confirmed! Processing your tickets...';
+        }
+      }, (totalTime * 1000) / 38);
+    }
+
+    // Initialize
+    document.getElementById('ticketCount2').textContent = '5,000';
+    document.getElementById('ticketCountInfo2').textContent = '5,000 tickets';
+    document.getElementById('totalCost2').textContent = '$' + (5000 * 0.25).toFixed(2);
+  </script>
+</body>
+</html>

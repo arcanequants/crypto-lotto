@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Design Option 3: Inline Badge Above Numbers + Trust Line</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e1a;
+            color: #e0e6ed;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: #e0e6ed;
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .draws-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .draw-section {
+            background: linear-gradient(135deg, #0f1629 0%, #0a0e1a 100%);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .draw-section.daily {
+            border: 2px solid rgba(0, 240, 255, 0.4);
+        }
+
+        .draw-section.weekly {
+            border: 2px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .draw-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .jackpot-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .jackpot-label.daily { color: #00f0ff; }
+        .jackpot-label.weekly { color: #ffd700; }
+
+        .winning-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .winning-title.daily {
+            background: linear-gradient(135deg, #00f0ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .winning-title.weekly {
+            background: linear-gradient(135deg, #ffd700, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-id {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* API3 INLINE BADGE - OPTION 3: Above numbers, clean */
+        .api3-inline-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: fit-content;
+            margin: 0 auto 25px;
+            padding: 14px 28px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .api3-inline-badge.daily {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 102, 255, 0.15));
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.2);
+        }
+
+        .api3-inline-badge.weekly {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.15));
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .api3-inline-badge:hover {
+            transform: translateY(-4px);
+        }
+
+        .api3-inline-badge.daily:hover {
+            box-shadow: 0 15px 50px rgba(0, 240, 255, 0.4);
+        }
+
+        .api3-inline-badge.weekly:hover {
+            box-shadow: 0 15px 50px rgba(255, 215, 0, 0.4);
+        }
+
+        .quantum-orb-inline {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            animation: rotate-pulse 4s ease-in-out infinite;
+        }
+
+        .quantum-orb-inline.daily {
+            background: linear-gradient(135deg, #00f0ff, #0066ff);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
+        }
+
+        .quantum-orb-inline.weekly {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+        }
+
+        @keyframes rotate-pulse {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.1);
+            }
+        }
+
+        /* Ripple effect */
+        .quantum-orb-inline::after {
+            content: '';
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            animation: ripple 2.5s ease-out infinite;
+            opacity: 0;
+        }
+
+        .quantum-orb-inline.daily::after {
+            border: 2px solid #00f0ff;
+        }
+
+        .quantum-orb-inline.weekly::after {
+            border: 2px solid #ffd700;
+        }
+
+        @keyframes ripple {
+            0% {
+                width: 42px;
+                height: 42px;
+                opacity: 1;
+            }
+            100% {
+                width: 90px;
+                height: 90px;
+                opacity: 0;
+            }
+        }
+
+        .badge-text-inline {
+            text-align: left;
+        }
+
+        .micro-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 3px;
+        }
+
+        .micro-label.daily { color: #00f0ff; }
+        .micro-label.weekly { color: #ffd700; }
+
+        .badge-main {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 900;
+            color: white;
+        }
+
+        .verified-check {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.6);
+            animation: pulse-check 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-check {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .numbers-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .number-ball {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .number-ball.daily {
+            background: linear-gradient(135deg, #00f0ff, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+        }
+
+        .number-ball.weekly {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #0a0e1a;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .number-ball.power {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+
+        .plus-symbol {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0 8px;
+        }
+
+        .plus-symbol.daily { color: #00f0ff; }
+        .plus-symbol.weekly { color: #ffd700; }
+
+        /* Trust line below numbers */
+        .trust-line {
+            text-align: center;
+            font-size: 11px;
+            opacity: 0.75;
+            font-style: italic;
+            margin-top: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .trust-line.daily { color: #00f0ff; }
+        .trust-line.weekly { color: #ffd700; }
+
+        .trust-line strong {
+            font-weight: 700;
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid #00f0ff;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: #00f0ff;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .draws-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">🎨 PROPUESTA 3: INLINE BADGE ABOVE + TRUST LINE BELOW</div>
+    <div class="mockup-subtitle">Impactante | Badge arriba + Trust line debajo | Elegante y seguro</div>
+
+    <div class="container">
+        <div class="draws-grid">
+            <!-- DAILY DRAW -->
+            <div class="draw-section daily">
+                <div class="draw-header">
+                    <div class="jackpot-label daily">🎯 DAILY JACKPOT</div>
+                    <h1 class="winning-title daily">🎉 WINNING NUMBERS</h1>
+                    <div class="draw-id">Draw #1</div>
+                </div>
+
+                <!-- API3 Inline Badge ABOVE numbers -->
+                <div class="api3-inline-badge daily">
+                    <div class="quantum-orb-inline daily">⚛️</div>
+                    <div class="badge-text-inline">
+                        <div class="micro-label daily">🔬 VERIFIED BY</div>
+                        <div class="badge-main">API3 QRNG</div>
+                    </div>
+                    <div class="verified-check">✓</div>
+                </div>
+
+                <div class="numbers-row">
+                    <div class="number-ball daily">05</div>
+                    <div class="number-ball daily">07</div>
+                    <div class="number-ball daily">08</div>
+                    <div class="number-ball daily">17</div>
+                    <div class="number-ball daily">38</div>
+                    <span class="plus-symbol daily">+</span>
+                    <div class="number-ball daily power">03</div>
+                </div>
+
+                <!-- Trust line BELOW numbers -->
+                <div class="trust-line daily">
+                    <strong>Quantum Randomness</strong> • Australian National University • 100% On-Chain Verification
+                </div>
+            </div>
+
+            <!-- WEEKLY DRAW -->
+            <div class="draw-section weekly">
+                <div class="draw-header">
+                    <div class="jackpot-label weekly">🏆 WEEKLY JACKPOT</div>
+                    <h1 class="winning-title weekly">🎉 WINNING NUMBERS</h1>
+                    <div class="draw-id">Draw #1</div>
+                </div>
+
+                <!-- API3 Inline Badge ABOVE numbers -->
+                <div class="api3-inline-badge weekly">
+                    <div class="quantum-orb-inline weekly">⚛️</div>
+                    <div class="badge-text-inline">
+                        <div class="micro-label weekly">🔬 VERIFIED BY</div>
+                        <div class="badge-main">API3 QRNG</div>
+                    </div>
+                    <div class="verified-check">✓</div>
+                </div>
+
+                <div class="numbers-row">
+                    <div class="number-ball weekly">02</div>
+                    <div class="number-ball weekly">07</div>
+                    <div class="number-ball weekly">15</div>
+                    <div class="number-ball weekly">21</div>
+                    <div class="number-ball weekly">48</div>
+                    <span class="plus-symbol weekly">+</span>
+                    <div class="number-ball weekly power">14</div>
+                </div>
+
+                <!-- Trust line BELOW numbers -->
+                <div class="trust-line weekly">
+                    <strong>Quantum Randomness</strong> • Australian National University • 100% On-Chain Verification
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>📍 PROPUESTA 3 - INLINE BADGE + TRUST LINE:</strong>
+            <br><br>
+            <strong>✨ Diseño:</strong> Badge inline arriba de números con quantum orb rotando + ripple effect + "Verified by API3 QRNG" + Checkmark. Trust line debajo con info clave separada por bullets.
+            <br><br>
+            <strong>✅ Ventajas:</strong> Súper limpio y elegante. Badge capta atención ANTES de ver números (psicología: primero verificación, luego números). Trust line refuerza sin ocupar espacio. Ripple effect hypnótico pero sutil.
+            <br><br>
+            <strong>🎯 Visibilidad:</strong> Alta | Balance perfecto entre impacto y minimalismo
+            <br><br>
+            <strong>🔐 Seguridad Visual:</strong> MUY ALTA - El flujo visual es: "Verificado" → Números → "Detalles técnicos"
+        </div>
+    </div>
+</body>
+</html>

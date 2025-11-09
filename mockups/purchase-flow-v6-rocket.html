@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V6: Rocket Launch - Compact & Exciting</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated stars */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    .modal {
+      max-width: 480px;
+      width: 100%;
+      background: rgba(10, 14, 39, 0.95);
+      border-radius: 24px;
+      padding: 30px;
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(0, 240, 255, 0.2);
+      position: relative;
+      animation: modal-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes modal-pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Rocket animation */
+    .rocket-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .rocket {
+      font-size: 60px;
+      display: inline-block;
+      animation: rocket-fly 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    }
+
+    @keyframes rocket-fly {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-15px) rotate(5deg); }
+    }
+
+    .fire {
+      font-size: 24px;
+      display: inline-block;
+      animation: fire-pulse 0.3s ease-in-out infinite;
+    }
+
+    @keyframes fire-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.3); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      text-align: center;
+      background: linear-gradient(135deg, #ffd700, #ff6b35, #ffd700);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient-slide 3s linear infinite;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    @keyframes gradient-slide {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    /* Compact stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(138, 43, 226, 0.1));
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    /* Compact progress */
+    .progress-section {
+      margin-bottom: 20px;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 10px;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+
+    .step::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 0;
+    }
+
+    .step:first-child::before {
+      left: 50%;
+      width: 50%;
+    }
+
+    .step:last-child::before {
+      width: 50%;
+    }
+
+    .step.completed::before {
+      background: #00ff88;
+    }
+
+    .step-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 6px;
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step.completed .step-icon {
+      background: rgba(0, 255, 136, 0.2);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    .step.active .step-icon {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: #ffd700;
+      color: #ffd700;
+      animation: pulse-step 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-step {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+      50% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+    }
+
+    .step-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .step.active .step-label {
+      color: #ffd700;
+    }
+
+    /* Exciting progress bar */
+    .progress-bar-container {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 20px;
+      padding: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b35 0%, #ffd700 50%, #00f0ff 100%);
+      background-size: 200% 100%;
+      border-radius: 15px;
+      animation: progress-rainbow 2s linear infinite;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      position: relative;
+    }
+
+    @keyframes progress-rainbow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      animation: shimmer-fast 1.5s linear infinite;
+    }
+
+    @keyframes shimmer-fast {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding: 0 5px;
+    }
+
+    .progress-text {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+    }
+
+    .progress-percent {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    /* Countdown timer */
+    .countdown {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 215, 0, 0.1));
+      border-radius: 12px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .countdown-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .countdown-time {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff6b35, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: time-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes time-glow {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
+      50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 1)); }
+    }
+
+    /* Demo button */
+    .demo-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ff6b35, #ffd700);
+      border: none;
+      border-radius: 12px;
+      color: #0a0e27;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      box-shadow: 0 5px 25px rgba(255, 107, 53, 0.5);
+      transition: all 0.3s ease;
+      animation: btn-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes btn-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 5px 25px rgba(255, 107, 53, 0.5); }
+      50% { transform: scale(1.02); box-shadow: 0 8px 35px rgba(255, 107, 53, 0.8); }
+    }
+
+    .demo-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 10px 40px rgba(255, 107, 53, 1);
+    }
+
+    .version-tag {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <div class="modal">
+    <!-- Rocket -->
+    <div class="rocket-container">
+      <div class="rocket">🚀</div>
+      <div class="fire">🔥🔥🔥</div>
+    </div>
+
+    <h1>Launching Purchase!</h1>
+    <div class="subtitle">Buckle up! Your tickets are being minted...</div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Tickets</div>
+        <div class="stat-value" id="tickets6">1,000</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="total6">$250</div>
+      </div>
+    </div>
+
+    <!-- Progress steps -->
+    <div class="progress-section">
+      <div class="progress-steps">
+        <div class="step completed">
+          <div class="step-icon">✓</div>
+          <div class="step-label">Signed</div>
+        </div>
+        <div class="step active">
+          <div class="step-icon">⚡</div>
+          <div class="step-label">Mining</div>
+        </div>
+        <div class="step">
+          <div class="step-icon">○</div>
+          <div class="step-label">Done</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressBar6" style="width: 65%"></div>
+        </div>
+        <div class="progress-info">
+          <span class="progress-text">Processing</span>
+          <span class="progress-percent" id="progressPercent6">65%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="countdown">
+      <div class="countdown-label">Time Remaining</div>
+      <div class="countdown-time" id="countdown6">0:24</div>
+    </div>
+
+    <button class="demo-btn" onclick="simulate6()">🚀 LAUNCH SIMULATION</button>
+    <div class="version-tag">V6: ROCKET LAUNCH</div>
+  </div>
+
+  <script>
+    // Create stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      starsContainer.appendChild(star);
+    }
+
+    let interval6;
+    function simulate6() {
+      let progress = 65;
+      let time = 24;
+      clearInterval(interval6);
+
+      const steps = document.querySelectorAll('.step');
+
+      interval6 = setInterval(() => {
+        progress += 2;
+        time -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          time = 0;
+          clearInterval(interval6);
+          steps[1].classList.remove('active');
+          steps[1].classList.add('completed');
+          steps[2].classList.add('active');
+          setTimeout(() => {
+            steps[2].classList.remove('active');
+            steps[2].classList.add('completed');
+          }, 1000);
+        }
+
+        document.getElementById('progressBar6').style.width = progress + '%';
+        document.getElementById('progressPercent6').textContent = progress + '%';
+        document.getElementById('countdown6').textContent = '0:' + String(time).padStart(2, '0');
+      }, 700);
+    }
+  </script>
+</body>
+</html>

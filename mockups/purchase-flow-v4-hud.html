@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V4: Futuristic HUD - Purchase Flow</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: #000;
+      color: #00f0ff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: grid-move 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes grid-move {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    /* Radar sweep */
+    .radar {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 600px;
+      height: 600px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(0, 240, 255, 0.1);
+      pointer-events: none;
+    }
+
+    .radar::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.5));
+      transform-origin: left center;
+      animation: radar-sweep 4s linear infinite;
+    }
+
+    @keyframes radar-sweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hud-container {
+      max-width: 650px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid rgba(0, 240, 255, 0.5);
+      clip-path: polygon(
+        0 20px, 20px 0,
+        calc(100% - 20px) 0, 100% 20px,
+        100% calc(100% - 20px), calc(100% - 20px) 100%,
+        20px 100%, 0 calc(100% - 20px)
+      );
+      padding: 40px;
+      position: relative;
+      box-shadow:
+        inset 0 0 50px rgba(0, 240, 255, 0.1),
+        0 0 50px rgba(0, 240, 255, 0.3);
+      animation: hud-flicker 0.15s infinite;
+    }
+
+    @keyframes hud-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.98; }
+    }
+
+    /* Corner decorations */
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 2px solid #00f0ff;
+    }
+
+    .corner-tl {
+      top: -2px;
+      left: -2px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner-tr {
+      top: -2px;
+      right: -2px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner-bl {
+      bottom: -2px;
+      left: -2px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .corner-br {
+      bottom: -2px;
+      right: -2px;
+      border-left: none;
+      border-top: none;
+    }
+
+    /* Scanline effect */
+    .scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+      animation: scanline-move 3s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes scanline-move {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .system-status {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      color: #00ff88;
+      letter-spacing: 2px;
+    }
+
+    .timestamp {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      color: rgba(0, 240, 255, 0.6);
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #00f0ff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .mission-id {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      color: rgba(0, 240, 255, 0.6);
+      letter-spacing: 1px;
+    }
+
+    /* Data panels */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .data-panel {
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 20px;
+      clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 0 100%);
+      position: relative;
+    }
+
+    .data-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 15px;
+      height: 15px;
+      border-right: 1px solid rgba(0, 240, 255, 0.3);
+      border-top: 1px solid rgba(0, 240, 255, 0.3);
+      transform: rotate(45deg);
+      transform-origin: top right;
+    }
+
+    .data-label {
+      font-size: 10px;
+      color: rgba(0, 240, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .data-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #00f0ff;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .data-subtext {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 5px;
+    }
+
+    /* Process monitor */
+    .process-monitor {
+      margin: 30px 0;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-left: 3px solid #00f0ff;
+    }
+
+    .monitor-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      color: #00f0ff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+      box-shadow: 0 0 10px #00ff88;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .process-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    }
+
+    .process-item:last-child {
+      border-bottom: none;
+    }
+
+    .process-icon {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-size: 16px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+    }
+
+    .process-item.active .process-icon {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: #00f0ff;
+      animation: pulse-icon 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-icon {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7); }
+      50% { box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
+    }
+
+    .process-item.completed .process-icon {
+      background: rgba(0, 255, 136, 0.2);
+      border-color: #00ff88;
+    }
+
+    .process-content {
+      flex: 1;
+    }
+
+    .process-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 4px;
+    }
+
+    .process-item.active .process-name {
+      color: #00f0ff;
+    }
+
+    .process-status {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    /* Technical progress bar */
+    .tech-progress {
+      margin: 25px 0;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: rgba(0, 240, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .progress-stats {
+      display: flex;
+      gap: 15px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+    }
+
+    .stat {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .stat span {
+      color: #00f0ff;
+      font-weight: 700;
+    }
+
+    .progress-bar-wrapper {
+      position: relative;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg,
+        rgba(0, 240, 255, 0.3),
+        rgba(0, 240, 255, 0.5),
+        rgba(0, 240, 255, 0.3)
+      );
+      border-right: 2px solid #00f0ff;
+      position: relative;
+      transition: width 0.5s ease;
+    }
+
+    .progress-bar-fill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(0, 240, 255, 0.5),
+        transparent
+      );
+      animation: progress-shimmer 2s linear infinite;
+    }
+
+    @keyframes progress-shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #00f0ff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      z-index: 1;
+    }
+
+    /* Timing display */
+    .timing-panel {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .timing-item {
+      text-align: center;
+    }
+
+    .timing-label {
+      font-size: 10px;
+      color: rgba(0, 240, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .timing-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #00f0ff;
+    }
+
+    /* Control button */
+    .control-btn {
+      width: 100%;
+      padding: 18px;
+      margin-top: 25px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 240, 255, 0.1));
+      border: 2px solid #00f0ff;
+      color: #00f0ff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+      animation: btn-slide 3s linear infinite;
+    }
+
+    @keyframes btn-slide {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .control-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(0, 240, 255, 0.2));
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+    }
+
+    .version-tag {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 9px;
+      color: rgba(0, 240, 255, 0.4);
+      letter-spacing: 2px;
+      font-family: 'Orbitron', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- Grid background -->
+  <div class="grid-bg"></div>
+
+  <!-- Radar -->
+  <div class="radar"></div>
+
+  <div class="hud-container">
+    <!-- Corners -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- Scanline -->
+    <div class="scanline"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="system-status">◉ SYSTEM ACTIVE</div>
+      <div class="timestamp" id="timestamp">2025.01.28 | 14:32:18</div>
+    </div>
+
+    <h1>Transaction Processing</h1>
+    <div class="mission-id">MISSION ID: TXN-BLK-50000-ALPHA</div>
+
+    <!-- Data grid -->
+    <div class="data-grid">
+      <div class="data-panel">
+        <div class="data-label">UNITS</div>
+        <div class="data-value" id="ticketCount4">50,000</div>
+        <div class="data-subtext">Lottery Tickets</div>
+      </div>
+      <div class="data-panel">
+        <div class="data-label">VALUE</div>
+        <div class="data-value" id="totalCost4">$12.5K</div>
+        <div class="data-subtext">USD Total</div>
+      </div>
+    </div>
+
+    <!-- Process monitor -->
+    <div class="process-monitor">
+      <div class="monitor-title">
+        <span class="status-indicator"></span>
+        <span>PROCESS SEQUENCE</span>
+      </div>
+
+      <div class="process-item completed">
+        <div class="process-icon">✓</div>
+        <div class="process-content">
+          <div class="process-name">Authorization</div>
+          <div class="process-status">SIGNATURE CONFIRMED</div>
+        </div>
+      </div>
+
+      <div class="process-item active">
+        <div class="process-icon">▶</div>
+        <div class="process-content">
+          <div class="process-name">Network Validation</div>
+          <div class="process-status">PROCESSING MEGA TRANSACTION</div>
+        </div>
+      </div>
+
+      <div class="process-item">
+        <div class="process-icon">○</div>
+        <div class="process-content">
+          <div class="process-name">Data Recording</div>
+          <div class="process-status">AWAITING CONFIRMATION</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical progress -->
+    <div class="tech-progress">
+      <div class="progress-header">
+        <div class="progress-label">⚡ BLOCKCHAIN SYNC</div>
+        <div class="progress-stats">
+          <div class="stat">BLOCKS: <span id="blocks">127/150</span></div>
+          <div class="stat">CONFIRMATIONS: <span id="confirmations">3/6</span></div>
+        </div>
+      </div>
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar-fill" id="progressBar4" style="width: 85%"></div>
+        <div class="progress-percentage" id="progressPercent4">85%</div>
+      </div>
+    </div>
+
+    <!-- Timing panel -->
+    <div class="timing-panel">
+      <div class="timing-item">
+        <div class="timing-label">Elapsed</div>
+        <div class="timing-value" id="elapsed4">01:35</div>
+      </div>
+      <div class="timing-item">
+        <div class="timing-label">Remaining</div>
+        <div class="timing-value" id="remaining4">00:15</div>
+      </div>
+      <div class="timing-item">
+        <div class="timing-label">Est. Total</div>
+        <div class="timing-value" id="total4">01:50</div>
+      </div>
+    </div>
+
+    <button class="control-btn" onclick="simulateProgress4()">▶ INITIATE SEQUENCE</button>
+
+    <div class="version-tag">VERSION 4: FUTURISTIC HUD</div>
+  </div>
+
+  <script>
+    // Update timestamp
+    setInterval(() => {
+      const now = new Date();
+      const timestamp = now.toISOString().split('T')[0].replace(/-/g, '.') + ' | ' +
+                       now.toTimeString().split(' ')[0];
+      document.getElementById('timestamp').textContent = timestamp;
+    }, 1000);
+
+    function calculateEstimatedTime(ticketCount) {
+      if (ticketCount <= 10) return { min: 15, max: 25, text: '15-25 seconds' };
+      if (ticketCount <= 100) return { min: 25, max: 35, text: '25-35 seconds' };
+      if (ticketCount <= 1000) return { min: 40, max: 60, text: '40-60 seconds' };
+      if (ticketCount <= 5000) return { min: 60, max: 90, text: '60-90 seconds' };
+      return { min: 90, max: 120, text: '90-120 seconds' };
+    }
+
+    let progressInterval4;
+    function simulateProgress4() {
+      const ticketCount = 50000;
+      const timeEst = calculateEstimatedTime(ticketCount);
+      const totalTime = (timeEst.min + timeEst.max) / 2;
+
+      let progress = 85;
+      let timeLeft = Math.floor(totalTime * 0.15);
+      let elapsed = Math.floor(totalTime * 0.85);
+
+      clearInterval(progressInterval4);
+
+      const processes = document.querySelectorAll('.process-item');
+
+      progressInterval4 = setInterval(() => {
+        progress += 1;
+        timeLeft -= 1;
+        elapsed += 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          timeLeft = 0;
+          clearInterval(progressInterval4);
+
+          // Complete processes
+          processes[1].classList.remove('active');
+          processes[1].classList.add('completed');
+          processes[2].classList.add('active');
+
+          setTimeout(() => {
+            processes[2].classList.remove('active');
+            processes[2].classList.add('completed');
+          }, 2000);
+        }
+
+        document.getElementById('progressBar4').style.width = progress + '%';
+        document.getElementById('progressPercent4').textContent = progress + '%';
+
+        // Update blocks and confirmations
+        const blocks = Math.floor(127 + (progress - 85) * 1.5);
+        const confirmations = Math.floor(3 + (progress - 85) * 0.2);
+        document.getElementById('blocks').textContent = blocks + '/150';
+        document.getElementById('confirmations').textContent = Math.min(confirmations, 6) + '/6';
+
+        // Update timing
+        const elapsedMin = Math.floor(elapsed / 60);
+        const elapsedSec = elapsed % 60;
+        const remainingMin = Math.floor(timeLeft / 60);
+        const remainingSec = timeLeft % 60;
+
+        document.getElementById('elapsed4').textContent =
+          String(elapsedMin).padStart(2, '0') + ':' + String(elapsedSec).padStart(2, '0');
+        document.getElementById('remaining4').textContent =
+          String(remainingMin).padStart(2, '0') + ':' + String(remainingSec).padStart(2, '0');
+      }, (totalTime * 1000) / 15);
+    }
+
+    // Initialize
+    document.getElementById('ticketCount4').textContent = '50,000';
+    document.getElementById('totalCost4').textContent = '$' + ((50000 * 0.25) / 1000).toFixed(1) + 'K';
+    document.getElementById('total4').textContent = '01:50';
+  </script>
+</body>
+</html>

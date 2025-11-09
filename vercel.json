@@ -1,0 +1,36 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/finalize-vote",
+      "schedule": "59 23 L * *"
+    },
+    {
+      "path": "/api/cron/calculate-fees",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/create-next-draws",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/execute-daily-draw",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/execute-weekly-draw",
+      "schedule": "0 20 * * 0"
+    },
+    {
+      "path": "/api/cron/claim-gas-reimbursement",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/execute-draw",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/execute-hourly-draw",
+      "schedule": "5 * * * *"
+    }
+  ]
+}

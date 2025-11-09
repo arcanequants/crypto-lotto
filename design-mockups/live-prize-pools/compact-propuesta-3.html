@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compact Propuesta 3</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #050811 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .title h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .title p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+
+    .tabs-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .tab {
+      padding: 10px 35px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab.active.daily {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: #00f0ff;
+      color: #00f0ff;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+    }
+
+    .tab.active.weekly {
+      background: rgba(255, 215, 0, 0.12);
+      border-color: #ffd700;
+      color: #ffd700;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+    }
+
+    .lottery-card {
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(5, 8, 17, 0.98));
+      border-radius: 20px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lottery-card.daily {
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      box-shadow: 0 20px 50px rgba(0, 240, 255, 0.2);
+    }
+
+    .lottery-card.weekly {
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 20px 50px rgba(255, 215, 0, 0.2);
+    }
+
+    .shimmer {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+      animation: shimmer 3s infinite;
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lottery-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lottery-icon {
+      font-size: 28px;
+    }
+
+    .lottery-meta h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .daily .lottery-meta h2 {
+      color: #00f0ff;
+    }
+
+    .weekly .lottery-meta h2 {
+      color: #ffd700;
+    }
+
+    .lottery-number {
+      font-size: 10px;
+      opacity: 0.6;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .live-badge {
+      padding: 6px 15px;
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid #4ade80;
+      border-radius: 20px;
+      color: #4ade80;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      animation: pulse 2s ease-in-out infinite;
+      letter-spacing: 1px;
+    }
+
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .left-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .prize-display {
+      text-align: center;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+    }
+
+    .daily .prize-display {
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .weekly .prize-display {
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .prize-label {
+      font-size: 10px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .prize-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .countdown-section {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .daily .countdown-section {
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .weekly .countdown-section {
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .countdown-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .daily .countdown-title {
+      color: #00f0ff;
+    }
+
+    .weekly .countdown-title {
+      color: #ffd700;
+    }
+
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .countdown-item {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      padding: 12px 5px;
+      text-align: center;
+    }
+
+    .daily .countdown-item {
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .weekly .countdown-item {
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .countdown-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff, #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .countdown-label {
+      font-size: 9px;
+      opacity: 0.6;
+      text-transform: uppercase;
+    }
+
+    .draw-date {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-item {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .daily .stat-item {
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .weekly .stat-item {
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      opacity: 0.6;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .daily .stat-value {
+      color: #00f0ff;
+    }
+
+    .weekly .stat-value {
+      color: #ffd700;
+    }
+
+    .cta-button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+    }
+
+    .right-section {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .daily .right-section {
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .weekly .right-section {
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .composition-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 18px;
+      text-align: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .daily .composition-header {
+      color: #00f0ff;
+    }
+
+    .weekly .composition-header {
+      color: #ffd700;
+    }
+
+    .crypto-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .crypto-item {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .crypto-item.btc {
+      border: 1px solid rgba(247, 147, 26, 0.3);
+    }
+
+    .crypto-item.eth {
+      border: 1px solid rgba(98, 126, 234, 0.3);
+    }
+
+    .crypto-item.sol {
+      border: 1px solid rgba(0, 255, 163, 0.3);
+    }
+
+    .crypto-item:hover {
+      transform: translateX(5px);
+    }
+
+    .crypto-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .crypto-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .crypto-icon {
+      font-size: 20px;
+    }
+
+    .crypto-symbol {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .crypto-item.btc .crypto-symbol {
+      color: #f7931a;
+    }
+
+    .crypto-item.eth .crypto-symbol {
+      color: #627eea;
+    }
+
+    .crypto-item.sol .crypto-symbol {
+      color: #00ffa3;
+    }
+
+    .crypto-percentage {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.6;
+    }
+
+    .crypto-values {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    .crypto-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .crypto-usd {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .split-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">
+      <h1>💎 COMPACT: Split Hero</h1>
+      <p>Layout horizontal compacto dashboard-style</p>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tab active daily" onclick="switchTab('daily')">🎯 Daily</div>
+      <div class="tab weekly" onclick="switchTab('weekly')">🏆 Weekly</div>
+    </div>
+
+    <!-- DAILY CONTENT -->
+    <div id="daily-content" class="tab-content active">
+      <div class="lottery-card daily">
+        <div class="shimmer"></div>
+
+        <div class="card-header">
+          <div class="lottery-info">
+            <div class="lottery-icon">🎯</div>
+            <div class="lottery-meta">
+              <h2>DAILY JACKPOT</h2>
+              <div class="lottery-number">Lottery #001</div>
+            </div>
+          </div>
+          <div class="live-badge">● LIVE</div>
+        </div>
+
+        <div class="split-layout">
+          <div class="left-section">
+            <div class="prize-display">
+              <div class="prize-label">Total Prize</div>
+              <div class="prize-amount">$26,096</div>
+            </div>
+
+            <div class="countdown-section">
+              <div class="countdown-title">⏱️ Next Draw</div>
+              <div class="countdown">
+                <div class="countdown-item">
+                  <div class="countdown-value">00</div>
+                  <div class="countdown-label">D</div>
+                </div>
+                <div class="countdown-item">
+                  <div class="countdown-value">15</div>
+                  <div class="countdown-label">H</div>
+                </div>
+                <div class="countdown-item">
+                  <div class="countdown-value">23</div>
+                  <div class="countdown-label">M</div>
+                </div>
+                <div class="countdown-item">
+                  <div class="countdown-value">42</div>
+                  <div class="countdown-label">S</div>
+                </div>
+              </div>
+              <div class="draw-date">Today 8:00 PM</div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-label">Tickets</div>
+                <div class="stat-value">1,250</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Updated</div>
+                <div class="stat-value">8:54 PM</div>
+              </div>
+            </div>
+
+            <button class="cta-button">🏆 View Results</button>
+          </div>
+
+          <div class="right-section">
+            <div class="composition-header">📊 Prize Pool</div>
+
+            <div class="crypto-list">
+              <div class="crypto-item btc">
+                <div class="crypto-header">
+                  <div class="crypto-left">
+                    <div class="crypto-icon">🟠</div>
+                    <div class="crypto-symbol">BTC</div>
+                  </div>
+                  <div class="crypto-percentage">70%</div>
+                </div>
+                <div class="crypto-values">
+                  <div class="crypto-amount">0.0500 BTC</div>
+                  <div class="crypto-usd">$5,479</div>
+                </div>
+              </div>
+
+              <div class="crypto-item eth">
+                <div class="crypto-header">
+                  <div class="crypto-left">
+                    <div class="crypto-icon">🔷</div>
+                    <div class="crypto-symbol">ETH</div>
+                  </div>
+                  <div class="crypto-percentage">25%</div>
+                </div>
+                <div class="crypto-values">
+                  <div class="crypto-amount">0.5000 ETH</div>
+                  <div class="crypto-usd">$1,968</div>
+                </div>
+              </div>
+
+              <div class="crypto-item sol">
+                <div class="crypto-header">
+                  <div class="crypto-left">
+                    <div class="crypto-icon">⚡</div>
+                    <div class="crypto-symbol">SOL</div>
+                  </div>
+                  <div class="crypto-percentage">5%</div>
+                </div>
+                <div class="crypto-values">
+                  <div class="crypto-amount">100.00 SOL</div>
+                  <div class="crypto-usd">$648</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEKLY CONTENT -->
+    <div id="weekly-content" class="tab-content">
+      <div class="lottery-card weekly">
+        <div class="shimmer"></div>
+
+        <div class="card-header">
+          <div class="lottery-info">
+            <div class="lottery-icon">🏆</div>
+            <div class="lottery-meta">
+              <h2>WEEKLY JACKPOT</h2>
+              <div class="lottery-number">Lottery #001</div>
+            </div>
+          </div>
+          <div class="live-badge">● LIVE</div>
+        </div>
+
+        <div class="split-layout">
+          <div class="left-section">
+            <div class="prize-display">
+              <div class="prize-label">Total Prize</div>
+              <div class="prize-amount">$207,888</div>
+            </div>
+
+            <div class="countdown-section">
+              <div class="countdown-title">⏱️ Next Draw</div>
+              <div class="countdown">
+                <div class="countdown-item">
+                  <div class="countdown-value">05</div>
+                  <div class="countdown-label">D</div>
+                </div>
+                <div class="countdown-item">
+                  <div class="countdown-value">23</div>
+                  <div class="countdown-label">H</div>
+                </div>
+                <div class="countdown-item">
+                  <div class="countdown-value">05</div>
+                  <div class="countdown-label">M</div>
+                </div>
+                <div class="countdown-item">
+                  <div class="countdown-value">15</div>
+                  <div class="countdown-label">S</div>
+                </div>
+              </div>
+              <div class="draw-date">Oct 26, 8:00 PM</div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-label">Tickets</div>
+                <div class="stat-value">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Updated</div>
+                <div class="stat-value">8:54 PM</div>
+              </div>
+            </div>
+
+            <button class="cta-button">🏆 View Results</button>
+          </div>
+
+          <div class="right-section">
+            <div class="composition-header">📊 Prize Pool</div>
+
+            <div class="crypto-list">
+              <div class="crypto-item btc">
+                <div class="crypto-header">
+                  <div class="crypto-left">
+                    <div class="crypto-icon">🟠</div>
+                    <div class="crypto-symbol">BTC</div>
+                  </div>
+                  <div class="crypto-percentage">70%</div>
+                </div>
+                <div class="crypto-values">
+                  <div class="crypto-amount">0.3500 BTC</div>
+                  <div class="crypto-usd">$38,356</div>
+                </div>
+              </div>
+
+              <div class="crypto-item eth">
+                <div class="crypto-header">
+                  <div class="crypto-left">
+                    <div class="crypto-icon">🔷</div>
+                    <div class="crypto-symbol">ETH</div>
+                  </div>
+                  <div class="crypto-percentage">25%</div>
+                </div>
+                <div class="crypto-values">
+                  <div class="crypto-amount">2.8000 ETH</div>
+                  <div class="crypto-usd">$11,023</div>
+                </div>
+              </div>
+
+              <div class="crypto-item sol">
+                <div class="crypto-header">
+                  <div class="crypto-left">
+                    <div class="crypto-icon">⚡</div>
+                    <div class="crypto-symbol">SOL</div>
+                  </div>
+                  <div class="crypto-percentage">5%</div>
+                </div>
+                <div class="crypto-values">
+                  <div class="crypto-amount">850.00 SOL</div>
+                  <div class="crypto-usd">$5,508</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(type) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      const activeTab = type === 'daily'
+        ? document.querySelector('.tab.daily')
+        : document.querySelector('.tab.weekly');
+      activeTab.classList.add('active');
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      document.getElementById(`${type}-content`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

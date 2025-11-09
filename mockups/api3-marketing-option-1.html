@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option 1: Hero Banner - Home Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --darker: #0a0e27;
+            --dark: #151932;
+            --primary: #00f0ff;
+            --secondary: #0066ff;
+            --accent: #ffd700;
+            --light: #e0e6ed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #000 100%);
+            color: var(--light);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: var(--light);
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 50px;
+        }
+
+        /* API3 BANNER - Opción 1: Hero destacado */
+        .api3-hero-banner {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 215, 0, 0.1));
+            border: 3px solid var(--primary);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 50px auto;
+            max-width: 900px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.3);
+            animation: pulse-border 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% {
+                box-shadow: 0 20px 60px rgba(0, 240, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 20px 80px rgba(0, 240, 255, 0.6);
+            }
+        }
+
+        .api3-hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .api3-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .api3-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 240, 255, 0.2);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            padding: 8px 20px;
+            margin-bottom: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .quantum-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .api3-hero-banner h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .api3-hero-banner p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .trust-icon {
+            font-size: 32px;
+        }
+
+        .trust-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .trust-value {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.6);
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .location-note strong {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">📍 OPCIÓN 1: HERO BANNER - HOME PAGE</div>
+    <div class="mockup-subtitle">Banner destacado debajo del hero principal | Máxima visibilidad</div>
+
+    <div class="container">
+        <!-- Simulated Hero -->
+        <section class="hero">
+            <h1>Win Big with Crypto</h1>
+            <p>Blockchain-powered lottery with transparent, verifiable draws</p>
+        </section>
+
+        <!-- API3 QRNG Banner -->
+        <div class="api3-hero-banner">
+            <div class="api3-content">
+                <div class="api3-badge">
+                    <div class="quantum-icon">⚛️</div>
+                    <span>Powered by Quantum Technology</span>
+                </div>
+
+                <h2>🔬 True Quantum Randomness</h2>
+                <p>
+                    Our draws use <strong>API3 QRNG</strong> - quantum random numbers generated by
+                    the <strong>Australian National University</strong>. Not pseudo-random. Not algorithms.
+                    Real quantum physics. 100% verifiable on-chain.
+                </p>
+
+                <div class="trust-indicators">
+                    <div class="trust-item">
+                        <div class="trust-icon">🏛️</div>
+                        <div class="trust-label">GOVERNMENT BACKED</div>
+                        <div class="trust-value">ANU Australia</div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">⚛️</div>
+                        <div class="trust-label">QUANTUM PHYSICS</div>
+                        <div class="trust-value">True Randomness</div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🔍</div>
+                        <div class="trust-label">100% AUDITABLE</div>
+                        <div class="trust-value">On-Chain Proof</div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🆓</div>
+                        <div class="trust-label">ZERO FEES</div>
+                        <div class="trust-value">More for Winners</div>
+                    </div>
+                </div>
+
+                <button class="cta-button">Learn How It Works →</button>
+
+                <div class="location-note">
+                    <strong>📍 Why This Location:</strong> Maximum visibility on home page, right after hero.
+                    Users see it immediately. Builds trust before they buy tickets.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

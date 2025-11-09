@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Propuesta 4: Ultra Compact</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #050811 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .title h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .title p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+
+    .cards-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .lottery-card {
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.8), rgba(5, 8, 17, 0.9));
+      border-radius: 20px;
+      padding: 20px 25px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .lottery-card.daily {
+      border: 1px solid rgba(0, 240, 255, 0.4);
+    }
+
+    .lottery-card.weekly {
+      border: 1px solid rgba(255, 215, 0, 0.4);
+    }
+
+    .lottery-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .lottery-card.daily:hover {
+      box-shadow: 0 15px 40px rgba(0, 240, 255, 0.25);
+    }
+
+    .lottery-card.weekly:hover {
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.25);
+    }
+
+    .lottery-card.expanded {
+      padding-bottom: 25px;
+    }
+
+    .shimmer {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+      animation: shimmer 3s infinite;
+      pointer-events: none;
+    }
+
+    .card-main {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 25px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lottery-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 180px;
+    }
+
+    .lottery-icon {
+      font-size: 28px;
+    }
+
+    .lottery-info h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .daily .lottery-info h3 {
+      color: #00f0ff;
+    }
+
+    .weekly .lottery-info h3 {
+      color: #ffd700;
+    }
+
+    .lottery-number {
+      font-size: 10px;
+      opacity: 0.6;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .prize-display {
+      text-align: center;
+    }
+
+    .prize-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .prize-label {
+      font-size: 10px;
+      opacity: 0.5;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .countdown-compact {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .countdown-item {
+      text-align: center;
+    }
+
+    .countdown-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff, #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .countdown-label {
+      font-size: 9px;
+      opacity: 0.6;
+      text-transform: uppercase;
+    }
+
+    .countdown-separator {
+      font-size: 20px;
+      opacity: 0.3;
+      margin: 0 -6px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .live-badge {
+      padding: 6px 12px;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid #4ade80;
+      border-radius: 15px;
+      color: #4ade80;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      animation: pulse 2s ease-in-out infinite;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .expand-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 11px;
+      font-family: 'Orbitron', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .expand-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .card-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lottery-card.expanded .card-details {
+      max-height: 300px;
+      margin-top: 20px;
+    }
+
+    .details-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      margin: 15px 0;
+    }
+
+    .details-content {
+      padding: 15px 0;
+    }
+
+    .crypto-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .crypto-item {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .crypto-item.btc {
+      border: 1px solid rgba(247, 147, 26, 0.25);
+    }
+
+    .crypto-item.eth {
+      border: 1px solid rgba(98, 126, 234, 0.25);
+    }
+
+    .crypto-item.sol {
+      border: 1px solid rgba(0, 255, 163, 0.25);
+    }
+
+    .crypto-item:hover {
+      transform: translateY(-3px);
+    }
+
+    .crypto-icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .crypto-symbol {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .crypto-item.btc .crypto-symbol {
+      color: #f7931a;
+    }
+
+    .crypto-item.eth .crypto-symbol {
+      color: #627eea;
+    }
+
+    .crypto-item.sol .crypto-symbol {
+      color: #00ffa3;
+    }
+
+    .crypto-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .crypto-usd {
+      font-size: 13px;
+      color: #ffd700;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .details-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .detail-item {
+      font-size: 11px;
+    }
+
+    .detail-label {
+      opacity: 0.6;
+      margin-bottom: 3px;
+    }
+
+    .detail-value {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .daily .detail-value {
+      color: #00f0ff;
+    }
+
+    .weekly .detail-value {
+      color: #ffd700;
+    }
+
+    .cta-button {
+      padding: 10px 25px;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+    }
+
+    @media (max-width: 900px) {
+      .card-main {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .lottery-header,
+      .prize-display,
+      .countdown-compact {
+        justify-self: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">
+      <h1>⚡ PROPUESTA 4: Ultra Compact</h1>
+      <p>Cards horizontales expandibles - Info esencial siempre visible</p>
+    </div>
+
+    <div class="cards-wrapper">
+      <!-- DAILY CARD -->
+      <div class="lottery-card daily" id="daily-card">
+        <div class="shimmer"></div>
+
+        <div class="card-main">
+          <div class="lottery-header">
+            <div class="lottery-icon">🎯</div>
+            <div class="lottery-info">
+              <h3>DAILY JACKPOT</h3>
+              <div class="lottery-number">Lottery #001</div>
+            </div>
+          </div>
+
+          <div class="prize-display">
+            <div class="prize-amount">$26,096</div>
+            <div class="prize-label">Total Prize</div>
+          </div>
+
+          <div class="countdown-compact">
+            <div class="countdown-item">
+              <div class="countdown-value">00</div>
+              <div class="countdown-label">D</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+              <div class="countdown-value">15</div>
+              <div class="countdown-label">H</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+              <div class="countdown-value">23</div>
+              <div class="countdown-label">M</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+              <div class="countdown-value">42</div>
+              <div class="countdown-label">S</div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="live-badge">● LIVE</div>
+            <button class="expand-btn" onclick="toggleCard('daily-card')">Details ▼</button>
+          </div>
+        </div>
+
+        <div class="card-details">
+          <div class="details-divider"></div>
+
+          <div class="details-content">
+            <div class="crypto-grid">
+              <div class="crypto-item btc">
+                <div class="crypto-icon">🟠</div>
+                <div class="crypto-symbol">BTC</div>
+                <div class="crypto-amount">0.0500</div>
+                <div class="crypto-usd">$5,479</div>
+              </div>
+
+              <div class="crypto-item eth">
+                <div class="crypto-icon">🔷</div>
+                <div class="crypto-symbol">ETH</div>
+                <div class="crypto-amount">0.5000</div>
+                <div class="crypto-usd">$1,968</div>
+              </div>
+
+              <div class="crypto-item sol">
+                <div class="crypto-icon">⚡</div>
+                <div class="crypto-symbol">SOL</div>
+                <div class="crypto-amount">100.00</div>
+                <div class="crypto-usd">$648</div>
+              </div>
+            </div>
+
+            <div class="details-footer">
+              <div class="detail-item">
+                <div class="detail-label">Next Draw</div>
+                <div class="detail-value">Today 8:00 PM</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Tickets Sold</div>
+                <div class="detail-value">1,250</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Last Updated</div>
+                <div class="detail-value">8:54 PM</div>
+              </div>
+              <button class="cta-button">🏆 View Results</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEKLY CARD -->
+      <div class="lottery-card weekly" id="weekly-card">
+        <div class="shimmer"></div>
+
+        <div class="card-main">
+          <div class="lottery-header">
+            <div class="lottery-icon">🏆</div>
+            <div class="lottery-info">
+              <h3>WEEKLY JACKPOT</h3>
+              <div class="lottery-number">Lottery #001</div>
+            </div>
+          </div>
+
+          <div class="prize-display">
+            <div class="prize-amount">$207,888</div>
+            <div class="prize-label">Total Prize</div>
+          </div>
+
+          <div class="countdown-compact">
+            <div class="countdown-item">
+              <div class="countdown-value">05</div>
+              <div class="countdown-label">D</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+              <div class="countdown-value">23</div>
+              <div class="countdown-label">H</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+              <div class="countdown-value">05</div>
+              <div class="countdown-label">M</div>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+              <div class="countdown-value">15</div>
+              <div class="countdown-label">S</div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="live-badge">● LIVE</div>
+            <button class="expand-btn" onclick="toggleCard('weekly-card')">Details ▼</button>
+          </div>
+        </div>
+
+        <div class="card-details">
+          <div class="details-divider"></div>
+
+          <div class="details-content">
+            <div class="crypto-grid">
+              <div class="crypto-item btc">
+                <div class="crypto-icon">🟠</div>
+                <div class="crypto-symbol">BTC</div>
+                <div class="crypto-amount">0.3500</div>
+                <div class="crypto-usd">$38,356</div>
+              </div>
+
+              <div class="crypto-item eth">
+                <div class="crypto-icon">🔷</div>
+                <div class="crypto-symbol">ETH</div>
+                <div class="crypto-amount">2.8000</div>
+                <div class="crypto-usd">$11,023</div>
+              </div>
+
+              <div class="crypto-item sol">
+                <div class="crypto-icon">⚡</div>
+                <div class="crypto-symbol">SOL</div>
+                <div class="crypto-amount">850.00</div>
+                <div class="crypto-usd">$5,508</div>
+              </div>
+            </div>
+
+            <div class="details-footer">
+              <div class="detail-item">
+                <div class="detail-label">Next Draw</div>
+                <div class="detail-value">Oct 26, 8:00 PM</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Tickets Sold</div>
+                <div class="detail-value">0</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Last Updated</div>
+                <div class="detail-value">8:54 PM</div>
+              </div>
+              <button class="cta-button">🏆 View Results</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleCard(cardId) {
+      const card = document.getElementById(cardId);
+      const btn = card.querySelector('.expand-btn');
+
+      if (card.classList.contains('expanded')) {
+        card.classList.remove('expanded');
+        btn.textContent = 'Details ▼';
+      } else {
+        card.classList.add('expanded');
+        btn.textContent = 'Details ▲';
+      }
+    }
+  </script>
+</body>
+</html>

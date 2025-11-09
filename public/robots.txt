@@ -1,0 +1,14 @@
+# Crypto Lotto - Robots.txt
+# Allow all search engines
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Sitemap
+Sitemap: https://crypto-lotto.com/sitemap.xml
+
+# Crawl delay (prevent aggressive crawling)
+Crawl-delay: 1

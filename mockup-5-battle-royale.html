@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCKUP 5: Battle Royale Gaming</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), 0 0 40px rgba(255, 165, 0, 0.2); }
+      50% { box-shadow: 0 0 40px rgba(255, 0, 0, 0.8), 0 0 80px rgba(255, 165, 0, 0.4); }
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      padding: 40px 20px;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(255, 0, 0, 0.15), transparent 40%),
+        radial-gradient(circle at 80% 50%, rgba(255, 165, 0, 0.15), transparent 40%),
+        linear-gradient(180deg, #0a0a0a 0%, #1a0a0a 100%);
+      position: relative;
+    }
+
+    /* Battle effects */
+    .battle-effect {
+      position: fixed;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      opacity: 0.1;
+      pointer-events: none;
+      animation: pulse-glow 3s infinite;
+    }
+
+    .effect-1 {
+      top: 10%;
+      left: 10%;
+      background: radial-gradient(circle, rgba(255, 0, 0, 0.4), transparent);
+    }
+
+    .effect-2 {
+      bottom: 10%;
+      right: 10%;
+      background: radial-gradient(circle, rgba(255, 165, 0, 0.4), transparent);
+      animation-delay: 1.5s;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .battle-header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 165, 0, 0.1));
+      border: 3px solid rgba(255, 0, 0, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
+    }
+
+    .battle-title {
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff0000, #ff6600, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      animation: shake 0.5s infinite;
+    }
+
+    .battle-subtitle {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Power Up Banner */
+    .power-banner {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15));
+      border: 3px solid rgba(255, 215, 0, 0.5);
+      border-radius: 25px;
+      padding: 25px;
+      text-align: center;
+      margin-bottom: 50px;
+      animation: pulse-glow 2s infinite;
+    }
+
+    .power-title {
+      font-size: 28px;
+      color: #ffd700;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+
+    .power-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Champion Card */
+    .champion-card {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+      border: 4px solid #ffd700;
+      border-radius: 40px;
+      padding: 60px 40px;
+      text-align: center;
+      margin-bottom: 40px;
+      box-shadow:
+        0 0 60px rgba(255, 215, 0, 0.5),
+        inset 0 0 40px rgba(255, 215, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .champion-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 215, 0, 0.03) 10px,
+        rgba(255, 215, 0, 0.03) 20px
+      );
+      animation: scan 20s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(50%); }
+    }
+
+    .champion-badge {
+      display: inline-block;
+      padding: 10px 25px;
+      background: linear-gradient(135deg, #ffd700, #ff6600);
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #000;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      position: relative;
+      z-index: 1;
+    }
+
+    .champion-emoji {
+      font-size: 140px;
+      margin-bottom: 20px;
+      display: block;
+      filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.8));
+      position: relative;
+      z-index: 1;
+    }
+
+    .champion-name {
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .champion-tagline {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 40px;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HP Bars */
+    .hp-section {
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hp-bar {
+      width: 100%;
+      height: 30px;
+      background: rgba(255, 0, 0, 0.2);
+      border: 2px solid #ff0000;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff0000, #ff6600, #ffd700);
+      border-radius: 18px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      transition: width 1s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hp-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .kills-bar {
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .kills-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00ff00, #ffd700);
+      border-radius: 13px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      transition: width 1s ease;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    /* Support Button */
+    .support-btn {
+      padding: 25px 60px;
+      background: linear-gradient(135deg, #ff0000, #ff6600);
+      border: 3px solid #ffd700;
+      border-radius: 20px;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow: 0 10px 40px rgba(255, 0, 0, 0.6);
+      position: relative;
+      z-index: 1;
+    }
+
+    .support-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 60px rgba(255, 0, 0, 0.8);
+      animation: shake 0.3s infinite;
+    }
+
+    /* Fighters Grid */
+    .fighters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .fighter-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .fighter-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(255, 165, 0, 0.5);
+      box-shadow: 0 15px 40px rgba(255, 165, 0, 0.4);
+    }
+
+    .rank-badge {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+
+    .fighter-emoji {
+      font-size: 60px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .fighter-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .fighter-kills {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 20px;
+    }
+
+    .boost-btn {
+      padding: 12px 30px;
+      background: rgba(255, 165, 0, 0.2);
+      border: 2px solid #ff6600;
+      border-radius: 15px;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .boost-btn:hover {
+      background: rgba(255, 165, 0, 0.4);
+      border-color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 165, 0, 0.6);
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 0, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="battle-effect effect-1"></div>
+  <div class="battle-effect effect-2"></div>
+
+  <div class="mockup-label">MOCKUP 5: BATTLE ROYALE</div>
+
+  <div class="container">
+    <div class="battle-header">
+      <div class="battle-title">⚔️ TOKEN BATTLE ROYALE ⚔️</div>
+      <div class="battle-subtitle">5 Tokens Enter • 1 Token Wins • October 2025</div>
+    </div>
+
+    <div class="power-banner">
+      <div class="power-title">⚡ POWER UP: 15 VOTES AVAILABLE</div>
+      <div class="power-subtitle">Choose your champion and dominate the leaderboard</div>
+    </div>
+
+    <div class="champion-card">
+      <div class="champion-badge">🥇 CHAMPION</div>
+      <span class="champion-emoji">🪐</span>
+      <div class="champion-name">JUPITER</div>
+      <div class="champion-tagline">"The DEX Dominator"</div>
+
+      <div class="hp-section">
+        <div class="stat-label">💀 KILLS (VOTES)</div>
+        <div class="hp-bar">
+          <div class="hp-fill" style="width: 86.4%;"></div>
+        </div>
+      </div>
+
+      <div class="hp-section">
+        <div class="stat-label">❤️ HP (WIN PERCENTAGE)</div>
+        <div class="kills-bar">
+          <div class="kills-fill" style="width: 86.4%;"></div>
+        </div>
+        <div style="text-align: right; font-size: 18px; color: #ffd700; margin-top: 8px;">
+          19 KILLS • 86.4% HP
+        </div>
+      </div>
+
+      <button class="support-btn">⚔️ SUPPORT WITH 15 VOTES ⚔️</button>
+    </div>
+
+    <div class="fighters-grid">
+      <div class="fighter-card">
+        <div class="rank-badge">🥈</div>
+        <span class="fighter-emoji">🐶</span>
+        <div class="fighter-name">BONK</div>
+        <div class="fighter-kills">3 kills</div>
+        <button class="boost-btn">BOOST</button>
+      </div>
+
+      <div class="fighter-card">
+        <div class="rank-badge">🥉</div>
+        <span class="fighter-emoji">₿</span>
+        <div class="fighter-name">BTC</div>
+        <div class="fighter-kills">0 kills</div>
+        <button class="boost-btn">BOOST</button>
+      </div>
+
+      <div class="fighter-card">
+        <div class="rank-badge">4️⃣</div>
+        <span class="fighter-emoji">🐋</span>
+        <div class="fighter-name">ORCA</div>
+        <div class="fighter-kills">0 kills</div>
+        <button class="boost-btn">BOOST</button>
+      </div>
+
+      <div class="fighter-card">
+        <div class="rank-badge">5️⃣</div>
+        <span class="fighter-emoji">💵</span>
+        <div class="fighter-name">USDC</div>
+        <div class="fighter-kills">0 kills</div>
+        <button class="boost-btn">BOOST</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

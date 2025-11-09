@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCKUP 1: Casino Premium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.15), transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(255, 165, 0, 0.1), transparent 50%);
+      animation: bgShift 10s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(5deg); }
+    }
+
+    /* Floating particles */
+    .particles {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 215, 0, 0.6);
+      border-radius: 50%;
+      animation: float 15s infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 40px;
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.8), rgba(5, 8, 17, 0.9));
+      border-radius: 30px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(255, 215, 0, 0.2);
+    }
+
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700 0%, #fff 50%, #ffd700 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+    }
+
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: rgba(255, 215, 0, 0.9);
+    }
+
+    .header-stats span {
+      padding: 8px 20px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    /* Banner */
+    .votes-banner {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15));
+      border: 3px solid rgba(255, 215, 0, 0.5);
+      border-radius: 25px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 50px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
+      50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.7); }
+    }
+
+    .votes-banner h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    .votes-banner p {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Slot Cards Grid */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .slot-card {
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(5, 8, 17, 0.98));
+      border-radius: 30px;
+      border: 3px solid rgba(255, 215, 0, 0.3);
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+
+    .slot-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .slot-card:hover::before { opacity: 1; }
+
+    .slot-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      border-color: #ffd700;
+      box-shadow: 0 30px 80px rgba(255, 215, 0, 0.5);
+    }
+
+    .slot-card.leading {
+      border-color: #ffd700;
+      box-shadow: 0 0 50px rgba(255, 215, 0, 0.4);
+    }
+
+    .slot-emoji {
+      font-size: 80px;
+      margin-bottom: 20px;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+    }
+
+    .slot-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffd700;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+
+    .slot-ticker {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .slot-description {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 20px;
+      min-height: 40px;
+    }
+
+    .slot-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(255, 215, 0, 0.2);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 20px;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffa500);
+      border-radius: 20px;
+      transition: width 1s ease;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+
+    .vote-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .vote-count {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .vote-percentage {
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Vote Button */
+    .vote-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      border: none;
+      border-radius: 15px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+    }
+
+    .vote-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 50px rgba(255, 215, 0, 0.7);
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 0, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="particles">
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 1s;"></div>
+    <div class="particle" style="left: 90%; animation-delay: 3s;"></div>
+  </div>
+
+  <div class="mockup-label">MOCKUP 1: CASINO PREMIUM</div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🗳️ VOTE FOR TOKEN OF THE MONTH</h1>
+      <div class="header-stats">
+        <span>October 2025</span>
+        <span>22 Total Votes</span>
+        <span>8 Days Left</span>
+      </div>
+    </div>
+
+    <div class="votes-banner">
+      <h2>🎫 YOU HAVE 15 VOTES AVAILABLE</h2>
+      <p>Cast all 15 votes at once • Make your voice heard</p>
+    </div>
+
+    <div class="slots-grid">
+      <!-- Jupiter - Leading -->
+      <div class="slot-card leading">
+        <span class="slot-emoji">🪐</span>
+        <div class="slot-name">JUPITER</div>
+        <div class="slot-ticker">JUP</div>
+        <div class="slot-description">Best DEX aggregator on Solana</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 86.4%;"></div>
+        </div>
+        <div class="vote-stats">
+          <span class="vote-count">19 VOTES</span>
+          <span class="vote-percentage">86.4%</span>
+        </div>
+        <button class="vote-btn">🎲 VOTE WITH 15 TICKETS</button>
+      </div>
+
+      <!-- Bonk -->
+      <div class="slot-card">
+        <span class="slot-emoji">🐶</span>
+        <div class="slot-name">BONK</div>
+        <div class="slot-ticker">BONK</div>
+        <div class="slot-description">Solana's #1 meme coin</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 13.6%;"></div>
+        </div>
+        <div class="vote-stats">
+          <span class="vote-count">3 VOTES</span>
+          <span class="vote-percentage">13.6%</span>
+        </div>
+        <button class="vote-btn">🎲 VOTE WITH 15 TICKETS</button>
+      </div>
+
+      <!-- Bitcoin -->
+      <div class="slot-card">
+        <span class="slot-emoji">₿</span>
+        <div class="slot-name">BITCOIN</div>
+        <div class="slot-ticker">BTC</div>
+        <span class="slot-badge">ALWAYS IN POOL</span>
+        <div class="slot-description">Digital gold - Most secure crypto</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div class="vote-stats">
+          <span class="vote-count">0 VOTES</span>
+          <span class="vote-percentage">0.0%</span>
+        </div>
+        <button class="vote-btn">🎲 VOTE WITH 15 TICKETS</button>
+      </div>
+
+      <!-- Orca -->
+      <div class="slot-card">
+        <span class="slot-emoji">🐋</span>
+        <div class="slot-name">ORCA</div>
+        <div class="slot-ticker">ORCA</div>
+        <div class="slot-description">Best UX DEX on Solana</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div class="vote-stats">
+          <span class="vote-count">0 VOTES</span>
+          <span class="vote-percentage">0.0%</span>
+        </div>
+        <button class="vote-btn">🎲 VOTE WITH 15 TICKETS</button>
+      </div>
+
+      <!-- USDC -->
+      <div class="slot-card">
+        <span class="slot-emoji">💵</span>
+        <div class="slot-name">USD COIN</div>
+        <div class="slot-ticker">USDC</div>
+        <div class="slot-description">Stable USD 1:1 backed</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div class="vote-stats">
+          <span class="vote-count">0 VOTES</span>
+          <span class="vote-percentage">0.0%</span>
+        </div>
+        <button class="vote-btn">🎲 VOTE WITH 15 TICKETS</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

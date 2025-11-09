@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Option 5: Large Inline Badge (Premium Look)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --darker: #0a0e27;
+            --dark: #151932;
+            --primary: #00f0ff;
+            --secondary: #0066ff;
+            --accent: #ffd700;
+            --light: #e0e6ed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #000 100%);
+            color: var(--light);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: var(--light);
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .two-draws {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .draw-container {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95));
+            border-radius: 30px;
+            padding: 40px;
+        }
+
+        .draw-container.daily {
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.2);
+        }
+
+        .draw-container.weekly {
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.2);
+        }
+
+        .draw-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .draw-label {
+            font-size: 14px;
+            fontFamily: "'Orbitron', sans-serif";
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .draw-label.daily { color: var(--primary); }
+        .draw-label.weekly { color: var(--accent); }
+
+        .draw-title {
+            fontFamily: "'Orbitron', sans-serif";
+            font-size: 32px;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .draw-title.daily {
+            background: linear-gradient(135deg, var(--primary), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-title.weekly {
+            background: linear-gradient(135deg, var(--accent), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-number {
+            font-size: 12px;
+            fontFamily: "'Inter', sans-serif";
+            color: var(--light);
+            opacity: 0.6;
+        }
+
+        /* API3 Premium Large Badge - OPCIÓN 5 */
+        .api3-premium-badge {
+            border-radius: 25px;
+            padding: 20px 35px;
+            margin: 0 auto 35px;
+            max-width: fit-content;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .api3-premium-badge.daily {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(0, 102, 255, 0.12));
+            border: 3px solid var(--primary);
+            box-shadow: 0 15px 50px rgba(0, 240, 255, 0.3);
+        }
+
+        .api3-premium-badge.weekly {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 165, 0, 0.12));
+            border: 3px solid var(--accent);
+            box-shadow: 0 15px 50px rgba(255, 215, 0, 0.3);
+        }
+
+        .api3-premium-badge:hover {
+            transform: translateY(-5px);
+        }
+
+        .api3-premium-badge.daily:hover {
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.5);
+        }
+
+        .api3-premium-badge.weekly:hover {
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Animated border */
+        .api3-premium-badge::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 25px;
+            padding: 3px;
+            opacity: 0.5;
+            animation: rotate-border 4s linear infinite;
+        }
+
+        .api3-premium-badge.daily::before {
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--primary));
+        }
+
+        .api3-premium-badge.weekly::before {
+            background: linear-gradient(45deg, var(--accent), var(--primary), var(--accent));
+        }
+
+        @keyframes rotate-border {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .quantum-orb-large {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            position: relative;
+            z-index: 1;
+            animation: float-rotate 6s ease-in-out infinite;
+        }
+
+        .quantum-orb-large.daily {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 40px rgba(0, 240, 255, 1);
+        }
+
+        .quantum-orb-large.weekly {
+            background: linear-gradient(135deg, var(--accent), #ffa500);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 1);
+        }
+
+        @keyframes float-rotate {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(180deg);
+            }
+        }
+
+        .badge-content {
+            text-align: left;
+            z-index: 1;
+        }
+
+        .premium-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+
+        .premium-label.daily {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .premium-label.weekly {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--accent);
+        }
+
+        .badge-main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 3px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .badge-subtitle {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .verified-seal {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
+            z-index: 1;
+            animation: pulse-seal 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-seal {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 10px 35px rgba(0, 255, 136, 0.8);
+            }
+        }
+
+        .verified-text {
+            font-size: 8px;
+            font-weight: 700;
+            color: white;
+            margin-top: -2px;
+        }
+
+        /* Numbers */
+        .numbers-display {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .number.daily {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.6);
+        }
+
+        .number.weekly {
+            background: linear-gradient(135deg, var(--accent), #ffa500);
+            color: var(--darker);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .number.power {
+            width: 70px;
+            height: 70px;
+            font-size: 28px;
+        }
+
+        .plus-sign {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .plus-sign.daily { color: var(--primary); }
+        .plus-sign.weekly { color: var(--accent); }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .two-draws {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">🎨 FINAL OPTION 5: LARGE INLINE BADGE (PREMIUM LOOK)</div>
+    <div class="mockup-subtitle">Badge grande premium | Máxima presencia | Look profesional y confiable</div>
+
+    <div class="container">
+        <div class="two-draws">
+            <!-- DAILY DRAW -->
+            <div class="draw-container daily">
+                <div class="draw-header">
+                    <div class="draw-label daily">🎯 DAILY JACKPOT</div>
+                    <h2 class="draw-title daily">🎉 WINNING NUMBERS</h2>
+                    <div class="draw-number">Draw #127</div>
+                </div>
+
+                <!-- API3 Premium Badge -->
+                <div class="api3-premium-badge daily">
+                    <div class="quantum-orb-large daily">⚛️</div>
+
+                    <div class="badge-content">
+                        <div class="premium-label daily">
+                            <span>⚡</span>
+                            <span>Quantum Technology</span>
+                        </div>
+                        <div class="badge-main-title">API3 QRNG</div>
+                        <div class="badge-subtitle">Australian National University • 100% On-Chain</div>
+                    </div>
+
+                    <div class="verified-seal">
+                        <span>✓</span>
+                        <div class="verified-text">VERIFIED</div>
+                    </div>
+                </div>
+
+                <!-- Numbers -->
+                <div class="numbers-display">
+                    <div class="number daily">07</div>
+                    <div class="number daily">14</div>
+                    <div class="number daily">21</div>
+                    <div class="number daily">35</div>
+                    <div class="number daily">42</div>
+                    <span class="plus-sign daily">+</span>
+                    <div class="number daily power">09</div>
+                </div>
+            </div>
+
+            <!-- WEEKLY DRAW -->
+            <div class="draw-container weekly">
+                <div class="draw-header">
+                    <div class="draw-label weekly">🏆 WEEKLY JACKPOT</div>
+                    <h2 class="draw-title weekly">🎉 WINNING NUMBERS</h2>
+                    <div class="draw-number">Draw #18</div>
+                </div>
+
+                <!-- API3 Premium Badge -->
+                <div class="api3-premium-badge weekly">
+                    <div class="quantum-orb-large weekly">⚛️</div>
+
+                    <div class="badge-content">
+                        <div class="premium-label weekly">
+                            <span>⚡</span>
+                            <span>Quantum Technology</span>
+                        </div>
+                        <div class="badge-main-title">API3 QRNG</div>
+                        <div class="badge-subtitle">Australian National University • 100% On-Chain</div>
+                    </div>
+
+                    <div class="verified-seal">
+                        <span>✓</span>
+                        <div class="verified-text">VERIFIED</div>
+                    </div>
+                </div>
+
+                <!-- Numbers -->
+                <div class="numbers-display">
+                    <div class="number weekly">03</div>
+                    <div class="number weekly">12</div>
+                    <div class="number weekly">28</div>
+                    <div class="number weekly">39</div>
+                    <div class="number weekly">47</div>
+                    <span class="plus-sign weekly">+</span>
+                    <div class="number weekly power">15</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>📍 Diseño:</strong> Badge grande premium de 3 columnas: Quantum orb flotante (55px) +
+            Contenido (label + título grande "API3 QRNG" + subtítulo) + Verified seal pulsante.
+            Border con gradient animado.
+            <br><br>
+            <strong>✅ Ventajas:</strong> Máxima presencia y credibilidad. Look extremadamente profesional.
+            Toda la info visible sin clicks. Efecto hover impresionante.
+            <br>
+            <strong>👁️ Visibilidad:</strong> Máxima (imposible no verlo, pero mantiene elegancia)
+            <br>
+            <strong>🎯 Best for:</strong> Cuando quieres que API3 QRNG sea el hero de confianza
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option 5: Inline Badge with Numbers - Results Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --darker: #0a0e27;
+            --dark: #151932;
+            --primary: #00f0ff;
+            --secondary: #0066ff;
+            --accent: #ffd700;
+            --light: #e0e6ed;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #000 100%);
+            color: var(--light);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: var(--light);
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .results-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .winning-numbers-section {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95));
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        /* API3 Inline Title - Opción 5 */
+        .api3-title-badge {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .badge-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 102, 255, 0.15));
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 15px 30px;
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.3);
+            position: relative;
+        }
+
+        .badge-container::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            border-radius: 20px;
+            z-index: -1;
+            animation: border-rotate 3s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes border-rotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .quantum-orb {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
+            animation: pulse-glow 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(0, 240, 255, 1);
+                transform: scale(1.1);
+            }
+        }
+
+        .quantum-orb::after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: ripple 2s ease-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes ripple {
+            0% {
+                width: 50px;
+                height: 50px;
+                opacity: 1;
+            }
+            100% {
+                width: 100px;
+                height: 100px;
+                opacity: 0;
+            }
+        }
+
+        .badge-text-group {
+            text-align: left;
+        }
+
+        .badge-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .badge-main-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .badge-subtext {
+            font-size: 11px;
+            color: var(--light);
+            opacity: 0.8;
+        }
+
+        .verified-checkmark {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+            animation: pop 0.6s ease-out;
+        }
+
+        @keyframes pop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Numbers Display */
+        .numbers-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .number {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.6);
+            animation: bounce-in 0.6s ease;
+        }
+
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Quick Info Pills */
+        .quick-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .info-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .info-pill:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .pill-icon {
+            font-size: 16px;
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">📍 OPCIÓN 5: INLINE BADGE WITH NUMBERS - RESULTS PAGE</div>
+    <div class="mockup-subtitle">Badge integrado arriba de números | Diseño limpio y profesional | Balance perfecto</div>
+
+    <div class="container">
+        <div class="results-header">
+            <h1>🎉 WINNING NUMBERS</h1>
+        </div>
+
+        <div class="winning-numbers-section">
+            <!-- API3 Inline Badge -->
+            <div class="api3-title-badge">
+                <div class="badge-container">
+                    <div class="quantum-orb">⚛️</div>
+
+                    <div class="badge-text-group">
+                        <div class="badge-label">🔬 Verified by Quantum Technology</div>
+                        <div class="badge-main-text">API3 QRNG</div>
+                        <div class="badge-subtext">Australian National University</div>
+                    </div>
+
+                    <div class="verified-checkmark">✓</div>
+                </div>
+            </div>
+
+            <!-- Winning Numbers -->
+            <div class="numbers-display">
+                <div class="number">07</div>
+                <div class="number">14</div>
+                <div class="number">21</div>
+                <div class="number">35</div>
+                <div class="number">42</div>
+                <span style="font-size: 40px; color: var(--primary); font-weight: bold;">+</span>
+                <div class="number" style="width: 80px; height: 80px; font-size: 32px;">09</div>
+            </div>
+
+            <!-- Quick Info Pills -->
+            <div class="quick-info">
+                <div class="info-pill">
+                    <span class="pill-icon">🏛️</span>
+                    <span>Government Backed</span>
+                </div>
+                <div class="info-pill">
+                    <span class="pill-icon">🔍</span>
+                    <span>100% Auditable</span>
+                </div>
+                <div class="info-pill">
+                    <span class="pill-icon">⚡</span>
+                    <span>True Quantum Physics</span>
+                </div>
+                <div class="info-pill">
+                    <span class="pill-icon">🛡️</span>
+                    <span>Impossible to Predict</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>📍 Why This Location:</strong> Inline badge positioned right above winning numbers
+            on Results page. Creates a visual flow: "Verified by API3 QRNG" → Numbers → Quick facts.
+            Clean, professional design that doesn't overwhelm. The checkmark provides instant trust signal.
+            Info pills below reinforce key benefits without cluttering. Perfect balance of visibility and elegance.
+            <br><br>
+            <strong>💡 Best for:</strong> Users who want clear verification without extra clicks or popups.
+            Everything they need to know is visible at a glance.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V5: Glassmorphism Premium - Purchase Flow</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradient-shift 15s ease infinite;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.6;
+      animation: float-orb 20s ease-in-out infinite;
+    }
+
+    .orb:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+      top: 10%;
+      left: 20%;
+      animation-delay: 0s;
+    }
+
+    .orb:nth-child(2) {
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(100, 200, 255, 0.4), transparent);
+      bottom: 20%;
+      right: 10%;
+      animation-delay: 7s;
+    }
+
+    .orb:nth-child(3) {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(200, 100, 255, 0.3), transparent);
+      top: 50%;
+      right: 30%;
+      animation-delay: 3s;
+    }
+
+    @keyframes float-orb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(50px, -50px) scale(1.1); }
+      66% { transform: translate(-50px, 50px) scale(0.9); }
+    }
+
+    .glass-container {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border-radius: 35px;
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      padding: 45px;
+      box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.15),
+        0 0 100px rgba(255, 255, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+      position: relative;
+      animation: glass-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes glass-enter {
+      from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Top glow */
+    .glass-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 25px;
+      padding: 8px 20px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      animation: badge-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badge-pulse {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+        transform: scale(1.03);
+      }
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+      box-shadow: 0 0 10px #00ff88;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+      }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    /* Premium card */
+    .premium-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 35px;
+      margin: 30px 0;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: card-shine 3s infinite;
+    }
+
+    @keyframes card-shine {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .amount-display {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .amount-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .amount-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.7));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 30px rgba(255, 255, 255, 0.5);
+    }
+
+    .amount-cost {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 600;
+    }
+
+    /* Elegant timeline */
+    .timeline {
+      margin: 35px 0;
+    }
+
+    .timeline-step {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .timeline-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-step::after {
+      content: '';
+      position: absolute;
+      left: 29px;
+      top: 60px;
+      width: 2px;
+      height: calc(100% - 30px);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+    }
+
+    .timeline-step:last-child::after {
+      display: none;
+    }
+
+    .timeline-bullet {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+
+    .timeline-step.completed .timeline-bullet {
+      background: rgba(0, 255, 136, 0.25);
+      border-color: rgba(0, 255, 136, 0.6);
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+    }
+
+    .timeline-step.active .timeline-bullet {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.8);
+      animation: bullet-glow 2s ease-in-out infinite;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes bullet-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+      }
+    }
+
+    .timeline-content {
+      flex: 1;
+      padding-top: 12px;
+    }
+
+    .timeline-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .timeline-step.active .timeline-title {
+      color: #fff;
+    }
+
+    .timeline-description {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+
+    /* Sleek progress */
+    .progress-glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 28px;
+      margin: 30px 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .progress-percent {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .progress-outer {
+      width: 100%;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-inner {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.9));
+      border-radius: 10px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-inner::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: progress-glide 2s linear infinite;
+    }
+
+    @keyframes progress-glide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .time-remaining {
+      margin-top: 18px;
+      text-align: center;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+    }
+
+    .time-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 6px;
+    }
+
+    .time-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Premium button */
+    .premium-btn {
+      width: 100%;
+      padding: 18px;
+      margin-top: 30px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(15px);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 16px;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .premium-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    .premium-btn:active {
+      transform: translateY(0);
+    }
+
+    .version-tag {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 2px;
+      font-family: 'Orbitron', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating orbs -->
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+
+  <div class="glass-container">
+    <div class="header">
+      <div class="status-badge">
+        <div class="pulse-dot"></div>
+        <span>PROCESSING TRANSACTION</span>
+      </div>
+      <h1>Purchase In Progress</h1>
+      <div class="subtitle">Your premium lottery experience</div>
+    </div>
+
+    <div class="premium-card">
+      <div class="amount-display">
+        <div class="amount-label">Selected Tickets</div>
+        <div class="amount-number" id="ticketCount5">100</div>
+        <div class="amount-cost" id="totalCost5">$25.00 USD</div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-step completed">
+        <div class="timeline-bullet">✓</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Signature Verified</div>
+          <div class="timeline-description">Your wallet has authorized the transaction</div>
+        </div>
+      </div>
+
+      <div class="timeline-step active">
+        <div class="timeline-bullet">◉</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Network Processing</div>
+          <div class="timeline-description">Blockchain validators are confirming your purchase securely</div>
+        </div>
+      </div>
+
+      <div class="timeline-step">
+        <div class="timeline-bullet">○</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Completion</div>
+          <div class="timeline-description">Finalizing tickets and updating your account</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-glass">
+      <div class="progress-info">
+        <span class="progress-text">Overall Progress</span>
+        <span class="progress-percent" id="progressPercent5">45%</span>
+      </div>
+      <div class="progress-outer">
+        <div class="progress-inner" id="progressBar5" style="width: 45%"></div>
+      </div>
+      <div class="time-remaining">
+        <div class="time-label">Estimated Time Remaining</div>
+        <div class="time-value" id="timeRemaining5">~18 seconds</div>
+      </div>
+    </div>
+
+    <button class="premium-btn" onclick="simulateProgress5()">▶ Simulate Progress</button>
+
+    <div class="version-tag">VERSION 5: GLASSMORPHISM PREMIUM</div>
+  </div>
+
+  <script>
+    function calculateEstimatedTime(ticketCount) {
+      if (ticketCount <= 10) return { min: 15, max: 25, text: '15-25 seconds' };
+      if (ticketCount <= 100) return { min: 25, max: 35, text: '25-35 seconds' };
+      if (ticketCount <= 1000) return { min: 40, max: 60, text: '40-60 seconds' };
+      if (ticketCount <= 5000) return { min: 60, max: 90, text: '60-90 seconds' };
+      return { min: 90, max: 120, text: '90-120 seconds' };
+    }
+
+    let progressInterval5;
+    function simulateProgress5() {
+      const ticketCount = 100;
+      const timeEst = calculateEstimatedTime(ticketCount);
+      const totalTime = (timeEst.min + timeEst.max) / 2;
+
+      let progress = 45;
+      let timeLeft = Math.floor(totalTime * 0.55);
+
+      clearInterval(progressInterval5);
+
+      const steps = document.querySelectorAll('.timeline-step');
+
+      progressInterval5 = setInterval(() => {
+        progress += 1;
+        timeLeft -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          timeLeft = 0;
+          clearInterval(progressInterval5);
+
+          // Complete steps
+          steps[1].classList.remove('active');
+          steps[1].classList.add('completed');
+          steps[2].classList.add('active');
+
+          setTimeout(() => {
+            steps[2].classList.remove('active');
+            steps[2].classList.add('completed');
+          }, 2000);
+        }
+
+        document.getElementById('progressBar5').style.width = progress + '%';
+        document.getElementById('progressPercent5').textContent = progress + '%';
+        document.getElementById('timeRemaining5').textContent =
+          timeLeft > 0 ? `~${timeLeft} seconds` : 'Complete!';
+
+        if (progress >= 80) {
+          steps[1].querySelector('.timeline-description').textContent =
+            'Transaction confirmed! Generating your lottery tickets...';
+        }
+      }, (totalTime * 1000) / 55);
+    }
+
+    // Initialize
+    document.getElementById('ticketCount5').textContent = '100';
+    document.getElementById('totalCost5').textContent = '$' + (100 * 0.25).toFixed(2) + ' USD';
+  </script>
+</body>
+</html>

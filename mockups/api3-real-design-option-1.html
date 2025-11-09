@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Design Option 1: Compact Card Below Numbers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e1a;
+            color: #e0e6ed;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .mockup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .mockup-subtitle {
+            font-size: 14px;
+            color: #e0e6ed;
+            opacity: 0.7;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .draws-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Drawing container - matches your actual design */
+        .draw-section {
+            background: linear-gradient(135deg, #0f1629 0%, #0a0e1a 100%);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .draw-section.daily {
+            border: 2px solid rgba(0, 240, 255, 0.4);
+        }
+
+        .draw-section.weekly {
+            border: 2px solid rgba(255, 215, 0, 0.4);
+        }
+
+        /* Header */
+        .draw-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .jackpot-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .jackpot-label.daily {
+            color: #00f0ff;
+        }
+
+        .jackpot-label.weekly {
+            color: #ffd700;
+        }
+
+        .winning-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .winning-title.daily {
+            background: linear-gradient(135deg, #00f0ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .winning-title.weekly {
+            background: linear-gradient(135deg, #ffd700, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .draw-id {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* Numbers - matches your actual gradient style */
+        .numbers-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .number-ball {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            position: relative;
+        }
+
+        .number-ball.daily {
+            background: linear-gradient(135deg, #00f0ff, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+        }
+
+        .number-ball.weekly {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #0a0e1a;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .number-ball.power {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+
+        .plus-symbol {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0 8px;
+        }
+
+        .plus-symbol.daily {
+            color: #00f0ff;
+        }
+
+        .plus-symbol.weekly {
+            color: #ffd700;
+        }
+
+        /* API3 COMPACT CARD - OPTION 1: Simple, below numbers */
+        .api3-compact-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(0, 102, 255, 0.08));
+            border-radius: 15px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 18px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .api3-compact-card.daily {
+            border: 2px solid rgba(0, 240, 255, 0.4);
+        }
+
+        .api3-compact-card.weekly {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 165, 0, 0.08));
+            border: 2px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .api3-compact-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .quantum-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .quantum-icon.daily {
+            background: linear-gradient(135deg, #00f0ff, #0066ff);
+            box-shadow: 0 8px 20px rgba(0, 240, 255, 0.4);
+        }
+
+        .quantum-icon.weekly {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .card-content {
+            text-align: left;
+        }
+
+        .tech-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            margin-bottom: 6px;
+        }
+
+        .tech-badge.daily {
+            background: rgba(0, 240, 255, 0.2);
+            color: #00f0ff;
+        }
+
+        .tech-badge.weekly {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .verified-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .location-note {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 4px solid #00f0ff;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .location-note strong {
+            color: #00f0ff;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .draws-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-title">🎨 PROPUESTA 1: COMPACT CARD BELOW NUMBERS</div>
+    <div class="mockup-subtitle">Simple | Card compacta debajo de números | Minimalista</div>
+
+    <div class="container">
+        <div class="draws-grid">
+            <!-- DAILY DRAW -->
+            <div class="draw-section daily">
+                <div class="draw-header">
+                    <div class="jackpot-label daily">🎯 DAILY JACKPOT</div>
+                    <h1 class="winning-title daily">🎉 WINNING NUMBERS</h1>
+                    <div class="draw-id">Draw #1</div>
+                </div>
+
+                <div class="numbers-row">
+                    <div class="number-ball daily">05</div>
+                    <div class="number-ball daily">07</div>
+                    <div class="number-ball daily">08</div>
+                    <div class="number-ball daily">17</div>
+                    <div class="number-ball daily">38</div>
+                    <span class="plus-symbol daily">+</span>
+                    <div class="number-ball daily power">03</div>
+                </div>
+
+                <!-- API3 Compact Card -->
+                <div class="api3-compact-card daily">
+                    <div class="quantum-icon daily">⚛️</div>
+                    <div class="card-content">
+                        <div class="tech-badge daily">🔬 QUANTUM TECH</div>
+                        <div class="card-title">Verified by API3 QRNG</div>
+                        <div class="card-subtitle">Australian National University • 100% On-Chain</div>
+                    </div>
+                    <div class="verified-badge">✓</div>
+                </div>
+            </div>
+
+            <!-- WEEKLY DRAW -->
+            <div class="draw-section weekly">
+                <div class="draw-header">
+                    <div class="jackpot-label weekly">🏆 WEEKLY JACKPOT</div>
+                    <h1 class="winning-title weekly">🎉 WINNING NUMBERS</h1>
+                    <div class="draw-id">Draw #1</div>
+                </div>
+
+                <div class="numbers-row">
+                    <div class="number-ball weekly">02</div>
+                    <div class="number-ball weekly">07</div>
+                    <div class="number-ball weekly">15</div>
+                    <div class="number-ball weekly">21</div>
+                    <div class="number-ball weekly">48</div>
+                    <span class="plus-symbol weekly">+</span>
+                    <div class="number-ball weekly power">14</div>
+                </div>
+
+                <!-- API3 Compact Card -->
+                <div class="api3-compact-card weekly">
+                    <div class="quantum-icon weekly">⚛️</div>
+                    <div class="card-content">
+                        <div class="tech-badge weekly">🔬 QUANTUM TECH</div>
+                        <div class="card-title">Verified by API3 QRNG</div>
+                        <div class="card-subtitle">Australian National University • 100% On-Chain</div>
+                    </div>
+                    <div class="verified-badge">✓</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="location-note">
+            <strong>📍 PROPUESTA 1 - COMPACT CARD:</strong>
+            <br><br>
+            <strong>✨ Diseño:</strong> Card compacta de 3 columnas debajo de números. Quantum icon flotante + Badge "Quantum Tech" + Título + Subtítulo + Checkmark verificado.
+            <br><br>
+            <strong>✅ Ventajas:</strong> Simple, limpio, profesional. No ocupa mucho espacio. Toda la info esencial visible.
+            <br><br>
+            <strong>🎯 Visibilidad:</strong> Media-Alta | Perfecto balance
+        </div>
+    </div>
+</body>
+</html>

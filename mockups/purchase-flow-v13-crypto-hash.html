@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V13: Crypto Hash - Digital Signature</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&family=Orbitron:wght@700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Courier Prime', monospace;
+      background: #0d0208;
+      color: #00ff41;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Binary rain background */
+    .binary-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .binary-col {
+      position: absolute;
+      top: -100%;
+      font-size: 14px;
+      color: #00ff41;
+      opacity: 0.3;
+      animation: binary-fall 10s linear infinite;
+      font-family: 'Courier Prime', monospace;
+      line-height: 1.5;
+    }
+
+    @keyframes binary-fall {
+      0% { top: -100%; opacity: 0; }
+      10% { opacity: 0.3; }
+      90% { opacity: 0.3; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    /* Glitch effect background */
+    .glitch-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 65, 0.03) 2px,
+        rgba(0, 255, 65, 0.03) 4px
+      );
+      pointer-events: none;
+    }
+
+    .modal {
+      max-width: 450px;
+      width: 100%;
+      background: rgba(13, 2, 8, 0.98);
+      border-radius: 0;
+      padding: 24px;
+      border: 3px solid #00ff41;
+      box-shadow:
+        0 0 50px rgba(0, 255, 65, 0.4),
+        inset 0 0 50px rgba(0, 255, 65, 0.05);
+      position: relative;
+      animation: modal-decrypt 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes modal-decrypt {
+      0% {
+        opacity: 0;
+        transform: rotateX(90deg) scale(0.5);
+        filter: blur(10px);
+      }
+      50% { filter: blur(5px); }
+      100% {
+        opacity: 1;
+        transform: rotateX(0deg) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    /* Digital corners */
+    .digital-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #00ff41;
+      animation: corner-scan 3s ease-in-out infinite;
+    }
+
+    @keyframes corner-scan {
+      0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(0, 255, 65, 1), inset 0 0 15px rgba(0, 255, 65, 0.3); }
+    }
+
+    .digital-corner.tl { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+    .digital-corner.tr { top: -3px; right: -3px; border-left: none; border-bottom: none; }
+    .digital-corner.bl { bottom: -3px; left: -3px; border-right: none; border-top: none; }
+    .digital-corner.br { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #00ff41;
+      padding-bottom: 12px;
+    }
+
+    .crypto-icon {
+      font-size: 52px;
+      display: inline-block;
+      animation: crypto-rotate 4s linear infinite;
+      filter: drop-shadow(0 0 20px #00ff41);
+    }
+
+    @keyframes crypto-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #00ff41;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-top: 8px;
+      text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+      animation: hash-glitch 5s ease-in-out infinite;
+    }
+
+    @keyframes hash-glitch {
+      0%, 96%, 100% { transform: translate(0); }
+      97% { transform: translate(-2px, 2px); }
+      98% { transform: translate(2px, -2px); }
+      99% { transform: translate(-2px, -2px); }
+    }
+
+    .hash-status {
+      font-size: 10px;
+      color: #00ff41;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-top: 6px;
+      opacity: 0.8;
+    }
+
+    /* Transaction data */
+    .tx-data {
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .data-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .data-key {
+      color: #00ff41;
+      opacity: 0.7;
+    }
+
+    .data-value {
+      color: #00ff41;
+      font-weight: 700;
+      text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    }
+
+    /* Hex visualization */
+    .hex-visual {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(0, 255, 65, 0.03);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+    }
+
+    .hex-block {
+      aspect-ratio: 1;
+      background: rgba(0, 255, 65, 0.1);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #00ff41;
+      transition: all 0.3s ease;
+    }
+
+    .hex-block.active {
+      background: rgba(0, 255, 65, 0.3);
+      border-color: #00ff41;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
+      animation: hex-compute 1.5s ease-in-out infinite;
+    }
+
+    @keyframes hex-compute {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    /* Hash progress */
+    .hash-progress {
+      margin-bottom: 16px;
+    }
+
+    .hash-label {
+      font-size: 10px;
+      color: rgba(0, 255, 65, 0.7);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hash-bar {
+      width: 100%;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(0, 255, 65, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hash-fill {
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 255, 65, 0.4),
+        rgba(0, 255, 65, 0.4) 10px,
+        rgba(0, 255, 65, 0.6) 10px,
+        rgba(0, 255, 65, 0.6) 20px
+      );
+      background-size: 200% 100%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 25px rgba(0, 255, 65, 0.7);
+      animation: hash-compute 2s linear infinite;
+    }
+
+    @keyframes hash-compute {
+      0% { background-position: 0% 50%; filter: brightness(1); }
+      50% { background-position: 100% 50%; filter: brightness(1.3); }
+      100% { background-position: 0% 50%; filter: brightness(1); }
+    }
+
+    .hash-percent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #00ff41;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      z-index: 1;
+    }
+
+    /* Signature output */
+    .signature-output {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #00ff41;
+      padding: 8px;
+      margin-bottom: 16px;
+      font-size: 8px;
+      font-family: 'Courier Prime', monospace;
+      color: #00ff41;
+      word-wrap: break-word;
+      line-height: 1.4;
+      max-height: 50px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .signature-output::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    }
+
+    /* Process stages */
+    .process-stages {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .stage {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(0, 255, 65, 0.3);
+      padding: 10px 6px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stage.verified {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.15);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+    }
+
+    .stage.hashing {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.2);
+      animation: stage-hash 1.5s ease-in-out infinite;
+    }
+
+    @keyframes stage-hash {
+      0%, 100% {
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        border-color: #00ff41;
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(0, 255, 65, 1), inset 0 0 20px rgba(0, 255, 65, 0.3);
+        border-color: #32ff7e;
+      }
+    }
+
+    .stage-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .stage-name {
+      font-size: 9px;
+      color: rgba(0, 255, 65, 0.7);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .stage.hashing .stage-name {
+      color: #00ff41;
+    }
+
+    /* Time display */
+    .time-display {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0, 255, 65, 0.05);
+      border: 2px solid rgba(0, 255, 65, 0.4);
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+
+    .time-box {
+      text-align: center;
+    }
+
+    .time-label {
+      font-size: 9px;
+      color: rgba(0, 255, 65, 0.6);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .time-val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #00ff41;
+      text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+      animation: time-glitch 3s ease-in-out infinite;
+    }
+
+    @keyframes time-glitch {
+      0%, 98%, 100% { transform: translate(0); }
+      99% { transform: translate(-1px, 1px); }
+    }
+
+    /* Hash button */
+    .hash-btn {
+      width: 100%;
+      padding: 14px;
+      background: rgba(0, 255, 65, 0.1);
+      border: 3px solid #00ff41;
+      color: #00ff41;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 255, 65, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hash-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(0, 255, 65, 0.3),
+        transparent
+      );
+      animation: btn-hash-scan 2.5s linear infinite;
+    }
+
+    @keyframes btn-hash-scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .hash-btn:hover {
+      background: rgba(0, 255, 65, 0.2);
+      box-shadow: 0 0 40px rgba(0, 255, 65, 0.8);
+      transform: scale(1.02);
+    }
+
+    .version {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 9px;
+      color: rgba(0, 255, 65, 0.4);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="glitch-bg"></div>
+  <div class="binary-rain" id="binaryRain"></div>
+
+  <div class="modal">
+    <div class="digital-corner tl"></div>
+    <div class="digital-corner tr"></div>
+    <div class="digital-corner bl"></div>
+    <div class="digital-corner br"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="crypto-icon">#️⃣</div>
+      <h1>Hashing TX</h1>
+      <div class="hash-status">SHA-256 COMPUTATION</div>
+    </div>
+
+    <!-- Transaction data -->
+    <div class="tx-data">
+      <div class="data-row">
+        <span class="data-key">TX_COUNT:</span>
+        <span class="data-value">4,200 tickets</span>
+      </div>
+      <div class="data-row">
+        <span class="data-key">TX_VALUE:</span>
+        <span class="data-value">$1,050 USDC</span>
+      </div>
+      <div class="data-row">
+        <span class="data-key">CHAIN_ID:</span>
+        <span class="data-value">8453 (BASE)</span>
+      </div>
+      <div class="data-row">
+        <span class="data-key">NONCE:</span>
+        <span class="data-value">0x7fa2c8</span>
+      </div>
+    </div>
+
+    <!-- Hex visualization -->
+    <div class="hex-visual">
+      <div class="hex-block">7F</div>
+      <div class="hex-block">A2</div>
+      <div class="hex-block active">C8</div>
+      <div class="hex-block">1D</div>
+      <div class="hex-block">E5</div>
+      <div class="hex-block active">9B</div>
+      <div class="hex-block">3F</div>
+      <div class="hex-block">6A</div>
+    </div>
+
+    <!-- Progress -->
+    <div class="hash-progress">
+      <div class="hash-label">
+        <span>HASH_PROGRESS:</span>
+        <span id="hashPercent13">68%</span>
+      </div>
+      <div class="hash-bar">
+        <div class="hash-fill" id="hashFill13" style="width: 68%"></div>
+        <div class="hash-percent" id="hashText13">68%</div>
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div class="signature-output" id="signature13">
+      0x7fa2c81de59b3f6a4c8e7d2f1a9b5e3c8d6f2a9e7b4c1f8d3a6e9b2c5f8e1a7d4b9c2e5f8a1d4b7c0e3f6a9c2d5e8b1f4a7d0c3e6b9f2e5a8d1f4b7a0d3e6c9f2b5e8a1f4d7b0c3f6e9a2d5f8b1e4a7d0f3e6c9b2e5a8f1d4b7a0e3f6d9c2b5f8e1a4d7b0f3e6c9a2e5f8d1b4a7e0f3c6d9b2f5a8e1d4b7a0f3e6d9c2b5f8e1a4d7b0f3e6c9a2e5f8d1b4a7
+    </div>
+
+    <!-- Stages -->
+    <div class="process-stages">
+      <div class="stage verified">
+        <div class="stage-icon">✓</div>
+        <div class="stage-name">Sign</div>
+      </div>
+      <div class="stage hashing">
+        <div class="stage-icon">#</div>
+        <div class="stage-name">Hash</div>
+      </div>
+      <div class="stage">
+        <div class="stage-icon">○</div>
+        <div class="stage-name">Verify</div>
+      </div>
+    </div>
+
+    <!-- Time -->
+    <div class="time-display">
+      <div class="time-box">
+        <div class="time-label">Elapsed</div>
+        <div class="time-val">0:41</div>
+      </div>
+      <div class="time-box">
+        <div class="time-label">Remaining</div>
+        <div class="time-val" id="remaining13">0:19</div>
+      </div>
+    </div>
+
+    <button class="hash-btn" onclick="simulate13()">
+      <span style="position: relative; z-index: 1;">#️⃣ COMPUTE HASH #️⃣</span>
+    </button>
+    <div class="version">V13: CRYPTO_HASH</div>
+  </div>
+
+  <script>
+    // Create binary rain
+    const binaryRain = document.getElementById('binaryRain');
+    for (let i = 0; i < 15; i++) {
+      const col = document.createElement('div');
+      col.className = 'binary-col';
+      col.style.left = (i * 7) + '%';
+      col.style.animationDelay = (i * 0.5) + 's';
+      let binary = '';
+      for (let j = 0; j < 30; j++) {
+        binary += Math.random() > 0.5 ? '1' : '0';
+        if (j % 8 === 7) binary += '<br>';
+      }
+      col.innerHTML = binary;
+      binaryRain.appendChild(col);
+    }
+
+    let interval13;
+    function simulate13() {
+      let progress = 68;
+      let time = 19;
+      clearInterval(interval13);
+
+      const stages = document.querySelectorAll('.stage');
+      const hexBlocks = document.querySelectorAll('.hex-block');
+
+      interval13 = setInterval(() => {
+        progress += 2;
+        time -= 1;
+
+        // Randomize active hex blocks
+        hexBlocks.forEach(block => block.classList.remove('active'));
+        const random1 = Math.floor(Math.random() * hexBlocks.length);
+        const random2 = Math.floor(Math.random() * hexBlocks.length);
+        hexBlocks[random1].classList.add('active');
+        hexBlocks[random2].classList.add('active');
+
+        // Generate random signature segment
+        const hash = '0x' + Math.random().toString(16).substr(2, 200);
+        document.getElementById('signature13').textContent = hash;
+
+        if (progress >= 100) {
+          progress = 100;
+          time = 0;
+          clearInterval(interval13);
+          stages[1].classList.remove('hashing');
+          stages[1].classList.add('verified');
+          stages[2].classList.add('hashing');
+          setTimeout(() => {
+            stages[2].classList.remove('hashing');
+            stages[2].classList.add('verified');
+          }, 1000);
+        }
+
+        document.getElementById('hashFill13').style.width = progress + '%';
+        document.getElementById('hashText13').textContent = progress + '%';
+        document.getElementById('hashPercent13').textContent = progress + '%';
+        document.getElementById('remaining13').textContent = '0:' + String(time).padStart(2, '0');
+      }, 600);
+    }
+  </script>
+</body>
+</html>

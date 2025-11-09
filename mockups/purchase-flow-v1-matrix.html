@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V1: Matrix Rain Style - Purchase Flow</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #050811 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Matrix Rain Background */
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .matrix-column {
+      position: absolute;
+      top: -100%;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #00f0ff;
+      animation: matrix-fall linear infinite;
+      text-shadow: 0 0 8px #00f0ff;
+    }
+
+    @keyframes matrix-fall {
+      to { top: 100%; }
+    }
+
+    .modal-overlay {
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.95);
+      padding: 20px;
+      border-radius: 30px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.95) 0%, rgba(26, 31, 58, 0.9) 100%);
+      border-radius: 25px;
+      padding: 40px;
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      box-shadow:
+        0 20px 60px rgba(0, 240, 255, 0.3),
+        inset 0 0 50px rgba(0, 240, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Scanning line effect */
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+      animation: scan 3s ease-in-out infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes scan {
+      0%, 100% { top: 0; }
+      50% { top: 100%; }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      position: relative;
+    }
+
+    .step-indicator {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      color: #00f0ff;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      background: linear-gradient(135deg, #00f0ff 0%, #0080ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5)); }
+      50% { filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8)); }
+    }
+
+    .ticket-count {
+      font-size: 48px;
+      font-weight: 900;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      animation: pulse-scale 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-scale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .time-estimate {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 20px;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 128, 255, 0.1));
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(0, 240, 255, 0.1),
+        transparent
+      );
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .info-title {
+      font-weight: 700;
+      color: #00f0ff;
+      margin-bottom: 12px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .info-content {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 13px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Progress Section */
+    .progress-section {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 25px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      margin-bottom: 25px;
+    }
+
+    .progress-steps {
+      margin-bottom: 25px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border-left: 3px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .progress-step.active {
+      background: rgba(0, 240, 255, 0.1);
+      border-left-color: #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+
+    .progress-step.completed {
+      border-left-color: #00ff88;
+      opacity: 0.7;
+    }
+
+    .step-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .step-icon.active {
+      background: rgba(0, 240, 255, 0.2);
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .step-text {
+      flex: 1;
+    }
+
+    .step-label {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .step-description {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* Progress Bar */
+    .progress-bar-container {
+      margin-bottom: 15px;
+    }
+
+    .progress-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00f0ff, #0080ff, #00f0ff);
+      background-size: 200% 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      animation: gradient-flow 2s linear infinite;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+    }
+
+    @keyframes gradient-flow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .time-remaining {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .time-remaining .time {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #00f0ff;
+      display: block;
+      margin-top: 5px;
+    }
+
+    /* Blockchain Info */
+    .blockchain-info {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    .blockchain-info-title {
+      color: #ffd700;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Particle effects */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #00f0ff;
+      border-radius: 50%;
+      animation: float linear infinite;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-10vh) translateX(50px);
+        opacity: 0;
+      }
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    button {
+      flex: 1;
+      padding: 15px;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-demo {
+      background: linear-gradient(135deg, #00f0ff, #0080ff);
+      color: #0a0e27;
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-demo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 240, 255, 0.6);
+    }
+
+    .version-label {
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Matrix Rain Background -->
+  <div class="matrix-bg" id="matrixBg"></div>
+
+  <div class="modal-overlay">
+    <div class="modal-content">
+      <div class="scan-line"></div>
+
+      <!-- Particles -->
+      <div class="particles" id="particles"></div>
+
+      <!-- Header -->
+      <div class="header">
+        <div class="step-indicator" id="stepIndicator">STEP 2 OF 2</div>
+        <h2>Purchasing Tickets</h2>
+        <div class="ticket-count" id="ticketCount">1,000</div>
+        <div class="time-estimate">
+          <span id="ticketCountText">1,000 tickets</span> × $0.25 = <span id="totalCost">$250.00</span>
+        </div>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <div class="info-title">
+          <span>⏱️</span>
+          <span>Expected Processing Time</span>
+        </div>
+        <div class="info-content">
+          <strong>Estimated Duration:</strong> <span id="estimatedDuration">45-60 seconds</span><br>
+          <strong>Why it takes time:</strong> Blockchain transactions require network confirmations for security
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="progress-section">
+        <div class="progress-steps">
+          <div class="progress-step completed">
+            <div class="step-icon">✅</div>
+            <div class="step-text">
+              <div class="step-label">Wallet Signature</div>
+              <div class="step-description">Transaction signed successfully</div>
+            </div>
+          </div>
+
+          <div class="progress-step active">
+            <div class="step-icon active">⏳</div>
+            <div class="step-text">
+              <div class="step-label">Blockchain Confirmation</div>
+              <div class="step-description">Waiting for network to process transaction...</div>
+            </div>
+          </div>
+
+          <div class="progress-step">
+            <div class="step-icon">⏸️</div>
+            <div class="step-text">
+              <div class="step-label">Finalizing Purchase</div>
+              <div class="step-description">Recording tickets to database</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-label">
+            <span>Progress</span>
+            <span id="progressPercent">45%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressBar" style="width: 45%"></div>
+          </div>
+        </div>
+
+        <div class="time-remaining">
+          Time remaining
+          <span class="time" id="timeRemaining">~32 seconds</span>
+        </div>
+      </div>
+
+      <!-- Blockchain Info -->
+      <div class="blockchain-info">
+        <div class="blockchain-info-title">
+          <span>💡</span>
+          <span>What's Happening?</span>
+        </div>
+        <div style="color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
+          Your transaction is being processed by the BASE blockchain network.
+          Miners are validating and adding your ticket purchase to the permanent ledger.
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn-demo" onclick="simulateProgress()">▶ Simulate Progress</button>
+      </div>
+
+      <div class="version-label">VERSION 1: MATRIX RAIN</div>
+    </div>
+  </div>
+
+  <script>
+    // Matrix Rain Effect
+    function createMatrixRain() {
+      const container = document.getElementById('matrixBg');
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+
+      for (let i = 0; i < 20; i++) {
+        const column = document.createElement('div');
+        column.className = 'matrix-column';
+        column.style.left = Math.random() * 100 + '%';
+        column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        column.style.animationDelay = Math.random() * 2 + 's';
+
+        let text = '';
+        for (let j = 0; j < 20; j++) {
+          text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+        }
+        column.innerHTML = text;
+
+        container.appendChild(column);
+      }
+    }
+
+    // Particles
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDuration = (Math.random() * 4 + 3) + 's';
+        particle.style.animationDelay = Math.random() * 3 + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    // Calculate time based on ticket count
+    function calculateEstimatedTime(ticketCount) {
+      if (ticketCount <= 10) return { min: 15, max: 25, text: '15-25 seconds' };
+      if (ticketCount <= 100) return { min: 25, max: 35, text: '25-35 seconds' };
+      if (ticketCount <= 1000) return { min: 40, max: 60, text: '40-60 seconds' };
+      if (ticketCount <= 5000) return { min: 60, max: 90, text: '60-90 seconds' };
+      return { min: 90, max: 120, text: '90-120 seconds' };
+    }
+
+    // Simulate progress
+    let progressInterval;
+    function simulateProgress() {
+      const ticketCount = parseInt(document.getElementById('ticketCount').textContent.replace(/,/g, ''));
+      const timeEst = calculateEstimatedTime(ticketCount);
+      const totalTime = (timeEst.min + timeEst.max) / 2;
+
+      let progress = 45; // Start at 45%
+      let timeLeft = Math.floor(totalTime * 0.55); // 55% of time remaining
+
+      clearInterval(progressInterval);
+
+      progressInterval = setInterval(() => {
+        progress += 1;
+        timeLeft -= 1;
+
+        if (progress >= 100) {
+          progress = 100;
+          timeLeft = 0;
+          clearInterval(progressInterval);
+
+          // Show completion
+          setTimeout(() => {
+            document.querySelector('.progress-step.active').classList.remove('active');
+            document.querySelector('.progress-step.active').classList.add('completed');
+            document.querySelectorAll('.progress-step')[2].classList.add('active');
+            document.getElementById('stepIndicator').textContent = 'FINALIZING...';
+          }, 500);
+        }
+
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressPercent').textContent = progress + '%';
+        document.getElementById('timeRemaining').textContent = timeLeft > 0 ? `~${timeLeft} seconds` : 'Complete!';
+
+        // Update step descriptions dynamically
+        if (progress >= 70 && progress < 100) {
+          document.querySelector('.progress-step.active .step-description').textContent =
+            'Transaction confirmed! Processing bulk tickets...';
+        }
+      }, totalTime * 10); // Adjust interval based on total time
+    }
+
+    // Update ticket count dynamically
+    function updateTicketCount(count) {
+      document.getElementById('ticketCount').textContent = count.toLocaleString();
+      document.getElementById('ticketCountText').textContent = count.toLocaleString() + ' tickets';
+      document.getElementById('totalCost').textContent = '$' + (count * 0.25).toFixed(2);
+
+      const timeEst = calculateEstimatedTime(count);
+      document.getElementById('estimatedDuration').textContent = timeEst.text;
+    }
+
+    // Initialize
+    createMatrixRain();
+    createParticles();
+    updateTicketCount(1000);
+  </script>
+</body>
+</html>

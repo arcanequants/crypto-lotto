@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCKUP A: Cards Mejoradas (Tu Estilo)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050811; /* Tu mismo darker del homepage */
+      color: #fff;
+      min-height: 100vh;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* BACKGROUND IGUAL AL HOMEPAGE - Animated gradients */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(5deg); }
+    }
+
+    /* GRID CYBER IGUAL AL HOMEPAGE */
+    .cyber-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ================================
+       EFECTOS ESPECIALES PREMIUM
+       ================================ */
+
+    /* Partículas flotantes */
+    .floating-particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 240, 255, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatParticle 15s infinite ease-in-out;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+    }
+
+    @keyframes floatParticle {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      50% {
+        transform: translate(var(--tx), var(--ty)) scale(1.5);
+        opacity: 0.8;
+      }
+      90% { opacity: 1; }
+    }
+
+    .floating-particle:nth-child(1) {
+      top: 10%; left: 10%;
+      --tx: 100px; --ty: -200px;
+      animation-delay: 0s;
+      background: rgba(0, 240, 255, 0.6);
+    }
+    .floating-particle:nth-child(2) {
+      top: 30%; right: 20%;
+      --tx: -150px; --ty: 150px;
+      animation-delay: 3s;
+      background: rgba(255, 0, 255, 0.6);
+    }
+    .floating-particle:nth-child(3) {
+      bottom: 20%; left: 30%;
+      --tx: 80px; --ty: -100px;
+      animation-delay: 6s;
+      background: rgba(255, 215, 0, 0.6);
+    }
+    .floating-particle:nth-child(4) {
+      top: 50%; right: 10%;
+      --tx: -120px; --ty: -180px;
+      animation-delay: 9s;
+      background: rgba(0, 240, 255, 0.6);
+    }
+    .floating-particle:nth-child(5) {
+      bottom: 40%; right: 40%;
+      --tx: 90px; --ty: 90px;
+      animation-delay: 12s;
+      background: rgba(255, 0, 255, 0.6);
+    }
+
+    /* Glow orbs en el fondo */
+    .glow-orb {
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(60px);
+      animation: orbFloat 20s infinite ease-in-out;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+      50% { transform: translate(50px, -50px) scale(1.2); opacity: 0.5; }
+    }
+
+    .glow-orb.cyan {
+      top: 10%;
+      left: 5%;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.3), transparent);
+      animation-delay: 0s;
+    }
+
+    .glow-orb.magenta {
+      bottom: 10%;
+      right: 5%;
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.3), transparent);
+      animation-delay: 7s;
+    }
+
+    .glow-orb.gold {
+      top: 50%;
+      right: 10%;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.2), transparent);
+      animation-delay: 14s;
+    }
+
+    /* Shimmer effect en el header title */
+    @keyframes shimmerGradient {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* Pulse glow para badges */
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+      }
+    }
+
+    /* Shine effect para cards */
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header - TU MISMO ESTILO */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00f0ff 0%, #ff00ff 30%, #ffd700 65%, #fff 85%, #00f0ff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
+      animation: shimmerGradient 4s linear infinite;
+    }
+
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      padding: 8px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Votes Banner - TU MISMO GLASSMORPHISM */
+    .votes-banner {
+      background: rgba(255, 215, 0, 0.05);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+
+    .votes-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 215, 0, 0.1),
+        transparent
+      );
+      animation: shine 3s infinite;
+    }
+
+    .votes-banner h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      color: #ffd700;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+
+    .votes-banner p {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* CARDS MEJORADAS - Mantienen tu estilo pero más premium */
+    .tokens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .token-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    /* Progress bar de fondo - COMO TU TIENES */
+    .token-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+      opacity: 0.3;
+      transition: all 0.5s;
+    }
+
+    .token-card.leading::before {
+      width: 86.4% !important;
+    }
+
+    .token-card:not(.leading)::before {
+      width: 0% !important;
+    }
+
+    /* Shine effect overlay en cards */
+    .token-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 70%
+      );
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .token-card:hover::after {
+      transform: translateX(100%);
+    }
+
+    .token-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(255, 215, 0, 0.6);
+      box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4), 0 0 40px rgba(0, 240, 255, 0.2);
+    }
+
+    .token-card.leading {
+      border-color: rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+      animation: pulseCard 3s ease-in-out infinite;
+    }
+
+    @keyframes pulseCard {
+      0%, 100% {
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 60px rgba(255, 215, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.2);
+      }
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Token Header */
+    .token-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .token-emoji {
+      font-size: 56px;
+      filter: drop-shadow(0 5px 15px rgba(255, 215, 0, 0.3));
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .token-card:hover .token-emoji {
+      transform: scale(1.1) rotate(5deg);
+      filter: drop-shadow(0 10px 25px rgba(255, 215, 0, 0.6));
+    }
+
+    .token-card.leading .token-emoji {
+      animation: floatEmoji 3s ease-in-out infinite;
+    }
+
+    @keyframes floatEmoji {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .token-info h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .token-info .ticker {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .token-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 6px 14px;
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffd700;
+      z-index: 2;
+      animation: pulseGlow 2s ease-in-out infinite;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    .token-description {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 25px;
+      min-height: 40px;
+    }
+
+    /* Vote Stats */
+    .vote-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .vote-count {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .vote-percentage {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Progress Bar - MEJORADA pero tu estilo */
+    .progress-container {
+      margin-bottom: 25px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffa500);
+      border-radius: 10px;
+      transition: width 1s ease;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+      );
+      animation: progressShine 2s infinite;
+    }
+
+    @keyframes progressShine {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    /* Vote Button - TU MISMO ESTILO CON EFECTOS */
+    .vote-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      border: none;
+      border-radius: 15px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vote-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .vote-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .vote-btn:hover {
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6);
+    }
+
+    .vote-btn:active {
+      transform: scale(0.98);
+    }
+
+    .vote-btn:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 150, 255, 0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      z-index: 1000;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="cyber-grid"></div>
+
+  <!-- Floating particles -->
+  <div class="floating-particle"></div>
+  <div class="floating-particle"></div>
+  <div class="floating-particle"></div>
+  <div class="floating-particle"></div>
+  <div class="floating-particle"></div>
+
+  <!-- Glow orbs -->
+  <div class="glow-orb cyan"></div>
+  <div class="glow-orb magenta"></div>
+  <div class="glow-orb gold"></div>
+
+  <div class="mockup-label">MOCKUP A: CARDS MEJORADAS (TU ESTILO)</div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🗳️ Vote for Token of the Month</h1>
+      <div class="header-stats">
+        <div class="stat-pill">October 2025</div>
+        <div class="stat-pill">Total Votes: <strong style="color: #ffd700;">22</strong></div>
+        <div class="stat-pill">Days Left: <strong style="color: #ffd700;">8</strong></div>
+      </div>
+    </div>
+
+    <div class="votes-banner">
+      <h2>🎫 You have 15 votes available</h2>
+      <p>Each ticket = 1 vote • Cast all votes at once</p>
+    </div>
+
+    <div class="tokens-grid">
+      <!-- Jupiter - Leading -->
+      <div class="token-card leading">
+        <div class="token-badge">🔥 LEADING</div>
+        <div class="card-content">
+          <div class="token-header">
+            <span class="token-emoji">🪐</span>
+            <div class="token-info">
+              <h3>JUPITER</h3>
+              <div class="ticker">JUP</div>
+            </div>
+          </div>
+
+          <div class="token-description">
+            Best DEX aggregator on Solana
+          </div>
+
+          <div class="progress-container">
+            <div class="vote-stats">
+              <div class="vote-count">19 votes</div>
+              <div class="vote-percentage">86.4%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 86.4%;"></div>
+            </div>
+          </div>
+
+          <button class="vote-btn">Vote with 15 votes</button>
+        </div>
+      </div>
+
+      <!-- Bonk -->
+      <div class="token-card">
+        <div class="card-content">
+          <div class="token-header">
+            <span class="token-emoji">🐶</span>
+            <div class="token-info">
+              <h3>BONK</h3>
+              <div class="ticker">BONK</div>
+            </div>
+          </div>
+
+          <div class="token-description">
+            Solana's #1 meme coin
+          </div>
+
+          <div class="progress-container">
+            <div class="vote-stats">
+              <div class="vote-count">3 votes</div>
+              <div class="vote-percentage">13.6%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 13.6%;"></div>
+            </div>
+          </div>
+
+          <button class="vote-btn">Vote with 15 votes</button>
+        </div>
+      </div>
+
+      <!-- Bitcoin -->
+      <div class="token-card">
+        <div class="token-badge">ALWAYS</div>
+        <div class="card-content">
+          <div class="token-header">
+            <span class="token-emoji">₿</span>
+            <div class="token-info">
+              <h3>BITCOIN</h3>
+              <div class="ticker">BTC</div>
+            </div>
+          </div>
+
+          <div class="token-description">
+            Digital gold - Most secure crypto
+          </div>
+
+          <div class="progress-container">
+            <div class="vote-stats">
+              <div class="vote-count">0 votes</div>
+              <div class="vote-percentage">0.0%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <button class="vote-btn">Vote with 15 votes</button>
+        </div>
+      </div>
+
+      <!-- Orca -->
+      <div class="token-card">
+        <div class="card-content">
+          <div class="token-header">
+            <span class="token-emoji">🐋</span>
+            <div class="token-info">
+              <h3>ORCA</h3>
+              <div class="ticker">ORCA</div>
+            </div>
+          </div>
+
+          <div class="token-description">
+            Best UX DEX on Solana
+          </div>
+
+          <div class="progress-container">
+            <div class="vote-stats">
+              <div class="vote-count">0 votes</div>
+              <div class="vote-percentage">0.0%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <button class="vote-btn">Vote with 15 votes</button>
+        </div>
+      </div>
+
+      <!-- USDC -->
+      <div class="token-card">
+        <div class="card-content">
+          <div class="token-header">
+            <span class="token-emoji">💵</span>
+            <div class="token-info">
+              <h3>USD COIN</h3>
+              <div class="ticker">USDC</div>
+            </div>
+          </div>
+
+          <div class="token-description">
+            Stable USD 1:1 backed
+          </div>
+
+          <div class="progress-container">
+            <div class="vote-stats">
+              <div class="vote-count">0 votes</div>
+              <div class="vote-percentage">0.0%</div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <button class="vote-btn">Vote with 15 votes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

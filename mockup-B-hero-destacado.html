@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCKUP B: Hero Destacado (Tu Estilo)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #000 0%, #0a0a1a 50%, #000 100%);
+      position: relative;
+    }
+
+    /* TU MISMO BACKGROUND - Gradientes sutiles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.1), transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 215, 0, 0.08), transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* TU MISMO GRID CYBER */
+    .cyber-grid {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header - TU MISMO ESTILO */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700 0%, #fff 50%, #ffd700 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+    }
+
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      padding: 8px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Votes Banner - TU MISMO GLASSMORPHISM */
+    .votes-banner {
+      background: rgba(255, 215, 0, 0.05);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .votes-banner h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      color: #ffd700;
+      margin-bottom: 8px;
+    }
+
+    .votes-banner p {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* HERO CARD - Líder destacado */
+    .hero-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(30px);
+      border: 2px solid rgba(255, 215, 0, 0.4);
+      border-radius: 30px;
+      padding: 60px 50px;
+      margin-bottom: 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+      transition: all 0.4s ease;
+    }
+
+    /* Progress bar de fondo - GRANDE para el héroe */
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 86.4%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+      opacity: 0.4;
+      transition: all 0.5s;
+    }
+
+    .hero-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.5);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(255, 215, 0, 0.2);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero-emoji {
+      font-size: 120px;
+      margin-bottom: 20px;
+      display: block;
+      filter: drop-shadow(0 10px 30px rgba(255, 215, 0, 0.5));
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    .hero-description {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 40px;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-bottom: 40px;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero-stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-progress {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffa500);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      transition: width 1s ease;
+    }
+
+    .hero-vote-btn {
+      padding: 20px 80px;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      border: none;
+      border-radius: 15px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .hero-vote-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6);
+    }
+
+    /* SECONDARY CARDS - Grid pequeño */
+    .secondary-section {
+      margin-top: 50px;
+    }
+
+    .secondary-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .tokens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .token-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 25px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .token-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 215, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .token-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .token-emoji {
+      font-size: 42px;
+    }
+
+    .token-info h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .token-info .ticker {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .token-description {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 20px;
+      min-height: 35px;
+    }
+
+    .vote-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .vote-count {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .vote-percentage {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffa500);
+      border-radius: 10px;
+      transition: width 1s ease;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .vote-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffd700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+
+    .vote-btn:hover {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: rgba(255, 215, 0, 0.5);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 150, 255, 0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      z-index: 1000;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="cyber-grid"></div>
+  <div class="mockup-label">MOCKUP B: HERO DESTACADO (TU ESTILO)</div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🗳️ Vote for Token of the Month</h1>
+      <div class="header-stats">
+        <div class="stat-pill">October 2025</div>
+        <div class="stat-pill">Total Votes: <strong style="color: #ffd700;">22</strong></div>
+        <div class="stat-pill">Days Left: <strong style="color: #ffd700;">8</strong></div>
+      </div>
+    </div>
+
+    <div class="votes-banner">
+      <h2>🎫 You have 15 votes available</h2>
+      <p>Each ticket = 1 vote • Cast all votes at once</p>
+    </div>
+
+    <!-- HERO CARD - Jupiter Leading -->
+    <div class="hero-card">
+      <div class="hero-content">
+        <div class="hero-badge">🔥 LEADING TOKEN</div>
+        <span class="hero-emoji">🪐</span>
+        <h2 class="hero-title">JUPITER</h2>
+        <p class="hero-description">Best DEX aggregator on Solana</p>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-label">Votes</div>
+            <div class="hero-stat-value">19</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">Leading</div>
+            <div class="hero-stat-value">86.4%</div>
+          </div>
+        </div>
+
+        <div class="hero-progress">
+          <div class="hero-progress-fill" style="width: 86.4%;"></div>
+        </div>
+
+        <button class="hero-vote-btn">Vote with 15 votes</button>
+      </div>
+    </div>
+
+    <!-- SECONDARY TOKENS -->
+    <div class="secondary-section">
+      <h3 class="secondary-title">Other Tokens</h3>
+
+      <div class="tokens-grid">
+        <!-- Bonk -->
+        <div class="token-card">
+          <div class="card-content">
+            <div class="token-header">
+              <span class="token-emoji">🐶</span>
+              <div class="token-info">
+                <h3>BONK</h3>
+                <div class="ticker">BONK</div>
+              </div>
+            </div>
+
+            <div class="token-description">
+              Solana's #1 meme coin
+            </div>
+
+            <div class="vote-stats">
+              <div class="vote-count">3 votes</div>
+              <div class="vote-percentage">13.6%</div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 13.6%;"></div>
+            </div>
+
+            <button class="vote-btn">Vote</button>
+          </div>
+        </div>
+
+        <!-- Bitcoin -->
+        <div class="token-card">
+          <div class="card-content">
+            <div class="token-header">
+              <span class="token-emoji">₿</span>
+              <div class="token-info">
+                <h3>BITCOIN</h3>
+                <div class="ticker">BTC</div>
+              </div>
+            </div>
+
+            <div class="token-description">
+              Digital gold - Most secure crypto
+            </div>
+
+            <div class="vote-stats">
+              <div class="vote-count">0 votes</div>
+              <div class="vote-percentage">0.0%</div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+
+            <button class="vote-btn">Vote</button>
+          </div>
+        </div>
+
+        <!-- Orca -->
+        <div class="token-card">
+          <div class="card-content">
+            <div class="token-header">
+              <span class="token-emoji">🐋</span>
+              <div class="token-info">
+                <h3>ORCA</h3>
+                <div class="ticker">ORCA</div>
+              </div>
+            </div>
+
+            <div class="token-description">
+              Best UX DEX on Solana
+            </div>
+
+            <div class="vote-stats">
+              <div class="vote-count">0 votes</div>
+              <div class="vote-percentage">0.0%</div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+
+            <button class="vote-btn">Vote</button>
+          </div>
+        </div>
+
+        <!-- USDC -->
+        <div class="token-card">
+          <div class="card-content">
+            <div class="token-header">
+              <span class="token-emoji">💵</span>
+              <div class="token-info">
+                <h3>USD COIN</h3>
+                <div class="ticker">USDC</div>
+              </div>
+            </div>
+
+            <div class="token-description">
+              Stable USD 1:1 backed
+            </div>
+
+            <div class="vote-stats">
+              <div class="vote-count">0 votes</div>
+              <div class="vote-percentage">0.0%</div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+
+            <button class="vote-btn">Vote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

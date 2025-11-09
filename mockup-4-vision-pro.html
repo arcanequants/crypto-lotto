@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCKUP 4: Vision Pro Glassmorphism</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      33% { transform: translateY(-20px) translateX(10px); }
+      66% { transform: translateY(-10px) translateX(-10px); }
+    }
+
+    @keyframes rotate3d {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      padding: 60px 20px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(138, 43, 226, 0.15), transparent 60%),
+                  radial-gradient(ellipse at 80% 50%, rgba(0, 191, 255, 0.1), transparent 50%),
+                  radial-gradient(ellipse at 20% 80%, rgba(255, 215, 0, 0.1), transparent 50%),
+                  #000;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    /* 3D Floating Particles */
+    .particle-3d {
+      position: fixed;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      opacity: 0.1;
+      pointer-events: none;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .particle-1 {
+      top: 10%;
+      left: 10%;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent);
+      animation-delay: 0s;
+    }
+
+    .particle-2 {
+      top: 60%;
+      right: 15%;
+      background: radial-gradient(circle, rgba(0, 191, 255, 0.4), transparent);
+      animation-delay: 5s;
+    }
+
+    .particle-3 {
+      bottom: 20%;
+      left: 20%;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.4), transparent);
+      animation-delay: 10s;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .header-badge {
+      display: inline-block;
+      padding: 8px 24px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Votes Banner */
+    .votes-banner {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 30px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 60px;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .votes-banner-title {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 10px;
+    }
+
+    .votes-banner-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Main Card - HUGE 3D */
+    .main-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(60px);
+      -webkit-backdrop-filter: blur(60px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      padding: 80px 60px;
+      text-align: center;
+      margin-bottom: 40px;
+      box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.5),
+        0 10px 30px rgba(138, 43, 226, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transform-style: preserve-3d;
+      transition: all 0.6s ease;
+      position: relative;
+    }
+
+    .main-card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(0, 191, 255, 0.3), rgba(255, 215, 0, 0.3));
+      border-radius: 50px;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+
+    .main-card:hover::before {
+      opacity: 1;
+    }
+
+    .main-card:hover {
+      transform: translateY(-20px) rotateX(5deg);
+      box-shadow:
+        0 50px 120px rgba(0, 0, 0, 0.6),
+        0 20px 60px rgba(255, 215, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .main-emoji {
+      font-size: 160px;
+      margin-bottom: 30px;
+      display: block;
+      filter: drop-shadow(0 20px 40px rgba(255, 215, 0, 0.4));
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .main-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+    }
+
+    .main-description {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 40px;
+    }
+
+    .progress-bar-3d {
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 25px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .progress-fill-3d {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffa500);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      transition: width 1.5s ease;
+    }
+
+    .vote-stats-3d {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-bottom: 40px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .stat-3d {
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .vote-btn-3d {
+      padding: 25px 70px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .vote-btn-3d:hover {
+      transform: scale(1.05);
+      background: rgba(255, 215, 0, 0.3);
+      border-color: rgba(255, 215, 0, 0.6);
+      box-shadow:
+        0 15px 60px rgba(255, 215, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    /* Secondary Cards */
+    .secondary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .secondary-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 30px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.4s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .secondary-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .secondary-emoji {
+      font-size: 60px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .secondary-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .secondary-percentage {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 20px;
+    }
+
+    .secondary-btn {
+      padding: 12px 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 0, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="particle-3d particle-1"></div>
+  <div class="particle-3d particle-2"></div>
+  <div class="particle-3d particle-3"></div>
+
+  <div class="mockup-label">MOCKUP 4: VISION PRO</div>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-badge">🗳️ COMMUNITY VOTE</div>
+      <h1>October 2025</h1>
+      <p>Shape the future of our prize pool</p>
+    </div>
+
+    <div class="votes-banner">
+      <div class="votes-banner-title">🎫 Votes Ready</div>
+      <div class="votes-banner-amount">15 VOTES</div>
+    </div>
+
+    <div class="main-card">
+      <span class="main-emoji">🪐</span>
+      <div class="main-title">JUPITER</div>
+      <div class="main-description">Best DEX aggregator on Solana</div>
+
+      <div class="progress-bar-3d">
+        <div class="progress-fill-3d" style="width: 86.4%;"></div>
+      </div>
+
+      <div class="vote-stats-3d">
+        <div class="stat-3d">
+          <div class="stat-label">VOTES</div>
+          <div class="stat-value">19</div>
+        </div>
+        <div class="stat-3d">
+          <div class="stat-label">LEADING</div>
+          <div class="stat-value">86.4%</div>
+        </div>
+      </div>
+
+      <button class="vote-btn-3d">Vote with 15 Tickets</button>
+    </div>
+
+    <div class="secondary-grid">
+      <div class="secondary-card">
+        <span class="secondary-emoji">🐶</span>
+        <div class="secondary-name">BONK</div>
+        <div class="secondary-percentage">13.6%</div>
+        <button class="secondary-btn">VOTE</button>
+      </div>
+
+      <div class="secondary-card">
+        <span class="secondary-emoji">₿</span>
+        <div class="secondary-name">BITCOIN</div>
+        <div class="secondary-percentage">ALWAYS</div>
+        <button class="secondary-btn">VOTE</button>
+      </div>
+
+      <div class="secondary-card">
+        <span class="secondary-emoji">🐋</span>
+        <div class="secondary-name">ORCA</div>
+        <div class="secondary-percentage">0.0%</div>
+        <button class="secondary-btn">VOTE</button>
+      </div>
+
+      <div class="secondary-card">
+        <span class="secondary-emoji">💵</span>
+        <div class="secondary-name">USDC</div>
+        <div class="secondary-percentage">0.0%</div>
+        <button class="secondary-btn">VOTE</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

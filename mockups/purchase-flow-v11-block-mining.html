@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V11: Block Mining - Blockchain Processing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #0a0a0a;
+      color: #00ff00;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Matrix-style background */
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(0deg, #0a0a0a 0%, rgba(0, 50, 0, 0.3) 100%);
+      pointer-events: none;
+    }
+
+    .block-particle {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      border: 2px solid #00ff00;
+      background: rgba(0, 255, 0, 0.05);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #00ff00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: block-fall 8s linear infinite;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    @keyframes block-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.7; }
+      100% { transform: translateY(calc(100vh + 100px)) rotate(360deg); opacity: 0; }
+    }
+
+    .modal {
+      max-width: 460px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      border-radius: 0;
+      padding: 24px;
+      border: 3px solid #00ff00;
+      box-shadow:
+        0 0 40px rgba(0, 255, 0, 0.4),
+        inset 0 0 30px rgba(0, 255, 0, 0.05);
+      position: relative;
+      font-family: 'JetBrains Mono', monospace;
+      animation: modal-compile 0.5s ease-out;
+    }
+
+    @keyframes modal-compile {
+      0% { opacity: 0; transform: scale(0.95); filter: blur(5px); }
+      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
+    /* Terminal corners */
+    .corner-bracket {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    .corner-bracket.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+    .corner-bracket.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+    .corner-bracket.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+    .corner-bracket.br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+    /* Header */
+    .terminal-header {
+      border-bottom: 2px solid #00ff00;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .terminal-title {
+      font-size: 10px;
+      color: #00ff00;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #00ff00;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+      animation: text-flicker 3s ease-in-out infinite;
+    }
+
+    @keyframes text-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.95; }
+    }
+
+    .block-height {
+      font-size: 11px;
+      color: #00ff00;
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    /* Info display */
+    .info-display {
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid #00ff00;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .info-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-key {
+      color: #00ff00;
+      opacity: 0.7;
+    }
+
+    .info-value {
+      color: #00ff00;
+      font-weight: 800;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    }
+
+    /* Block visualization */
+    .block-chain {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .block {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #00ff00;
+      background: rgba(0, 255, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .block.mined {
+      background: rgba(0, 255, 0, 0.2);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      animation: block-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes block-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.8), inset 0 0 15px rgba(0, 255, 0, 0.3); }
+    }
+
+    .block.mining {
+      animation: block-mining 1s ease-in-out infinite;
+    }
+
+    @keyframes block-mining {
+      0%, 100% { transform: scale(1); border-color: #00ff00; }
+      50% { transform: scale(1.1); border-color: #00ff00; box-shadow: 0 0 25px rgba(0, 255, 0, 0.8); }
+    }
+
+    .block-icon {
+      font-size: 24px;
+      margin-bottom: 2px;
+    }
+
+    .block-label {
+      font-size: 8px;
+      color: #00ff00;
+      font-weight: 700;
+    }
+
+    .chain-link {
+      width: 15px;
+      height: 2px;
+      background: #00ff00;
+      opacity: 0.5;
+    }
+
+    .chain-link.active {
+      opacity: 1;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    /* Mining progress */
+    .mining-progress {
+      margin-bottom: 16px;
+    }
+
+    .progress-label {
+      font-size: 10px;
+      color: #00ff00;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 30px;
+      border: 2px solid #00ff00;
+      background: rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(0, 255, 0, 0.3),
+        rgba(0, 255, 0, 0.3) 10px,
+        rgba(0, 255, 0, 0.5) 10px,
+        rgba(0, 255, 0, 0.5) 20px
+      );
+      transition: width 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+      animation: progress-scan 1s linear infinite;
+    }
+
+    @keyframes progress-scan {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+      100% { filter: brightness(1); }
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      font-weight: 800;
+      color: #00ff00;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      z-index: 1;
+    }
+
+    /* Hash display */
+    .hash-display {
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid #00ff00;
+      padding: 10px;
+      margin-bottom: 16px;
+      font-size: 9px;
+      text-align: center;
+      word-wrap: break-word;
+      color: #00ff00;
+      opacity: 0.8;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Timer */
+    .timer-section {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0, 255, 0, 0.05);
+      border: 2px solid #00ff00;
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+
+    .timer-block {
+      text-align: center;
+    }
+
+    .timer-label {
+      font-size: 9px;
+      color: #00ff00;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+
+    .timer-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #00ff00;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+      animation: timer-blink 2s ease-in-out infinite;
+    }
+
+    @keyframes timer-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Mine button */
+    .mine-btn {
+      width: 100%;
+      padding: 14px;
+      background: rgba(0, 255, 0, 0.1);
+      border: 3px solid #00ff00;
+      color: #00ff00;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mine-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+      animation: btn-scan 2s linear infinite;
+    }
+
+    @keyframes btn-scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .mine-btn:hover {
+      background: rgba(0, 255, 0, 0.2);
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.7);
+      transform: scale(1.02);
+    }
+
+    .version {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 9px;
+      color: #00ff00;
+      opacity: 0.5;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="matrix-bg"></div>
+  <div class="block-particle" style="left: 15%; animation-delay: 0s;">█</div>
+  <div class="block-particle" style="left: 45%; animation-delay: 2s;">▓</div>
+  <div class="block-particle" style="left: 75%; animation-delay: 4s;">▒</div>
+
+  <div class="modal">
+    <div class="corner-bracket tl"></div>
+    <div class="corner-bracket tr"></div>
+    <div class="corner-bracket bl"></div>
+    <div class="corner-bracket br"></div>
+
+    <!-- Header -->
+    <div class="terminal-header">
+      <div class="terminal-title">[BLOCKCHAIN TERMINAL v2.1.5]</div>
+      <h1>⛏ Mining Block</h1>
+      <div class="block-height">HEIGHT: #3,847,291</div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-display">
+      <div class="info-line">
+        <span class="info-key">TX_COUNT:</span>
+        <span class="info-value">1,500 tickets</span>
+      </div>
+      <div class="info-line">
+        <span class="info-key">TX_VALUE:</span>
+        <span class="info-value">$375.00 USDC</span>
+      </div>
+      <div class="info-line">
+        <span class="info-key">NETWORK:</span>
+        <span class="info-value">BASE_MAINNET</span>
+      </div>
+      <div class="info-line">
+        <span class="info-key">GAS_PRICE:</span>
+        <span class="info-value">0.00012 ETH</span>
+      </div>
+    </div>
+
+    <!-- Block chain -->
+    <div class="block-chain">
+      <div class="block mined">
+        <div class="block-icon">✓</div>
+        <div class="block-label">PREV</div>
+      </div>
+      <div class="chain-link active"></div>
+      <div class="block mining">
+        <div class="block-icon">⚡</div>
+        <div class="block-label">CURR</div>
+      </div>
+      <div class="chain-link"></div>
+      <div class="block">
+        <div class="block-icon">○</div>
+        <div class="block-label">NEXT</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="mining-progress">
+      <div class="progress-label">MINING_PROGRESS:</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="mineFill11" style="width: 76%"></div>
+        <div class="progress-text" id="mineText11">76%</div>
+      </div>
+    </div>
+
+    <!-- Hash -->
+    <div class="hash-display" id="hash11">
+      HASH: 0x7f9a4b2c8e1d3f6a9b5c2e8d1f4a7c3b9e6d2f8a1c5b7e4d
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-section">
+      <div class="timer-block">
+        <div class="timer-label">ELAPSED</div>
+        <div class="timer-value">0:46</div>
+      </div>
+      <div class="timer-block">
+        <div class="timer-label">REMAINING</div>
+        <div class="timer-value" id="remaining11">0:14</div>
+      </div>
+    </div>
+
+    <button class="mine-btn" onclick="simulate11()">
+      <span style="position: relative; z-index: 1;">⛏ SIMULATE MINING ⛏</span>
+    </button>
+    <div class="version">V11: BLOCK_MINING</div>
+  </div>
+
+  <script>
+    let interval11;
+    function simulate11() {
+      let progress = 76;
+      let time = 14;
+      clearInterval(interval11);
+
+      const blocks = document.querySelectorAll('.block');
+      const links = document.querySelectorAll('.chain-link');
+
+      interval11 = setInterval(() => {
+        progress += 2;
+        time -= 1;
+
+        // Generate random hash
+        const hash = '0x' + Math.random().toString(16).substr(2, 50);
+        document.getElementById('hash11').textContent = `HASH: ${hash}`;
+
+        if (progress >= 100) {
+          progress = 100;
+          time = 0;
+          clearInterval(interval11);
+          blocks[1].classList.remove('mining');
+          blocks[1].classList.add('mined');
+          links[1].classList.add('active');
+          setTimeout(() => {
+            blocks[2].classList.add('mining');
+          }, 500);
+        }
+
+        document.getElementById('mineFill11').style.width = progress + '%';
+        document.getElementById('mineText11').textContent = progress + '%';
+        document.getElementById('remaining11').textContent = '0:' + String(time).padStart(2, '0');
+      }, 550);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup 3 - Timeline UPDATED (New Effects)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050811;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Background Effects */
+    .bg-animated {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+      animation: bgShift 20s ease-in-out infinite;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    /* Content */
+    .content {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 90px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00f0ff 0%, #ff00ff 30%, #ffd700 65%, #fff 85%, #00f0ff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .subtitle {
+      font-size: 26px;
+      color: #d1d5db;
+    }
+
+    /* Timeline Flow */
+    .timeline {
+      position: relative;
+      padding: 40px 0;
+    }
+
+    /* Vertical line connecting steps - NOW WITH ANIMATED GRADIENT */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #ffd700, #00f0ff, #ff00ff, #ffd700);
+      background-size: 100% 200%;
+      transform: translateX(-50%);
+      animation: gradientFlow 3s linear infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 0% 200%; }
+    }
+
+    .step {
+      position: relative;
+      margin-bottom: 100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .step:nth-child(even) .step-content {
+      order: 2;
+    }
+
+    .step:nth-child(even) .step-visual {
+      order: 1;
+    }
+
+    /* Step number circle - WITH ROTATING RING */
+    .step-number {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd700, #ff00ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      z-index: 10;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      }
+      50% {
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.9), 0 0 70px rgba(255, 215, 0, 0.6);
+      }
+    }
+
+    /* NEW: Rotating ring around step number */
+    .step-number::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border: 3px solid transparent;
+      border-top-color: #00f0ff;
+      border-right-color: #ff00ff;
+      border-radius: 50%;
+      animation: rotateRing 3s linear infinite;
+    }
+
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* NEW: Sparkle particles around step number */
+    .step-number::after {
+      content: '✨';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      font-size: 20px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1) rotate(180deg);
+      }
+    }
+
+    .step-content {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(30px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* NEW: Animated gradient overlay on hover */
+    .step-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .step-content:hover::before {
+      left: 100%;
+    }
+
+    .step-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-description {
+      font-size: 18px;
+      color: #d1d5db;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* NEW: Floating animated emoji */
+    .step-visual {
+      text-align: center;
+      font-size: 120px;
+      animation: floatEmoji 3s ease-in-out infinite;
+      position: relative;
+    }
+
+    @keyframes floatEmoji {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotate(5deg);
+      }
+    }
+
+    /* NEW: Glow effect behind emoji */
+    .step-visual::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      animation: glowPulse 2s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+    }
+
+    /* Prize Grid at top */
+    .prize-banner {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(139, 43, 226, 0.1));
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 30px;
+      padding: 50px;
+      margin-bottom: 80px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* NEW: Moving gradient background */
+    .prize-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.05) 50%, transparent 70%);
+      animation: movingGradient 6s linear infinite;
+    }
+
+    @keyframes movingGradient {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(50%, 50%) rotate(360deg); }
+    }
+
+    .prize-item {
+      font-family: 'Orbitron', sans-serif;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prize-percent {
+      font-size: 64px;
+      font-weight: 900;
+      color: #ffd700;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+      animation: numberPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes numberPulse {
+      0%, 100% {
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+      }
+      50% {
+        text-shadow: 0 0 30px rgba(255, 215, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.6);
+      }
+    }
+
+    .prize-name {
+      font-size: 22px;
+      color: #fff;
+    }
+
+    /* FAQ Compact */
+    .faq-compact {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 60px;
+    }
+
+    .faq-item {
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 15px;
+      padding: 25px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* NEW: Animated border on hover */
+    .faq-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+      animation: borderSlide 3s linear infinite;
+    }
+
+    @keyframes borderSlide {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .faq-q {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      color: #00f0ff;
+      margin-bottom: 10px;
+    }
+
+    .faq-a {
+      font-size: 15px;
+      color: #d1d5db;
+    }
+
+    .mockup-label {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #ffd700;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: #ffd700;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animated"></div>
+  <div class="grid-bg"></div>
+  <div class="mockup-label">UPDATED: Timeline with New Effects ✨</div>
+
+  <div class="content">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">⚡ How It Works</h1>
+      <p class="subtitle">Your voice shapes the prize pool</p>
+    </div>
+
+    <!-- Prize Distribution Banner -->
+    <div class="prize-banner">
+      <div class="prize-item">
+        <div class="prize-percent">70%</div>
+        <div class="prize-name">Bitcoin (BTC)</div>
+      </div>
+      <div class="prize-item">
+        <div class="prize-percent">25%</div>
+        <div class="prize-name">Ethereum (ETH)</div>
+      </div>
+      <div class="prize-item">
+        <div class="prize-percent">5%</div>
+        <div class="prize-name">Your Choice</div>
+      </div>
+    </div>
+
+    <!-- Timeline Steps -->
+    <div class="timeline">
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-title">🎫 Buy Tickets</div>
+          <div class="step-description">
+            Each ticket you purchase = 1 vote. More tickets = more voting power to choose your favorite crypto!
+          </div>
+        </div>
+        <div class="step-visual">🎫</div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-title">🗳️ Cast Your Vote</div>
+          <div class="step-description">
+            Voting opens on the 1st of each month. Choose wisely - your vote is final and cannot be changed!
+          </div>
+        </div>
+        <div class="step-visual">🗳️</div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-title">⏰ Wait for Results</div>
+          <div class="step-description">
+            Voting closes on the last day of the month. The winner is automatically announced and added to prizes!
+          </div>
+        </div>
+        <div class="step-visual">⏰</div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <div class="step-title">🏆 Win Big!</div>
+          <div class="step-description">
+            All prizes now include Bitcoin (70%), Ethereum (25%), and the community-voted token (5%). Good luck!
+          </div>
+        </div>
+        <div class="step-visual">🏆</div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-compact">
+      <div class="faq-item">
+        <div class="faq-q">→ Can I change my vote?</div>
+        <div class="faq-a">No, votes are final. Choose carefully!</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">→ What if there's a tie?</div>
+        <div class="faq-a">Bitcoin wins by default.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">→ Vote multiple times?</div>
+        <div class="faq-a">Yes! Buy more tickets anytime.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">→ All tokens available?</div>
+        <div class="faq-a">Bitcoin always. Others rotate monthly.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
