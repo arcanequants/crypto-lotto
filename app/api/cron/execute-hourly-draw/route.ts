@@ -109,32 +109,35 @@ export async function GET(request: NextRequest) {
       args: [currentDrawId]
     });
 
+    // Destructure draw tuple: [drawId, drawTime, winningNumber, executed, totalTickets, cbBTCPrize, wethPrize, usdcPrize]
+    const [drawId, drawTime, winningNumber, executed, totalTickets, cbBTCPrize, wethPrize, usdcPrize] = draw;
+
     console.log('📊 Current Hourly Draw Status:');
     console.log(`  - Draw ID: ${currentDrawId}`);
-    console.log(`  - Draw Time: ${draw.drawTime > 0n ? new Date(Number(draw.drawTime) * 1000).toISOString() : 'NOT SET'}`);
-    console.log(`  - Winning Number: ${draw.winningNumber}`);
-    console.log(`  - Total Tickets: ${draw.totalTickets || 0n}`);
-    console.log(`  - Executed: ${draw.executed || false}`);
+    console.log(`  - Draw Time: ${drawTime > BigInt(0) ? new Date(Number(drawTime) * 1000).toISOString() : 'NOT SET'}`);
+    console.log(`  - Winning Number: ${winningNumber}`);
+    console.log(`  - Total Tickets: ${totalTickets || BigInt(0)}`);
+    console.log(`  - Executed: ${executed || false}`);
 
     // 6. Check if draw needs to be executed
     const now = Math.floor(Date.now() / 1000);
-    const drawTime = Number(draw.drawTime);
+    const drawTimeNum = Number(drawTime);
 
     // Check if already executed (either has winning number OR executed flag is true)
-    if (draw.executed || draw.winningNumber > 0) {
+    if (executed || winningNumber > 0) {
       console.log('✅ Draw already executed - nothing to do');
       return NextResponse.json({
         success: true,
         message: 'Draw already executed',
         drawId: Number(currentDrawId),
         executed: true,
-        winningNumber: Number(draw.winningNumber),
-        totalTickets: Number(draw.totalTickets || 0n)
+        winningNumber: Number(winningNumber),
+        totalTickets: Number(totalTickets || BigInt(0))
       });
     }
 
     // Check if draw time is set (should be > 0)
-    if (drawTime === 0) {
+    if (drawTimeNum === 0) {
       console.log('⏳ Draw time not set yet (waiting for first ticket)');
       return NextResponse.json({
         success: true,
@@ -145,24 +148,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if it's time to execute
-    if (now < drawTime) {
+    if (now < drawTimeNum) {
       console.log('⏰ Draw time not reached yet - waiting...');
       return NextResponse.json({
         success: true,
         message: 'Draw time not reached yet',
         drawId: Number(currentDrawId),
-        drawTime: new Date(drawTime * 1000).toISOString(),
-        timeRemaining: drawTime - now
+        drawTime: new Date(drawTimeNum * 1000).toISOString(),
+        timeRemaining: drawTimeNum - now
       });
     }
 
     // Check if there are tickets (optional - contract handles this too)
-    const totalTickets = Number(draw.totalTickets || 0n);
-    if (totalTickets === 0) {
+    const totalTicketsNum = Number(totalTickets || BigInt(0));
+    if (totalTicketsNum === 0) {
       console.log('📭 No tickets sold - contract will skip this draw automatically');
       // We still execute - the contract will handle skipping and creating next draw
     } else {
-      console.log(`🎫 ${totalTickets} ticket(s) sold - proceeding with draw execution`);
+      console.log(`🎫 ${totalTicketsNum} ticket(s) sold - proceeding with draw execution`);
     }
 
     // 7. Execute draw (draw time has passed and not executed)

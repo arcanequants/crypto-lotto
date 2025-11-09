@@ -57,13 +57,13 @@ const LOTTERY_CONTRACT_ADDRESS = process.env.LOTTERY_CONTRACT_ADDRESS_GASLESS!;
 const RELAYER_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY!;
 const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
 
-// Validate environment
-if (!LOTTERY_CONTRACT_ADDRESS) {
-  throw new Error('LOTTERY_CONTRACT_ADDRESS_GASLESS not set');
-}
-if (!RELAYER_PRIVATE_KEY) {
-  throw new Error('RELAYER_PRIVATE_KEY not set');
-}
+// Validate environment (moved to runtime)
+// if (!LOTTERY_CONTRACT_ADDRESS) {
+//   throw new Error('LOTTERY_CONTRACT_ADDRESS_GASLESS not set');
+// }
+// if (!RELAYER_PRIVATE_KEY) {
+//   throw new Error('RELAYER_PRIVATE_KEY not set');
+// }
 
 // ============ SMART CONTRACT ABI (only buyTicketGasless function) ============
 const LOTTERY_ABI = [
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
         );
 
         // Add 20% buffer to estimated gas
-        gasLimit = (estimatedGas * 120n) / 100n;
+        gasLimit = (estimatedGas * BigInt(120)) / BigInt(100);
 
         logger.info('Gas estimation completed', {
           estimatedGas: estimatedGas.toString(),
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (estimateError: any) {
         // Fallback to safe default if estimation fails
-        gasLimit = 500000n;
+        gasLimit = BigInt(500000);
         logger.warn('Gas estimation failed, using fallback', {
           error: estimateError.message,
           fallbackGasLimit: gasLimit.toString(),

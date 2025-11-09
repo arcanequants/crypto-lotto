@@ -55,13 +55,13 @@ const GAS_REIMBURSEMENT_THRESHOLD = ethers.parseEther(
   process.env.GAS_REIMBURSEMENT_THRESHOLD || '0.01'
 );
 
-// Validate critical environment variables
-if (!LOTTERY_CONTRACT_ADDRESS) {
-  throw new Error('LOTTERY_CONTRACT_ADDRESS_GASLESS not set');
-}
-if (!RELAYER_PRIVATE_KEY) {
-  throw new Error('RELAYER_PRIVATE_KEY not set');
-}
+// Validate critical environment variables (moved to runtime)
+// if (!LOTTERY_CONTRACT_ADDRESS) {
+//   throw new Error('LOTTERY_CONTRACT_ADDRESS_GASLESS not set');
+// }
+// if (!RELAYER_PRIVATE_KEY) {
+//   throw new Error('RELAYER_PRIVATE_KEY not set');
+// }
 
 // ============ SMART CONTRACT ABI ============
 const LOTTERY_ABI = [

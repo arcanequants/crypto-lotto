@@ -101,10 +101,10 @@ export default function PrizesPage() {
       // Attach full ticket data
       const winningTicketsWithData = winningTicketsData.map(wt => {
         const ticket = userTickets.find(t => t.id === wt.ticketId)!;
-        return { ...wt, ticket };
+        return { ...wt, ticket } as any;
       });
 
-      setWinningTickets(winningTicketsWithData);
+      setWinningTickets(winningTicketsWithData as any);
       setLoading(false);
     } catch (error) {
       console.error('Error loading prizes:', error);

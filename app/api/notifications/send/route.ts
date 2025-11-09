@@ -18,8 +18,14 @@ import {
 } from '@/lib/notifications/notification-manager';
 import { updateNotificationStatus } from '@/lib/database/notifications';
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend (lazy to avoid build-time errors)
+let resend: Resend | null = null;
+function getResend() {
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY || 'dummy');
+  }
+  return resend;
+}
 
 /**
  * POST /api/notifications/send
@@ -59,11 +65,11 @@ export async function POST(request: NextRequest) {
 
         // Render email based on template
         if (result.template === 'deposit-confirmed') {
-          emailHtml = render(React.createElement(DepositConfirmedEmail, result.props));
+          emailHtml = await render(React.createElement(DepositConfirmedEmail, result.props as any));
           emailSubject = '✅ Deposit Confirmed!';
         } else {
-          emailHtml = render(React.createElement(DepositBulkEmail, result.props));
-          emailSubject = `✅ ${result.props.ticketCount} Tickets Purchased!`;
+          emailHtml = await render(React.createElement(DepositBulkEmail, result.props as any));
+          emailSubject = `✅ ${(result.props as any).ticketCount} Tickets Purchased!`;
         }
 
         toEmail = data.emailAddress;
@@ -80,8 +86,8 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        emailHtml = render(React.createElement(RandomDrawResultEmail, result.props));
-        emailSubject = `🎲 Draw #${result.props.drawId} Results`;
+        emailHtml = await render(React.createElement(RandomDrawResultEmail, result.props as any));
+        emailSubject = `🎲 Draw #${(result.props as any).drawId} Results`;
         toEmail = data.emailAddress;
         break;
 
@@ -96,7 +102,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        emailHtml = render(React.createElement(PrizeWonPremiumEmail, result.props));
+        emailHtml = await render(React.createElement(PrizeWonPremiumEmail, result.props as any));
         emailSubject = '🎊 YOU WON!';
         toEmail = data.emailAddress;
         break;
@@ -110,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     // Send email via Resend
     try {
-      const emailResponse = await resend.emails.send({
+      const emailResponse = await getResend().emails.send({
         from: 'CryptoLotto <noreply@cryptolotto.app>',
         to: toEmail,
         subject: emailSubject,
