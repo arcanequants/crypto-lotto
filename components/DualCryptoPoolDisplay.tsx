@@ -34,11 +34,13 @@ const LOTTERY_ABI = [
       { name: 'executed', type: 'bool' },
       { name: 'totalTickets', type: 'uint256' },
       { name: 'winner', type: 'address' },
-      { name: 'vrfSequenceNumber', type: 'uint256' },
       { name: 'totalWinners', type: 'uint256' },
       { name: 'btcPrizeSnapshot', type: 'uint256' },
       { name: 'ethPrizeSnapshot', type: 'uint256' },
-      { name: 'usdcPrizeSnapshot', type: 'uint256' }
+      { name: 'usdcPrizeSnapshot', type: 'uint256' },
+      { name: 'commitBlock', type: 'uint256' },
+      { name: 'revealBlock', type: 'uint256' },
+      { name: 'salesClosed', type: 'bool' }
     ],
     stateMutability: 'view',
     type: 'function'
@@ -53,11 +55,13 @@ const LOTTERY_ABI = [
       { name: 'executed', type: 'bool' },
       { name: 'totalTickets', type: 'uint256' },
       { name: 'winner', type: 'address' },
-      { name: 'vrfSequenceNumber', type: 'uint256' },
       { name: 'totalWinners', type: 'uint256' },
       { name: 'btcPrizeSnapshot', type: 'uint256' },
       { name: 'ethPrizeSnapshot', type: 'uint256' },
-      { name: 'usdcPrizeSnapshot', type: 'uint256' }
+      { name: 'usdcPrizeSnapshot', type: 'uint256' },
+      { name: 'commitBlock', type: 'uint256' },
+      { name: 'revealBlock', type: 'uint256' },
+      { name: 'salesClosed', type: 'bool' }
     ],
     stateMutability: 'view',
     type: 'function'
