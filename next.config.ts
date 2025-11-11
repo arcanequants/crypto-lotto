@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Use standalone output for serverless deployment (Vercel)
+  output: 'standalone',
+
   // Disable type checking during build (for faster deployments)
   typescript: {
     ignoreBuildErrors: true,

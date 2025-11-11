@@ -1,468 +1,315 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { logger } from '@/lib/logging/logger';
+import { createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { base } from 'viem/chains';
 import { requireCronAuth } from '@/lib/security/cron';
-import { batchUpdateTickets } from '@/lib/database/batchOperations';
-import { acquireCronLock, releaseCronLock } from '@/lib/cron/idempotency';
-import { LOTTERY_CONFIG } from '@/lib/config/lottery';
 
 /**
- * CRON JOB 2: EXECUTE DAILY DRAW
+ * CRON JOB: Execute Daily Draw (STEP 2 of 2-step process)
  *
- * Ejecuta: DIARIAMENTE a las 8:00 PM
+ * NEW BLOCKHASH SYSTEM - Commit-Reveal Pattern
  *
- * Propósito:
- * - Ejecuta el daily draw de HOY a las 8 PM
- * - Genera números ganadores (MOCK o Chainlink VRF)
- * - Calcula ganadores por tier
- * - Calcula rollover multi-tier
- * - Transfiere rollover al próximo daily draw
- * - Sistema INFINITO: Siempre hay un siguiente draw
+ * This endpoint should be called ~5 minutes after close-daily-draw
+ * STEP 1: close-daily-draw (commit to future blocks)
+ * STEP 2: execute-daily-draw (reveal using 5 blockhashes) ← THIS
  *
- * Lógica:
- * 1. Buscar daily draw que termine HOY a las 8 PM y NO esté ejecutado
- * 2. Generar winning numbers (MOCK random por ahora)
- * 3. Obtener todos los tickets asignados a este draw
- * 4. Calcular matches y determinar ganadores por tier
- * 5. Calcular prize amounts por tier (dividir pool entre ganadores)
- * 6. Actualizar tickets con resultados (daily_winner, daily_tier, daily_prize_amount)
- * 7. Calcular rollover multi-tier:
- *    - Tier 5+1: Si nadie gana, 100% rollover → próximo draw
- *    - Tier 5+0: Si nadie gana, 100% rollover → próximo draw
- *    - Tier 4+1: Si nadie gana, 50% rollover + 50% a jackpot
- *    - Tier 3+1 y 4+0: 100% a jackpot
- * 8. Actualizar próximo daily draw con rollover
- * 9. Marcar draw actual como ejecutado
+ * What it does:
+ * 1. Verifies sales are closed (salesClosed = true)
+ * 2. Verifies waited 5 blocks after revealBlock
+ * 3. Verifies not too late (< 250 blocks from revealBlock)
+ * 4. Calls executeDailyDraw() on contract
+ * 5. Uses 5 consecutive blockhashes for randomness
  *
- * Schedule (vercel.json):
- * "0 20 * * *" - Todos los días a las 8:00 PM (20:00)
+ * Security:
+ * - Blockhash commit-reveal pattern
+ * - 5 consecutive blockhashes (not 1)
+ * - SmartBillions attack prevention
+ * - All hashes verified != 0x00
+ * - Requires CRON_SECRET
+ *
+ * Setup Instructions:
+ * 1. Add to vercel.json:
+ *    {
+ *      "crons": [{
+ *        "path": "/api/cron/execute-daily-draw",
+ *        "schedule": "5 2 * * *"
+ *      }]
+ *    }
+ *
+ * 2. Or use cron-job.org:
+ *    - URL: https://your-domain.com/api/cron/execute-daily-draw
+ *    - Schedule: Daily at 2:05 AM (5 2 * * *)
+ *    - Add header: Authorization: Bearer YOUR_CRON_SECRET
  */
 
-// Prize tier distribution
-const TIER_PERCENTAGES = {
-  '5+1': 0.50, // 50% del pool
-  '5+0': 0.20, // 20% del pool
-  '4+1': 0.15, // 15% del pool
-  '4+0': 0.10, // 10% del pool
-  '3+1': 0.05, // 5% del pool
-};
-
-// Helper function: Generate random winning numbers (MOCK)
-// Uses dynamic configuration from LOTTERY_CONFIG
-function generateWinningNumbers() {
-  const numbers: number[] = [];
-  while (numbers.length < LOTTERY_CONFIG.numbers.count) {
-    const num = Math.floor(Math.random() * LOTTERY_CONFIG.numbers.max) + LOTTERY_CONFIG.numbers.min;
-    if (!numbers.includes(num)) {
-      numbers.push(num);
-    }
+const LOTTERY_ABI = [
+  {
+    name: 'executeDailyDraw',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [],
+    outputs: []
+  },
+  {
+    name: 'currentDailyDrawId',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    name: 'getDailyDraw',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'drawId', type: 'uint256' }],
+    outputs: [
+      { name: 'drawId', type: 'uint256' },
+      { name: 'drawTime', type: 'uint256' },
+      { name: 'winningNumber', type: 'uint8' },
+      { name: 'totalTickets', type: 'uint256' },
+      { name: 'totalPrize', type: 'uint256' },
+      { name: 'executed', type: 'bool' },
+      { name: 'commitBlock', type: 'uint256' },
+      { name: 'revealBlock', type: 'uint256' },
+      { name: 'salesClosed', type: 'bool' }
+    ]
   }
-  const powerNumber = Math.floor(Math.random() * LOTTERY_CONFIG.powerNumber.max) + LOTTERY_CONFIG.powerNumber.min;
-
-  return {
-    winning_numbers: numbers.sort((a, b) => a - b),
-    power_number: powerNumber,
-  };
-}
-
-// Helper function: Calculate matches
-function calculateMatches(ticketNumbers: number[], winningNumbers: number[]) {
-  return ticketNumbers.filter(n => winningNumbers.includes(n)).length;
-}
-
-// Helper function: Determine tier
-// Dynamically check prize tiers from config
-function determineTier(matches: number, powerMatch: boolean): string | null {
-  const tiers = LOTTERY_CONFIG.prizeTiers;
-
-  // Check each tier in order (higher tiers first)
-  for (const [tierKey, tierConfig] of Object.entries(tiers)) {
-    if (tierConfig.match === matches && tierConfig.powerMatch === powerMatch) {
-      return `${matches}+${powerMatch ? '1' : '0'}`;
-    }
-  }
-
-  return null; // No winner
-}
+] as const;
 
 export async function GET(request: NextRequest) {
-  // ============================================
-  // CRITICAL FIX C-10: Idempotency Lock
-  // ============================================
-  let lockResult: Awaited<ReturnType<typeof acquireCronLock>> | null = null;
-
   try {
-    // Verificar autenticación con multi-layer security
+    // 1. Verify CRON authentication
     const authResponse = requireCronAuth(request);
     if (authResponse) {
       return authResponse; // Unauthorized
     }
 
-    // Acquire distributed lock (prevents duplicate executions)
-    lockResult = await acquireCronLock('execute-daily-draw', 300); // 5 min timeout
+    console.log('⏰ CRON JOB: Execute Daily Draw (STEP 2) - Starting...');
 
-    if (!lockResult.acquired) {
-      logger.warn('CRON job already running, skipping execution', {
-        job: 'execute-daily-draw',
-        reason: lockResult.message,
+    // 2. Get contract address
+    const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO as `0x${string}`;
+    if (!LOTTERY_CONTRACT || LOTTERY_CONTRACT === '0x0000000000000000000000000000000000000000') {
+      throw new Error('NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO not configured');
+    }
+
+    // 3. Get Alchemy RPC URL
+    const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
+    const rpcUrl = `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+
+    // 4. Create public client
+    const publicClient = createPublicClient({
+      chain: base,
+      transport: http(rpcUrl)
+    });
+
+    // 5. Check current draw status
+    const currentDrawId = await publicClient.readContract({
+      address: LOTTERY_CONTRACT,
+      abi: LOTTERY_ABI,
+      functionName: 'currentDailyDrawId'
+    });
+
+    const draw = await publicClient.readContract({
+      address: LOTTERY_CONTRACT,
+      abi: LOTTERY_ABI,
+      functionName: 'getDailyDraw',
+      args: [currentDrawId]
+    });
+
+    // Destructure draw tuple with new fields
+    const [drawId, drawTime, winningNumber, totalTickets, totalPrize, executed, commitBlock, revealBlock, salesClosed] = draw;
+
+    const currentBlock = await publicClient.getBlockNumber();
+
+    console.log('📊 Current Daily Draw Status:');
+    console.log(`  - Draw ID: ${currentDrawId}`);
+    console.log(`  - Draw Time: ${drawTime > BigInt(0) ? new Date(Number(drawTime) * 1000).toISOString() : 'NOT SET'}`);
+    console.log(`  - Total Tickets: ${totalTickets || BigInt(0)}`);
+    console.log(`  - Sales Closed: ${salesClosed}`);
+    console.log(`  - Executed: ${executed}`);
+    console.log(`  - Commit Block: ${commitBlock}`);
+    console.log(`  - Reveal Block: ${revealBlock}`);
+    console.log(`  - Current Block: ${currentBlock}`);
+
+    // 6. Check if draw already executed
+    if (executed || winningNumber > 0) {
+      console.log('✅ Draw already executed - nothing to do');
+      return NextResponse.json({
+        success: true,
+        message: 'Draw already executed',
+        drawId: Number(currentDrawId),
+        executed: true,
+        winningNumber: Number(winningNumber),
+        totalTickets: Number(totalTickets || BigInt(0))
       });
+    }
+
+    // 7. Check if sales are closed (STEP 1 must be done first)
+    if (!salesClosed) {
+      console.log('⚠️ Sales not closed yet - need to call close-daily-draw first (STEP 1)');
+      return NextResponse.json({
+        success: false,
+        message: 'Sales not closed - call close-daily-draw first (STEP 1)',
+        drawId: Number(currentDrawId),
+        salesClosed: false,
+        hint: 'Run /api/cron/close-daily-draw first'
+      }, { status: 400 });
+    }
+
+    // 8. Check if revealBlock is set
+    if (revealBlock === BigInt(0)) {
+      console.log('⚠️ Reveal block not set - draw was not properly closed');
+      return NextResponse.json({
+        success: false,
+        message: 'Reveal block not set - draw not properly closed',
+        drawId: Number(currentDrawId)
+      }, { status: 400 });
+    }
+
+    // 9. Check if we've waited enough blocks (revealBlock + 5)
+    const minExecutionBlock = revealBlock + BigInt(5);
+    if (currentBlock < minExecutionBlock) {
+      const blocksRemaining = Number(minExecutionBlock - currentBlock);
+      const secondsRemaining = blocksRemaining * 2; // ~2 seconds per block on BASE
+
+      console.log(`⏳ Too early - must wait ${blocksRemaining} more blocks (~${secondsRemaining}s)`);
+      return NextResponse.json({
+        success: false,
+        message: 'Too early - must wait 5 blocks after reveal block',
+        drawId: Number(currentDrawId),
+        currentBlock: Number(currentBlock),
+        minExecutionBlock: Number(minExecutionBlock),
+        blocksRemaining,
+        secondsRemaining,
+        hint: 'Wait a few more minutes and try again'
+      }, { status: 400 });
+    }
+
+    // 10. Check if not too late (SmartBillions protection - within 250 blocks)
+    const maxExecutionBlock = revealBlock + BigInt(250);
+    if (currentBlock > maxExecutionBlock) {
+      console.log(`❌ TOO LATE - exceeded 250 block limit (SmartBillions protection)`);
+      console.log(`  - Reveal Block: ${revealBlock}`);
+      console.log(`  - Max Execution Block: ${maxExecutionBlock}`);
+      console.log(`  - Current Block: ${currentBlock}`);
+      console.log(`  - Blocks over limit: ${currentBlock - maxExecutionBlock}`);
 
       return NextResponse.json({
         success: false,
-        message: 'Job already running',
-        reason: lockResult.message,
-      }, { status: 409 });
+        error: 'Too late - exceeded 250 block limit',
+        drawId: Number(currentDrawId),
+        revealBlock: Number(revealBlock),
+        currentBlock: Number(currentBlock),
+        maxExecutionBlock: Number(maxExecutionBlock),
+        blocksOverLimit: Number(currentBlock - maxExecutionBlock),
+        hint: 'Draw cannot be executed - blockhashes no longer available. May need manual intervention.'
+      }, { status: 400 });
     }
 
-    logger.info('Starting execute-daily-draw job', {
-      jobType: 'daily-draw',
-      executionUuid: lockResult.execution_uuid,
+    // 11. All checks passed - execute draw
+    console.log('🎲 Executing daily draw (reveal phase with 5 blockhashes)...');
+    console.log(`  - Reveal Block: ${revealBlock}`);
+    console.log(`  - Current Block: ${currentBlock}`);
+    console.log(`  - Will use blockhashes from blocks: ${revealBlock} to ${revealBlock + BigInt(4)}`);
+
+    // Get executor private key
+    const EXECUTOR_PRIVATE_KEY = process.env.WITHDRAWAL_EXECUTOR_PRIVATE_KEY as `0x${string}`;
+    if (!EXECUTOR_PRIVATE_KEY) {
+      throw new Error('WITHDRAWAL_EXECUTOR_PRIVATE_KEY not configured');
+    }
+
+    const account = privateKeyToAccount(EXECUTOR_PRIVATE_KEY);
+
+    const walletClient = createWalletClient({
+      account,
+      chain: base,
+      transport: http(rpcUrl)
     });
 
-    // ============================================
-    // PASO 0: Leer configuración de horario (admin-configurable)
-    // ============================================
-
-    const { data: configData, error: configError } = await supabase
-      .from('draw_config')
-      .select('config_value')
-      .eq('config_key', 'daily_draw_hour_utc')
-      .single();
-
-    if (configError) {
-      logger.warn('Error loading config, using default hour', { defaultHour: 2 });
-    }
-
-    const configuredHour = configData ? parseInt(configData.config_value) : 2;
-    logger.info('Configured daily draw hour', { configuredHour });
-
-    // ============================================
-    // PASO 1: Buscar draw de HOY que debe ejecutarse
-    // ============================================
-
-    const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(now);
-    todayEnd.setHours(23, 59, 59, 999);
-
-    const { data: drawToExecute, error: drawError } = await supabase
-      .from('draws')
-      .select('*')
-      .eq('draw_type', 'daily')
-      .eq('executed', false)
-      .gte('end_time', todayStart.toISOString())
-      .lte('end_time', todayEnd.toISOString())
-      .order('end_time', { ascending: true })
-      .limit(1)
-      .single();
-
-    if (drawError) {
-      if (drawError.code === 'PGRST116') {
-        logger.info('No daily draw to execute today');
-        return NextResponse.json({
-          success: true,
-          message: 'No daily draw scheduled for today',
-        });
-      }
-      logger.error('Error fetching draw', { error: drawError.message });
-      return NextResponse.json({ error: drawError.message }, { status: 500 });
-    }
-
-    logger.info('Executing daily draw', {
-      drawId: drawToExecute.id,
-      endTime: drawToExecute.end_time
+    // Get current nonce
+    const nonce = await publicClient.getTransactionCount({
+      address: account.address
     });
 
-    // ============================================
-    // PASO 2: Generar winning numbers
-    // ============================================
+    console.log(`  - Executor address: ${account.address}`);
+    console.log(`  - Current nonce: ${nonce}`);
 
-    // Check if cheat mode numbers are set (testing only)
-    let winning_numbers: number[];
-    let power_number: number;
-
-    if (drawToExecute.cheat_mode_winning_numbers && drawToExecute.cheat_mode_power_number) {
-      // Use pre-set cheat mode numbers
-      winning_numbers = drawToExecute.cheat_mode_winning_numbers;
-      power_number = drawToExecute.cheat_mode_power_number;
-      logger.info('🧪 CHEAT MODE: Using pre-set winning numbers', {
-        winningNumbers: winning_numbers,
-        powerNumber: power_number
-      });
-    } else {
-      // Generate random numbers normally
-      const generated = generateWinningNumbers();
-      winning_numbers = generated.winning_numbers;
-      power_number = generated.power_number;
-      logger.info('Winning numbers generated', {
-        winningNumbers: winning_numbers,
-        powerNumber: power_number
-      });
-    }
-
-    // ============================================
-    // PASO 3: Obtener todos los tickets asignados
-    // ============================================
-
-    const { data: tickets, error: ticketsError } = await supabase
-      .from('tickets')
-      .select('*')
-      .eq('assigned_daily_draw_id', drawToExecute.id);
-
-    if (ticketsError) {
-      logger.error('Error fetching tickets', { error: ticketsError.message });
-      return NextResponse.json({ error: ticketsError.message }, { status: 500 });
-    }
-
-    logger.info('Tickets fetched for draw', { ticketCount: tickets?.length || 0 });
-
-    // ============================================
-    // PASO 4: Calcular ganadores por tier
-    // ============================================
-
-    const winnersByTier: Record<string, any[]> = {
-      '5+1': [],
-      '5+0': [],
-      '4+1': [],
-      '4+0': [],
-      '3+1': [],
-    };
-
-    for (const ticket of tickets || []) {
-      const matches = calculateMatches(ticket.numbers, winning_numbers);
-      const powerMatch = ticket.power_number === power_number;
-      const tier = determineTier(matches, powerMatch);
-
-      if (tier) {
-        winnersByTier[tier].push(ticket);
-      }
-    }
-
-    logger.info('Winners calculated by tier', {
-      tier_5_1: winnersByTier['5+1'].length,
-      tier_5_0: winnersByTier['5+0'].length,
-      tier_4_1: winnersByTier['4+1'].length,
-      tier_4_0: winnersByTier['4+0'].length,
-      tier_3_1: winnersByTier['3+1'].length,
+    // Call executeDailyDraw() - uses 5 blockhashes internally
+    const hash = await walletClient.writeContract({
+      address: LOTTERY_CONTRACT,
+      abi: LOTTERY_ABI,
+      functionName: 'executeDailyDraw',
+      nonce,
+      gas: BigInt(500000) // Higher gas limit for blockhash operations
     });
 
-    // ============================================
-    // PASO 5: Calcular prize amounts
-    // ============================================
+    console.log(`  - Using BLOCKHASH randomness (5 consecutive blocks) - FREE!`);
+    console.log(`  - Transaction sent: ${hash}`);
 
-    const totalPool = drawToExecute.total_prize_usd || 0;
-    const prizeAmounts: Record<string, number> = {};
+    // Wait for confirmation
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-    for (const [tier, winners] of Object.entries(winnersByTier)) {
-      const tierPool = totalPool * TIER_PERCENTAGES[tier as keyof typeof TIER_PERCENTAGES];
-      const winnersCount = winners.length;
+    console.log(`  - Status: ${receipt.status === 'success' ? '✅ SUCCESS' : '❌ FAILED'}`);
+    console.log(`  - Gas used: ${receipt.gasUsed}`);
 
-      if (winnersCount > 0) {
-        prizeAmounts[tier] = tierPool / winnersCount; // Dividir entre ganadores
-      } else {
-        prizeAmounts[tier] = 0; // No ganadores
-      }
+    if (receipt.status !== 'success') {
+      throw new Error('Transaction failed on-chain');
     }
 
-    logger.info('Prize amounts calculated per tier', prizeAmounts);
-
-    // ============================================
-    // PASO 6: Actualizar tickets con resultados (BATCH OPERATION)
-    // ============================================
-
-    // Preparar updates en batch (10-20x más rápido que N+1 queries)
-    const ticketUpdates = (tickets || []).map(ticket => {
-      const matches = calculateMatches(ticket.numbers, winning_numbers);
-      const powerMatch = ticket.power_number === power_number;
-      const tier = determineTier(matches, powerMatch);
-
-      return {
-        id: ticket.id,
-        daily_processed: true,
-        daily_winner: tier !== null,
-        daily_tier: tier,
-        daily_prize_amount: tier ? prizeAmounts[tier] : 0,
-      };
+    // 12. Get updated draw info
+    const updatedDraw = await publicClient.readContract({
+      address: LOTTERY_CONTRACT,
+      abi: LOTTERY_ABI,
+      functionName: 'getDailyDraw',
+      args: [currentDrawId]
     });
 
-    // Ejecutar batch update
-    const batchResult = await batchUpdateTickets(supabase, ticketUpdates);
+    const [, , newWinningNumber, newTotalTickets] = updatedDraw;
 
-    if (!batchResult.success) {
-      logger.error('Batch ticket update failed', { error: batchResult.error });
-      return NextResponse.json({ error: 'Failed to update tickets' }, { status: 500 });
-    }
-
-    logger.info('All tickets updated with results (batch)', {
-      ticketsUpdated: ticketUpdates.length
+    const newDrawId = await publicClient.readContract({
+      address: LOTTERY_CONTRACT,
+      abi: LOTTERY_ABI,
+      functionName: 'currentDailyDrawId'
     });
 
-    // ============================================
-    // PASO 7: Calcular rollover multi-tier
-    // ============================================
-
-    let rollover_5_1 = drawToExecute.rollover_tier_5_1 || 0;
-    let rollover_5_0 = drawToExecute.rollover_tier_5_0 || 0;
-    let rollover_4_1 = drawToExecute.rollover_tier_4_1 || 0;
-    let extraForJackpot = 0;
-
-    // TIER 5+1: 100% rollover si no hay ganadores
-    if (winnersByTier['5+1'].length === 0) {
-      const tier51Pool = totalPool * TIER_PERCENTAGES['5+1'];
-      rollover_5_1 += tier51Pool;
-      logger.info('No 5+1 winners, rolling over', { rolloverAmount: tier51Pool });
-    } else {
-      rollover_5_1 = 0; // Reset si hay ganador
-      logger.info('5+1 winner(s) found, rollover reset');
-    }
-
-    // TIER 5+0: 100% rollover si no hay ganadores
-    if (winnersByTier['5+0'].length === 0) {
-      const tier50Pool = totalPool * TIER_PERCENTAGES['5+0'];
-      rollover_5_0 += tier50Pool;
-      logger.info('No 5+0 winners, rolling over', { rolloverAmount: tier50Pool });
-    } else {
-      rollover_5_0 = 0; // Reset si hay ganador
-      logger.info('5+0 winner(s) found, rollover reset');
-    }
-
-    // TIER 4+1: 50% rollover + 50% a jackpot
-    if (winnersByTier['4+1'].length === 0) {
-      const tier41Pool = totalPool * TIER_PERCENTAGES['4+1'];
-      rollover_4_1 += tier41Pool * 0.5; // 50% rollover
-      extraForJackpot += tier41Pool * 0.5; // 50% a jackpot
-      logger.info('No 4+1 winners', {
-        rolloverAmount: tier41Pool * 0.5,
-        jackpotBonus: tier41Pool * 0.5
-      });
-    } else {
-      rollover_4_1 = 0; // Reset si hay ganador
-      logger.info('4+1 winner(s) found, rollover reset');
-    }
-
-    // TIER 3+1: 100% a jackpot
-    if (winnersByTier['3+1'].length === 0) {
-      const tier31Pool = totalPool * TIER_PERCENTAGES['3+1'];
-      extraForJackpot += tier31Pool;
-      logger.info('No 3+1 winners, adding to jackpot', { jackpotBonus: tier31Pool });
-    }
-
-    // TIER 4+0: 100% a jackpot
-    if (winnersByTier['4+0'].length === 0) {
-      const tier40Pool = totalPool * TIER_PERCENTAGES['4+0'];
-      extraForJackpot += tier40Pool;
-      logger.info('No 4+0 winners, adding to jackpot', { jackpotBonus: tier40Pool });
-    }
-
-    // Agregar extra al jackpot (tier 5+1)
-    rollover_5_1 += extraForJackpot;
-
-    logger.info('Final rollover calculated', {
-      rollover_5_1,
-      rollover_5_0,
-      rollover_4_1
-    });
-
-    // ============================================
-    // PASO 8: Actualizar próximo daily draw con rollover
-    // ============================================
-
-    const { data: nextDraw, error: nextDrawError } = await supabase
-      .from('draws')
-      .select('id')
-      .eq('draw_type', 'daily')
-      .eq('executed', false)
-      .gt('end_time', drawToExecute.end_time)
-      .order('end_time', { ascending: true })
-      .limit(1)
-      .single();
-
-    if (nextDrawError) {
-      logger.warn('Could not find next daily draw for rollover');
-    } else {
-      await supabase
-        .from('draws')
-        .update({
-          rollover_tier_5_1: rollover_5_1,
-          rollover_tier_5_0: rollover_5_0,
-          rollover_tier_4_1: rollover_4_1,
-        })
-        .eq('id', nextDraw.id);
-
-      logger.info('Next draw updated with rollover', { nextDrawId: nextDraw.id });
-    }
-
-    // ============================================
-    // PASO 9: Marcar draw actual como ejecutado
-    // ============================================
-
-    await supabase
-      .from('draws')
-      .update({
-        executed: true,
-        executed_at: new Date().toISOString(),
-        winning_numbers,
-        power_number,
-      })
-      .eq('id', drawToExecute.id);
-
-    logger.info('Draw marked as executed', { drawId: drawToExecute.id });
-
-    // ============================================
-    // RETURN SUCCESS
-    // ============================================
-
-    // Release lock with success
-    if (lockResult?.execution_uuid) {
-      await releaseCronLock(lockResult.execution_uuid, 'completed', null, {
-        drawId: drawToExecute.id,
-        totalTickets: tickets?.length || 0,
-        totalWinners: Object.values(winnersByTier).reduce((sum, winners) => sum + winners.length, 0),
-      });
-    }
+    console.log('🎉 Daily draw executed successfully (STEP 2 complete)!');
+    console.log(`  - Old Draw ID: ${currentDrawId}`);
+    console.log(`  - New Draw ID: ${newDrawId}`);
+    console.log(`  - Winning Number: ${newWinningNumber}`);
+    console.log(`  - Total Tickets: ${newTotalTickets}`);
 
     return NextResponse.json({
       success: true,
-      drawId: drawToExecute.id,
-      drawType: 'daily',
-      winningNumbers: winning_numbers,
-      powerNumber: power_number,
-      totalTickets: tickets?.length || 0,
-      winners: {
-        '5+1': winnersByTier['5+1'].length,
-        '5+0': winnersByTier['5+0'].length,
-        '4+1': winnersByTier['4+1'].length,
-        '4+0': winnersByTier['4+0'].length,
-        '3+1': winnersByTier['3+1'].length,
-      },
-      rollover: {
-        tier_5_1: rollover_5_1,
-        tier_5_0: rollover_5_0,
-        tier_4_1: rollover_4_1,
-      },
-      message: 'Daily draw executed successfully',
+      message: 'Daily draw executed successfully (STEP 2 complete)',
+      oldDrawId: Number(currentDrawId),
+      newDrawId: Number(newDrawId),
+      winningNumber: Number(newWinningNumber),
+      totalTickets: Number(newTotalTickets),
+      txHash: hash,
+      gasUsed: receipt.gasUsed.toString(),
+      blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
     });
 
-  } catch (error) {
-    // Release lock with failure
-    if (lockResult?.execution_uuid) {
-      await releaseCronLock(
-        lockResult.execution_uuid,
-        'failed',
-        error instanceof Error ? error.message : 'Unknown error'
-      );
+  } catch (error: any) {
+    console.error('❌ Error executing daily draw:', error);
+
+    // Check if it's a revert error with a specific message
+    let errorMessage = error.message;
+    if (error.message.includes('Too early')) {
+      errorMessage = 'Too early - must wait 5 blocks after reveal block';
+    } else if (error.message.includes('Too late')) {
+      errorMessage = 'Too late - beyond 256 block limit (SmartBillions protection)';
+    } else if (error.message.includes('Sales not closed')) {
+      errorMessage = 'Sales not closed - call close-daily-draw first';
+    } else if (error.message.includes('Hash') && error.message.includes('not available')) {
+      errorMessage = 'Blockhash not available - may need to retry';
     }
-
-    logger.error('Error in execute-daily-draw', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-    });
 
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Failed to execute daily draw',
+        details: errorMessage,
+        fullError: error.message
       },
       { status: 500 }
     );

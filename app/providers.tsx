@@ -18,10 +18,11 @@ const getAlchemyRpcUrl = () => {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const alchemyRpcUrl = getAlchemyRpcUrl();
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cmgyczp6p01wdl90bh8v20dua';
 
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+      appId={privyAppId}
       config={{
         // Login methods
         loginMethods: ['email', 'wallet', 'google'],

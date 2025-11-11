@@ -130,8 +130,14 @@ export function validateCronRequest(request: NextRequest): {
       ip,
       path: request.nextUrl.pathname,
     });
+  } else if (hasValidAuth) {
+    // 4. If valid Bearer token, allow it (for manual triggers or external cron services like cron-job.org)
+    logger.info('CRON request authenticated via Bearer token', {
+      ip,
+      path: request.nextUrl.pathname,
+    });
   } else if (process.env.NODE_ENV !== 'development') {
-    // 4. Check IP whitelist for non-Vercel crons (manual triggers with Bearer token)
+    // 5. Check IP whitelist for requests without auth or Vercel header
     if (!isIPWhitelisted(ip)) {
       logger.security('CRON request from non-whitelisted IP without Vercel header', {
         ip,

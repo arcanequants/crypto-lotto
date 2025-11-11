@@ -5,29 +5,40 @@ import { base } from 'viem/chains';
 import { requireCronAuth } from '@/lib/security/cron';
 
 /**
- * CRON JOB: Execute Hourly Draw for LotteryDualCrypto
+ * CRON JOB: Execute Hourly Draw (STEP 2 of 2-step process)
  *
- * This endpoint should be called every hour by a cron service (like Vercel Cron or cron-job.org)
+ * NEW BLOCKHASH SYSTEM - Commit-Reveal Pattern
+ *
+ * This endpoint should be called ~5 minutes after close-hourly-draw
+ * STEP 1: close-hourly-draw (commit to future blocks)
+ * STEP 2: execute-hourly-draw (reveal using 5 blockhashes) ← THIS
  *
  * What it does:
- * 1. Calls executeHourlyDraw() on the LotteryDualCrypto contract
- * 2. Requests QRNG from API3 and executes the draw
+ * 1. Verifies sales are closed (salesClosed = true)
+ * 2. Verifies waited 5 blocks after revealBlock
+ * 3. Verifies not too late (< 250 blocks from revealBlock)
+ * 4. Calls executeHourlyDraw() on contract
+ * 5. Uses 5 consecutive blockhashes for randomness
  *
  * Security:
- * - Requires CRON_SECRET to prevent unauthorized calls
+ * - Blockhash commit-reveal pattern
+ * - 5 consecutive blockhashes (not 1)
+ * - SmartBillions attack prevention
+ * - All hashes verified != 0x00
+ * - Requires CRON_SECRET
  *
  * Setup Instructions:
  * 1. Add to vercel.json:
  *    {
  *      "crons": [{
  *        "path": "/api/cron/execute-hourly-draw",
- *        "schedule": "0 * * * *"
+ *        "schedule": "5 * * * *"
  *      }]
  *    }
  *
  * 2. Or use cron-job.org:
  *    - URL: https://your-domain.com/api/cron/execute-hourly-draw
- *    - Schedule: Every hour at minute 0 (0 * * * *)
+ *    - Schedule: Every hour at minute 5 (5 * * * *)
  *    - Add header: Authorization: Bearer YOUR_CRON_SECRET
  */
 
@@ -35,7 +46,7 @@ const LOTTERY_ABI = [
   {
     name: 'executeHourlyDraw',
     type: 'function',
-    stateMutability: 'payable',
+    stateMutability: 'nonpayable',
     inputs: [],
     outputs: []
   },
@@ -55,26 +66,27 @@ const LOTTERY_ABI = [
       { name: 'drawId', type: 'uint256' },
       { name: 'drawTime', type: 'uint256' },
       { name: 'winningNumber', type: 'uint8' },
-      { name: 'executed', type: 'bool' },
       { name: 'totalTickets', type: 'uint256' },
-      { name: 'cbBTCPrize', type: 'uint256' },
-      { name: 'wethPrize', type: 'uint256' },
-      { name: 'usdcPrize', type: 'uint256' }
+      { name: 'totalPrize', type: 'uint256' },
+      { name: 'executed', type: 'bool' },
+      { name: 'commitBlock', type: 'uint256' },
+      { name: 'revealBlock', type: 'uint256' },
+      { name: 'salesClosed', type: 'bool' }
     ]
   }
 ] as const;
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. Verify CRON authentication (Vercel Cron)
+    // 1. Verify CRON authentication
     const authResponse = requireCronAuth(request);
     if (authResponse) {
       return authResponse; // Unauthorized
     }
 
-    console.log('⏰ CRON JOB: Execute Hourly Draw - Starting...');
+    console.log('⏰ CRON JOB: Execute Hourly Draw (STEP 2) - Starting...');
 
-    // 2. Get contract address - USE LOTTERY_DUAL_CRYPTO (latest deployment)
+    // 2. Get contract address
     const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO as `0x${string}`;
     if (!LOTTERY_CONTRACT || LOTTERY_CONTRACT === '0x0000000000000000000000000000000000000000') {
       throw new Error('NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO not configured');
@@ -104,21 +116,22 @@ export async function GET(request: NextRequest) {
       args: [currentDrawId]
     });
 
-    // Destructure draw tuple: [drawId, drawTime, winningNumber, executed, totalTickets, cbBTCPrize, wethPrize, usdcPrize]
-    const [drawId, drawTime, winningNumber, executed, totalTickets, cbBTCPrize, wethPrize, usdcPrize] = draw;
+    // Destructure draw tuple with new fields
+    const [drawId, drawTime, winningNumber, totalTickets, totalPrize, executed, commitBlock, revealBlock, salesClosed] = draw;
+
+    const currentBlock = await publicClient.getBlockNumber();
 
     console.log('📊 Current Hourly Draw Status:');
     console.log(`  - Draw ID: ${currentDrawId}`);
     console.log(`  - Draw Time: ${drawTime > BigInt(0) ? new Date(Number(drawTime) * 1000).toISOString() : 'NOT SET'}`);
-    console.log(`  - Winning Number: ${winningNumber}`);
     console.log(`  - Total Tickets: ${totalTickets || BigInt(0)}`);
-    console.log(`  - Executed: ${executed || false}`);
+    console.log(`  - Sales Closed: ${salesClosed}`);
+    console.log(`  - Executed: ${executed}`);
+    console.log(`  - Commit Block: ${commitBlock}`);
+    console.log(`  - Reveal Block: ${revealBlock}`);
+    console.log(`  - Current Block: ${currentBlock}`);
 
-    // 6. Check if draw needs to be executed
-    const now = Math.floor(Date.now() / 1000);
-    const drawTimeNum = Number(drawTime);
-
-    // Check if already executed (either has winning number OR executed flag is true)
+    // 6. Check if draw already executed
     if (executed || winningNumber > 0) {
       console.log('✅ Draw already executed - nothing to do');
       return NextResponse.json({
@@ -131,40 +144,73 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check if draw time is set (should be > 0)
-    if (drawTimeNum === 0) {
-      console.log('⏳ Draw time not set yet (waiting for first ticket)');
+    // 7. Check if sales are closed (STEP 1 must be done first)
+    if (!salesClosed) {
+      console.log('⚠️ Sales not closed yet - need to call close-hourly-draw first (STEP 1)');
       return NextResponse.json({
-        success: true,
-        message: 'Draw time not set yet - waiting for first ticket purchase',
+        success: false,
+        message: 'Sales not closed - call close-hourly-draw first (STEP 1)',
         drawId: Number(currentDrawId),
-        executed: false
-      });
+        salesClosed: false,
+        hint: 'Run /api/cron/close-hourly-draw first'
+      }, { status: 400 });
     }
 
-    // Check if it's time to execute
-    if (now < drawTimeNum) {
-      console.log('⏰ Draw time not reached yet - waiting...');
+    // 8. Check if revealBlock is set
+    if (revealBlock === BigInt(0)) {
+      console.log('⚠️ Reveal block not set - draw was not properly closed');
       return NextResponse.json({
-        success: true,
-        message: 'Draw time not reached yet',
+        success: false,
+        message: 'Reveal block not set - draw not properly closed',
+        drawId: Number(currentDrawId)
+      }, { status: 400 });
+    }
+
+    // 9. Check if we've waited enough blocks (revealBlock + 5)
+    const minExecutionBlock = revealBlock + BigInt(5);
+    if (currentBlock < minExecutionBlock) {
+      const blocksRemaining = Number(minExecutionBlock - currentBlock);
+      const secondsRemaining = blocksRemaining * 2; // ~2 seconds per block on BASE
+
+      console.log(`⏳ Too early - must wait ${blocksRemaining} more blocks (~${secondsRemaining}s)`);
+      return NextResponse.json({
+        success: false,
+        message: 'Too early - must wait 5 blocks after reveal block',
         drawId: Number(currentDrawId),
-        drawTime: new Date(drawTimeNum * 1000).toISOString(),
-        timeRemaining: drawTimeNum - now
-      });
+        currentBlock: Number(currentBlock),
+        minExecutionBlock: Number(minExecutionBlock),
+        blocksRemaining,
+        secondsRemaining,
+        hint: 'Wait a few more minutes and try again'
+      }, { status: 400 });
     }
 
-    // Check if there are tickets (optional - contract handles this too)
-    const totalTicketsNum = Number(totalTickets || BigInt(0));
-    if (totalTicketsNum === 0) {
-      console.log('📭 No tickets sold - contract will skip this draw automatically');
-      // We still execute - the contract will handle skipping and creating next draw
-    } else {
-      console.log(`🎫 ${totalTicketsNum} ticket(s) sold - proceeding with draw execution`);
+    // 10. Check if not too late (SmartBillions protection - within 250 blocks)
+    const maxExecutionBlock = revealBlock + BigInt(250);
+    if (currentBlock > maxExecutionBlock) {
+      console.log(`❌ TOO LATE - exceeded 250 block limit (SmartBillions protection)`);
+      console.log(`  - Reveal Block: ${revealBlock}`);
+      console.log(`  - Max Execution Block: ${maxExecutionBlock}`);
+      console.log(`  - Current Block: ${currentBlock}`);
+      console.log(`  - Blocks over limit: ${currentBlock - maxExecutionBlock}`);
+
+      return NextResponse.json({
+        success: false,
+        error: 'Too late - exceeded 250 block limit',
+        drawId: Number(currentDrawId),
+        revealBlock: Number(revealBlock),
+        currentBlock: Number(currentBlock),
+        maxExecutionBlock: Number(maxExecutionBlock),
+        blocksOverLimit: Number(currentBlock - maxExecutionBlock),
+        hint: 'Draw cannot be executed - blockhashes no longer available. May need manual intervention.'
+      }, { status: 400 });
     }
 
-    // 7. Execute draw (draw time has passed and not executed)
-    console.log('🎲 Executing hourly draw...');
+    // 11. All checks passed - execute draw
+    console.log('🎲 Executing hourly draw (reveal phase with 5 blockhashes)...');
+    console.log(`  - Reveal Block: ${revealBlock}`);
+    console.log(`  - Current Block: ${currentBlock}`);
+    console.log(`  - Will use blockhashes from blocks: ${revealBlock} to ${revealBlock + BigInt(4)}`);
 
     // Get executor private key
     const EXECUTOR_PRIVATE_KEY = process.env.WITHDRAWAL_EXECUTOR_PRIVATE_KEY as `0x${string}`;
@@ -180,7 +226,7 @@ export async function GET(request: NextRequest) {
       transport: http(rpcUrl)
     });
 
-    // Get current nonce to avoid "nonce too low" errors
+    // Get current nonce
     const nonce = await publicClient.getTransactionCount({
       address: account.address
     });
@@ -188,19 +234,16 @@ export async function GET(request: NextRequest) {
     console.log(`  - Executor address: ${account.address}`);
     console.log(`  - Current nonce: ${nonce}`);
 
-    // Call executeHourlyDraw() with Pyth Entropy VRF fee
-    // Fee from Pyth Entropy contract on BASE: ~0.000005 ETH
-    const vrfFee = BigInt('10000000000000'); // 0.00001 ETH (2x actual fee for safety margin)
+    // Call executeHourlyDraw() - uses 5 blockhashes internally
     const hash = await walletClient.writeContract({
       address: LOTTERY_CONTRACT,
       abi: LOTTERY_ABI,
       functionName: 'executeHourlyDraw',
-      value: vrfFee,
-      nonce
+      nonce,
+      gas: BigInt(500000) // Higher gas limit for blockhash operations
     });
 
-    console.log(`  - VRF Fee sent: ${vrfFee} wei (0.00001 ETH)`);
-
+    console.log(`  - Using BLOCKHASH randomness (5 consecutive blocks) - FREE!`);
     console.log(`  - Transaction sent: ${hash}`);
 
     // Wait for confirmation
@@ -209,32 +252,64 @@ export async function GET(request: NextRequest) {
     console.log(`  - Status: ${receipt.status === 'success' ? '✅ SUCCESS' : '❌ FAILED'}`);
     console.log(`  - Gas used: ${receipt.gasUsed}`);
 
-    // 8. Get new draw info
+    if (receipt.status !== 'success') {
+      throw new Error('Transaction failed on-chain');
+    }
+
+    // 12. Get updated draw info
+    const updatedDraw = await publicClient.readContract({
+      address: LOTTERY_CONTRACT,
+      abi: LOTTERY_ABI,
+      functionName: 'getHourlyDraw',
+      args: [currentDrawId]
+    });
+
+    const [, , newWinningNumber, newTotalTickets] = updatedDraw;
+
     const newDrawId = await publicClient.readContract({
       address: LOTTERY_CONTRACT,
       abi: LOTTERY_ABI,
       functionName: 'currentHourlyDrawId'
     });
 
-    console.log('🎉 Hourly draw executed successfully!');
+    console.log('🎉 Hourly draw executed successfully (STEP 2 complete)!');
     console.log(`  - Old Draw ID: ${currentDrawId}`);
     console.log(`  - New Draw ID: ${newDrawId}`);
+    console.log(`  - Winning Number: ${newWinningNumber}`);
+    console.log(`  - Total Tickets: ${newTotalTickets}`);
 
     return NextResponse.json({
       success: true,
-      message: 'Hourly draw executed successfully',
+      message: 'Hourly draw executed successfully (STEP 2 complete)',
       oldDrawId: Number(currentDrawId),
       newDrawId: Number(newDrawId),
+      winningNumber: Number(newWinningNumber),
+      totalTickets: Number(newTotalTickets),
       txHash: hash,
-      gasUsed: receipt.gasUsed.toString()
+      gasUsed: receipt.gasUsed.toString(),
+      blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
     });
 
   } catch (error: any) {
     console.error('❌ Error executing hourly draw:', error);
+
+    // Check if it's a revert error with a specific message
+    let errorMessage = error.message;
+    if (error.message.includes('Too early')) {
+      errorMessage = 'Too early - must wait 5 blocks after reveal block';
+    } else if (error.message.includes('Too late')) {
+      errorMessage = 'Too late - beyond 256 block limit (SmartBillions protection)';
+    } else if (error.message.includes('Sales not closed')) {
+      errorMessage = 'Sales not closed - call close-hourly-draw first';
+    } else if (error.message.includes('Hash') && error.message.includes('not available')) {
+      errorMessage = 'Blockhash not available - may need to retry';
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to execute hourly draw',
-        details: error.message
+        details: errorMessage,
+        fullError: error.message
       },
       { status: 500 }
     );

@@ -2,36 +2,20 @@
   "installCommand": "npm install --legacy-peer-deps",
   "crons": [
     {
-      "path": "/api/cron/finalize-vote",
-      "schedule": "59 23 28 * *"
-    },
-    {
-      "path": "/api/cron/calculate-fees",
+      "path": "/api/cron/close-hourly-draw",
       "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/create-next-draws",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/execute-daily-draw",
-      "schedule": "0 20 * * *"
-    },
-    {
-      "path": "/api/cron/execute-weekly-draw",
-      "schedule": "0 20 * * 0"
-    },
-    {
-      "path": "/api/cron/claim-gas-reimbursement",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/execute-draw",
-      "schedule": "*/30 * * * *"
     },
     {
       "path": "/api/cron/execute-hourly-draw",
       "schedule": "5 * * * *"
+    },
+    {
+      "path": "/api/cron/close-daily-draw",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/execute-daily-draw",
+      "schedule": "5 2 * * *"
     }
   ]
 }

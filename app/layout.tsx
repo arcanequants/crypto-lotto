@@ -3,6 +3,9 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { StructuredData } from "./components/StructuredData";
 
+// Force dynamic rendering (no static generation)
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   // Basic SEO
   title: {
