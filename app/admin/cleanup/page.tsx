@@ -10,6 +10,8 @@ export default function CleanupPage() {
   const [cleanOutput, setCleanOutput] = useState('');
   const [verifyOutput, setVerifyOutput] = useState('');
   const [ticketOutput, setTicketOutput] = useState('');
+  const [cronLogs, setCronLogs] = useState('');
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const checkLocalStorage = () => {
     const tickets = localStorage.getItem('blockchain_tickets');
@@ -139,6 +141,60 @@ ${JSON.stringify(ticketArray[ticketArray.length - 1], null, 2)}
       `);
     } catch (error: any) {
       setTicketOutput(`❌ Error: ${error.message}`);
+    }
+  };
+
+  const checkCronStatus = async () => {
+    setCronLogs('🔄 Checking CRON job status and draw info...\n\n');
+
+    try {
+      const response = await fetch('/api/verify-contract');
+      const data = await response.json();
+
+      const now = new Date();
+      const drawTime = new Date(data.data.currentHourlyDraw.drawTime);
+      const timeUntilDraw = Math.max(0, Math.floor((drawTime.getTime() - now.getTime()) / 1000));
+      const minutes = Math.floor(timeUntilDraw / 60);
+      const seconds = timeUntilDraw % 60;
+
+      const logs = `📊 CURRENT DRAW STATUS
+═══════════════════════════════════════
+
+⏰ Current Time: ${now.toLocaleString()}
+🎯 Draw Time: ${drawTime.toLocaleString()}
+⏳ Time Until Draw: ${minutes}m ${seconds}s
+
+📌 Draw Info:
+   - Draw ID: ${data.data.currentHourlyDraw.drawId}
+   - Total Tickets: ${data.data.currentHourlyDraw.totalTickets}
+   - Sales Closed: ${data.data.currentHourlyDraw.salesClosed ? '✅ YES' : '❌ NO'}
+   - Executed: ${data.data.currentHourlyDraw.executed ? '✅ YES' : '❌ NO'}
+   - Winning Number: ${data.data.currentHourlyDraw.winningNumber || 'Not drawn yet'}
+
+🔐 Blockhash Info:
+   - Commit Block: ${data.data.currentHourlyDraw.commitBlock || 'Not committed yet'}
+   - Reveal Block: ${data.data.currentHourlyDraw.revealBlock || 'Not set yet'}
+
+💰 Prize Pool:
+   - USDC: $${data.data.hourlyVault.usdcFormatted}
+
+═══════════════════════════════════════
+
+📋 CRON SCHEDULE:
+   - Close Draw: Every hour at :00 (next: ${new Date(Math.ceil(now.getTime() / 3600000) * 3600000).toLocaleTimeString()})
+   - Execute Draw: Every hour at :05 (next: ${new Date(Math.ceil(now.getTime() / 3600000) * 3600000 + 300000).toLocaleTimeString()})
+
+${data.data.currentHourlyDraw.salesClosed ?
+  '🔒 Sales are CLOSED - waiting for execution at :05' :
+  timeUntilDraw <= 0 ?
+    '⚠️ Draw time reached - CRON should close soon' :
+    `⏳ Waiting for draw time (${minutes}m ${seconds}s remaining)`
+}
+      `;
+
+      setCronLogs(logs);
+    } catch (error: any) {
+      setCronLogs(`❌ Error: ${error.message}`);
     }
   };
 
@@ -311,6 +367,76 @@ ${JSON.stringify(ticketArray[ticketArray.length - 1], null, 2)}
             fontSize: '14px'
           }}>
             {ticketOutput || 'Click button after buying a ticket...'}
+          </div>
+        </div>
+
+        {/* Step 5 - CRON Monitoring */}
+        <div style={{
+          background: 'rgba(255, 215, 0, 0.1)',
+          border: '2px solid #ffd700',
+          borderRadius: '10px',
+          padding: '20px',
+          marginBottom: '20px'
+        }}>
+          <h2 style={{ color: '#ffd700' }}>📋 Step 5: Monitor CRON Jobs & Draw Status</h2>
+          <p>Check when the next draw will happen and monitor the CRON job execution</p>
+
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <button
+              onClick={checkCronStatus}
+              style={{
+                background: 'linear-gradient(135deg, #ffd700, #ffa500)',
+                border: 'none',
+                padding: '15px 30px',
+                borderRadius: '10px',
+                color: '#000',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '16px',
+                flex: 1
+              }}
+            >
+              Check CRON Status
+            </button>
+
+            <button
+              onClick={() => {
+                setAutoRefresh(!autoRefresh);
+                if (!autoRefresh) {
+                  checkCronStatus();
+                  const interval = setInterval(() => {
+                    if (autoRefresh) checkCronStatus();
+                    else clearInterval(interval);
+                  }, 10000); // Refresh every 10 seconds
+                }
+              }}
+              style={{
+                background: autoRefresh ? 'linear-gradient(135deg, #00ff88, #00cc66)' : 'rgba(255, 255, 255, 0.1)',
+                border: `2px solid ${autoRefresh ? '#00ff88' : '#ffd700'}`,
+                padding: '15px 30px',
+                borderRadius: '10px',
+                color: autoRefresh ? '#000' : '#ffd700',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '16px',
+                flex: 1
+              }}
+            >
+              {autoRefresh ? '⏸️ Stop Auto-Refresh' : '▶️ Auto-Refresh (10s)'}
+            </button>
+          </div>
+
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.5)',
+            padding: '15px',
+            borderRadius: '5px',
+            marginTop: '10px',
+            whiteSpace: 'pre-wrap',
+            fontSize: '14px',
+            maxHeight: '500px',
+            overflowY: 'auto'
+          }}>
+            {cronLogs || 'Click button to check CRON status...'}
           </div>
         </div>
 
