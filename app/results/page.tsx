@@ -27,29 +27,43 @@ const LOTTERY_ABI = [
     type: 'function'
   },
   {
-    inputs: [{ name: '', type: 'uint256' }],
-    name: 'hourlyDraws',
+    inputs: [{ name: 'drawId', type: 'uint256' }],
+    name: 'getHourlyDraw',
     outputs: [
       { name: 'drawId', type: 'uint256' },
-      { name: 'winningNumber', type: 'uint8' },
       { name: 'drawTime', type: 'uint256' },
-      { name: 'totalPrize', type: 'uint256' },
+      { name: 'winningNumber', type: 'uint8' },
+      { name: 'executed', type: 'bool' },
+      { name: 'totalTickets', type: 'uint256' },
       { name: 'winner', type: 'address' },
-      { name: 'claimed', type: 'bool' }
+      { name: 'totalWinners', type: 'uint256' },
+      { name: 'btcPrizeSnapshot', type: 'uint256' },
+      { name: 'ethPrizeSnapshot', type: 'uint256' },
+      { name: 'usdcPrizeSnapshot', type: 'uint256' },
+      { name: 'commitBlock', type: 'uint256' },
+      { name: 'revealBlock', type: 'uint256' },
+      { name: 'salesClosed', type: 'bool' }
     ],
     stateMutability: 'view',
     type: 'function'
   },
   {
-    inputs: [{ name: '', type: 'uint256' }],
-    name: 'dailyDraws',
+    inputs: [{ name: 'drawId', type: 'uint256' }],
+    name: 'getDailyDraw',
     outputs: [
       { name: 'drawId', type: 'uint256' },
-      { name: 'winningNumber', type: 'uint8' },
       { name: 'drawTime', type: 'uint256' },
-      { name: 'totalPrize', type: 'uint256' },
+      { name: 'winningNumber', type: 'uint8' },
+      { name: 'executed', type: 'bool' },
+      { name: 'totalTickets', type: 'uint256' },
       { name: 'winner', type: 'address' },
-      { name: 'claimed', type: 'bool' }
+      { name: 'totalWinners', type: 'uint256' },
+      { name: 'btcPrizeSnapshot', type: 'uint256' },
+      { name: 'ethPrizeSnapshot', type: 'uint256' },
+      { name: 'usdcPrizeSnapshot', type: 'uint256' },
+      { name: 'commitBlock', type: 'uint256' },
+      { name: 'revealBlock', type: 'uint256' },
+      { name: 'salesClosed', type: 'bool' }
     ],
     stateMutability: 'view',
     type: 'function'
@@ -63,7 +77,9 @@ interface DrawResults {
   winningNumber: number;
   totalPrize: bigint;
   winner: string;
-  claimed: boolean;
+  executed: boolean;
+  totalTickets: number;
+  salesClosed: boolean;
 }
 
 export default function ResultsPage() {
@@ -100,29 +116,33 @@ export default function ResultsPage() {
         functionName: 'currentDailyDrawId'
       });
 
-      // Load last 10 hourly draws (current draw might not have results yet, so we go backwards)
+      // Load last 10 hourly draws (including current if executed)
       const hourlyResults: DrawResults[] = [];
-      const lastCompletedHourly = currentHourlyDrawId > 0n ? currentHourlyDrawId - 1n : 0n;
-      const hourlyStart = lastCompletedHourly > 9n ? lastCompletedHourly - 9n : 1n;
-      for (let i = lastCompletedHourly; i >= hourlyStart && i >= 1n; i--) {
+      const startHourly = currentHourlyDrawId > 10n ? currentHourlyDrawId - 10n : 0n;
+      for (let i = currentHourlyDrawId; i >= startHourly && i >= 0n; i--) {
         try {
           const draw = await publicClient.readContract({
             address: contractAddress,
             abi: LOTTERY_ABI,
-            functionName: 'hourlyDraws',
+            functionName: 'getHourlyDraw',
             args: [i]
           });
 
-          // Only show draws with valid data (winningNumber > 0, drawTime > 0, winningNumber <= 100)
-          if (draw.winningNumber > 0 && draw.winningNumber <= 100 && draw.drawTime > 0n) {
+          // Show all executed draws (even with 0 tickets)
+          if (draw.executed && draw.drawTime > 0n) {
+            // Calculate total prize in USDC (usdcPrizeSnapshot is in wei with 6 decimals)
+            const usdcPrize = draw.usdcPrizeSnapshot;
+
             hourlyResults.push({
               drawType: 'hourly',
               drawId: Number(draw.drawId),
               drawTime: Number(draw.drawTime),
               winningNumber: Number(draw.winningNumber),
-              totalPrize: draw.totalPrize,
+              totalPrize: usdcPrize,
               winner: draw.winner,
-              claimed: draw.claimed
+              executed: draw.executed,
+              totalTickets: Number(draw.totalTickets),
+              salesClosed: draw.salesClosed
             });
           }
         } catch (error) {
@@ -130,29 +150,33 @@ export default function ResultsPage() {
         }
       }
 
-      // Load last 10 daily draws (current draw might not have results yet, so we go backwards)
+      // Load last 10 daily draws (including current if executed)
       const dailyResults: DrawResults[] = [];
-      const lastCompletedDaily = currentDailyDrawId > 0n ? currentDailyDrawId - 1n : 0n;
-      const dailyStart = lastCompletedDaily > 9n ? lastCompletedDaily - 9n : 1n;
-      for (let i = lastCompletedDaily; i >= dailyStart && i >= 1n; i--) {
+      const startDaily = currentDailyDrawId > 10n ? currentDailyDrawId - 10n : 0n;
+      for (let i = currentDailyDrawId; i >= startDaily && i >= 0n; i--) {
         try {
           const draw = await publicClient.readContract({
             address: contractAddress,
             abi: LOTTERY_ABI,
-            functionName: 'dailyDraws',
+            functionName: 'getDailyDraw',
             args: [i]
           });
 
-          // Only show draws with valid data (winningNumber > 0, drawTime > 0, winningNumber <= 100)
-          if (draw.winningNumber > 0 && draw.winningNumber <= 100 && draw.drawTime > 0n) {
+          // Show all executed draws (even with 0 tickets)
+          if (draw.executed && draw.drawTime > 0n) {
+            // Calculate total prize in USDC (usdcPrizeSnapshot is in wei with 6 decimals)
+            const usdcPrize = draw.usdcPrizeSnapshot;
+
             dailyResults.push({
               drawType: 'daily',
               drawId: Number(draw.drawId),
               drawTime: Number(draw.drawTime),
               winningNumber: Number(draw.winningNumber),
-              totalPrize: draw.totalPrize,
+              totalPrize: usdcPrize,
               winner: draw.winner,
-              claimed: draw.claimed
+              executed: draw.executed,
+              totalTickets: Number(draw.totalTickets),
+              salesClosed: draw.salesClosed
             });
           }
         } catch (error) {
@@ -180,9 +204,9 @@ export default function ResultsPage() {
   };
 
   const formatPrize = (prize: bigint) => {
-    // Convert from wei to ETH and format
-    const ethValue = Number(prize) / 1e18;
-    return ethValue.toFixed(6);
+    // Prize is in USDC with 6 decimals
+    const usdcValue = Number(prize) / 1e6;
+    return usdcValue.toFixed(2);
   };
 
   const renderDrawCard = (draw: DrawResults) => {
@@ -267,28 +291,40 @@ export default function ResultsPage() {
             marginBottom: '15px',
             letterSpacing: '2px'
           }}>
-            WINNING NUMBER
+            {draw.totalTickets === 0 ? 'NO PARTICIPANTS' : 'WINNING NUMBER'}
           </div>
-          <div
-            className={`number ${isHourly ? 'hourly' : 'daily'}`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              background: `linear-gradient(135deg, ${titleColor}, ${isHourly ? 'var(--secondary)' : '#ffa500'})`,
-              fontSize: '36px',
-              fontWeight: 'bold',
+          {draw.totalTickets === 0 ? (
+            <div style={{
+              fontSize: '16px',
               fontFamily: "'Orbitron', sans-serif",
-              color: isHourly ? 'white' : 'var(--darker)',
-              boxShadow: `0 10px 30px ${borderColor.replace('0.4', '0.5')}`,
-              animation: 'pulse 2s ease-in-out infinite'
-            }}
-          >
-            {draw.winningNumber.toString().padStart(2, '0')}
-          </div>
+              color: 'var(--light)',
+              opacity: 0.6,
+              padding: '20px'
+            }}>
+              No tickets were sold for this draw
+            </div>
+          ) : (
+            <div
+              className={`number ${isHourly ? 'hourly' : 'daily'}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: `linear-gradient(135deg, ${titleColor}, ${isHourly ? 'var(--secondary)' : '#ffa500'})`,
+                fontSize: '36px',
+                fontWeight: 'bold',
+                fontFamily: "'Orbitron', sans-serif",
+                color: isHourly ? 'white' : 'var(--darker)',
+                boxShadow: `0 10px 30px ${borderColor.replace('0.4', '0.5')}`,
+                animation: 'pulse 2s ease-in-out infinite'
+              }}
+            >
+              {draw.winningNumber.toString().padStart(2, '0')}
+            </div>
+          )}
         </div>
 
         {/* Prize and Winner Info */}
@@ -322,7 +358,7 @@ export default function ResultsPage() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              {formatPrize(draw.totalPrize)} ETH
+              ${formatPrize(draw.totalPrize)} USDC
             </div>
           </div>
 
@@ -340,15 +376,15 @@ export default function ResultsPage() {
               opacity: 0.6,
               marginBottom: '8px'
             }}>
-              Status
+              Total Tickets
             </div>
             <div style={{
-              fontSize: '14px',
+              fontSize: '20px',
               fontFamily: "'Orbitron', sans-serif",
               fontWeight: 700,
-              color: draw.claimed ? '#4ade80' : '#fbbf24'
+              color: draw.totalTickets > 0 ? '#4ade80' : '#ef4444'
             }}>
-              {draw.claimed ? '✅ CLAIMED' : '⏳ UNCLAIMED'}
+              {draw.totalTickets}
             </div>
           </div>
         </div>
