@@ -230,9 +230,11 @@ export function DualCryptoPoolDisplay() {
         functionName: 'getDailyVault'
       }) as [bigint, bigint, bigint];
 
-      // Process hourly pool
-      const btcPrice = 108000;
-      const ethPrice = 3940;
+      // Fetch REAL-TIME prices from CoinGecko
+      const pricesResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+      const pricesData = await pricesResponse.json();
+      const btcPrice = pricesData.bitcoin?.usd || 108000; // Fallback to 108k if API fails
+      const ethPrice = pricesData.ethereum?.usd || 3940; // Fallback to 3940 if API fails
 
       const hourlyBtc = parseFloat(formatUnits(hourlyVaultResult[0], 8));
       const hourlyEth = parseFloat(formatUnits(hourlyVaultResult[1], 18));
@@ -299,12 +301,9 @@ export function DualCryptoPoolDisplay() {
     const titleColor = isHourly ? '#00f0ff' : '#ffd700';
     const detailColor = isHourly ? '#00f0ff' : '#ffd700';
 
-    // Calculate crypto USD values
-    const btcPrice = 108000;
-    const ethPrice = 3940;
-
-    const btcUSD = data.cbbtcAmount * btcPrice;
-    const ethUSD = data.wethAmount * ethPrice;
+    // Calculate crypto USD values (prizePool already includes correct prices)
+    const btcUSD = data.cbbtcAmount * (data.prizePool / (data.cbbtcAmount + data.wethAmount + data.usdcAmount) || 0);
+    const ethUSD = data.wethAmount * (data.prizePool / (data.cbbtcAmount + data.wethAmount + data.usdcAmount) || 0);
 
     return (
       <div

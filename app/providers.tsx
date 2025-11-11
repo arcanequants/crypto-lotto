@@ -5,6 +5,7 @@ import { SmartWalletsProvider } from '@privy-io/react-auth/smart-wallets';
 import { base, baseSepolia } from 'viem/chains';
 import { http } from 'viem';
 import { ToastProvider } from '@/components/ToastProvider';
+import { useDepositMonitor } from '@/hooks/useDepositMonitor';
 
 // Get Alchemy RPC URL
 const getAlchemyRpcUrl = () => {
@@ -15,6 +16,12 @@ const getAlchemyRpcUrl = () => {
   // Fallback to default RPC if Alchemy not configured
   return undefined;
 };
+
+// Component that activates deposit monitoring
+function DepositMonitorActivator() {
+  useDepositMonitor(); // Auto-starts when user is authenticated
+  return null;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const alchemyRpcUrl = getAlchemyRpcUrl();
@@ -75,6 +82,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }}
     >
       <SmartWalletsProvider>
+        <DepositMonitorActivator />
         {children}
         <ToastProvider />
       </SmartWalletsProvider>
