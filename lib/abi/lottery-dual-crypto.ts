@@ -1,6 +1,8 @@
 /**
  * OFFICIAL ABI for LotteryDualCrypto contract
- * Contract: 0x2aB8570632D431843F40eb48dA8cE67695BAE3D9
+ * Contract v2.1.0: 0xF3f6f3452513C6101D2EeA45BB8d4f552131B2C7 (BASE Mainnet)
+ * Deployed: Jan 12, 2025
+ * Features: Blockhash commit-reveal, auto-skip logic, refundFailedDrawTicket()
  *
  * ⚠️ IMPORTANT: This is the SINGLE SOURCE OF TRUTH for the contract ABI
  * All other files MUST import from here to ensure consistency

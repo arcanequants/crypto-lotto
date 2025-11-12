@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-const OLD_CONTRACT = '0xDEB0b4355a89Dec15C173c517Ca02b2e1398936e';
-const NEW_CONTRACT = '0x2aB8570632D431843F40eb48dA8cE67695BAE3D9';
+const OLD_CONTRACT = '0x2aB8570632D431843F40eb48dA8cE67695BAE3D9'; // OLD CONTRACT with deadlock (Draw #4)
+const NEW_CONTRACT = '0xF3f6f3452513C6101D2EeA45BB8d4f552131B2C7'; // NEW CONTRACT v2.1.0 with auto-skip + refund
 
 export default function CleanupPage() {
   const [checkOutput, setCheckOutput] = useState('');
