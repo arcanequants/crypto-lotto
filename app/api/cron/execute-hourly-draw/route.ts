@@ -4,6 +4,11 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { requireCronAuth } from '@/lib/security/cron';
 
+// Force dynamic rendering - prevents Next.js from caching this route
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 /**
  * CRON JOB: Execute Hourly Draw (STEP 2 of 2-step process)
  *
