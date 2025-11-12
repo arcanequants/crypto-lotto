@@ -71,9 +71,13 @@ const LOTTERY_ABI = [
       { name: 'drawId', type: 'uint256' },
       { name: 'drawTime', type: 'uint256' },
       { name: 'winningNumber', type: 'uint8' },
-      { name: 'totalTickets', type: 'uint256' },
-      { name: 'totalPrize', type: 'uint256' },
       { name: 'executed', type: 'bool' },
+      { name: 'totalTickets', type: 'uint256' },
+      { name: 'winner', type: 'address' },
+      { name: 'totalWinners', type: 'uint256' },
+      { name: 'btcPrizeSnapshot', type: 'uint256' },
+      { name: 'ethPrizeSnapshot', type: 'uint256' },
+      { name: 'usdcPrizeSnapshot', type: 'uint256' },
       { name: 'commitBlock', type: 'uint256' },
       { name: 'revealBlock', type: 'uint256' },
       { name: 'salesClosed', type: 'bool' }
@@ -121,8 +125,8 @@ export async function GET(request: NextRequest) {
       args: [currentDrawId]
     });
 
-    // Destructure draw tuple with new fields
-    const [drawId, drawTime, winningNumber, totalTickets, totalPrize, executed, commitBlock, revealBlock, salesClosed] = draw;
+    // Destructure draw tuple with ALL 13 fields in correct order
+    const [drawId, drawTime, winningNumber, executed, totalTickets, winner, totalWinners, btcPrizeSnapshot, ethPrizeSnapshot, usdcPrizeSnapshot, commitBlock, revealBlock, salesClosed] = draw;
 
     const currentBlock = await publicClient.getBlockNumber();
 
@@ -269,7 +273,7 @@ export async function GET(request: NextRequest) {
       args: [currentDrawId]
     });
 
-    const [, , newWinningNumber, newTotalTickets] = updatedDraw;
+    const [, , newWinningNumber, , newTotalTickets] = updatedDraw;
 
     const newDrawId = await publicClient.readContract({
       address: LOTTERY_CONTRACT,
