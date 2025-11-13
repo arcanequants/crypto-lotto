@@ -99,6 +99,9 @@ export default function ResultsPage() {
   const loadDrawResults = async () => {
     try {
       setLoading(true);
+      console.log('[Results] Starting to load draw results...');
+      console.log('[Results] Contract address:', contractAddress);
+      console.log('[Results] History limit:', historyLimit);
 
       const publicClient = createPublicClient({
         chain: base,
@@ -106,6 +109,7 @@ export default function ResultsPage() {
       });
 
       // Get current draw IDs
+      console.log('[Results] Fetching current draw IDs...');
       const currentHourlyDrawId = await publicClient.readContract({
         address: contractAddress,
         abi: LOTTERY_ABI,
@@ -118,9 +122,14 @@ export default function ResultsPage() {
         functionName: 'currentDailyDrawId'
       });
 
+      console.log('[Results] Current hourly draw ID:', currentHourlyDrawId.toString());
+      console.log('[Results] Current daily draw ID:', currentDailyDrawId.toString());
+
       // Load hourly draws based on historyLimit
       const hourlyResults: DrawResults[] = [];
       const startHourly = currentHourlyDrawId > BigInt(historyLimit) ? currentHourlyDrawId - BigInt(historyLimit) : 1n;
+      console.log('[Results] Loading hourly draws from', currentHourlyDrawId.toString(), 'to', startHourly.toString());
+
       for (let i = currentHourlyDrawId; i >= startHourly && i >= 1n; i--) {
         try {
           const draw = await publicClient.readContract({
@@ -128,6 +137,13 @@ export default function ResultsPage() {
             abi: LOTTERY_ABI,
             functionName: 'getHourlyDraw',
             args: [i]
+          });
+
+          console.log(`[Results] Draw #${i}:`, {
+            executed: draw.executed,
+            drawTime: draw.drawTime.toString(),
+            winningNumber: draw.winningNumber,
+            totalTickets: draw.totalTickets.toString()
           });
 
           // Show all executed draws (even with 0 tickets)
@@ -186,11 +202,14 @@ export default function ResultsPage() {
         }
       }
 
+      console.log('[Results] Total hourly draws found:', hourlyResults.length);
+      console.log('[Results] Total daily draws found:', dailyResults.length);
+
       setHourlyDraws(hourlyResults);
       setDailyDraws(dailyResults);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading draw results:', error);
+      console.error('[Results] ❌ Error loading draw results:', error);
       setLoading(false);
     }
   };
