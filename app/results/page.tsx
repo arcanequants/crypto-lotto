@@ -529,8 +529,8 @@ export default function ResultsPage() {
       {/* Hero */}
       <section className="hero" style={{ paddingTop: '80px', paddingBottom: '40px' }}>
         <div className="container">
-          <h1 className="hero-title" style={{ fontSize: '48px' }}>Draw Results</h1>
-          <p className="hero-subtitle">View past winning numbers from the blockchain</p>
+          <h1 className="hero-title" style={{ fontSize: '48px' }}>Draw Results [v2.1.0]</h1>
+          <p className="hero-subtitle">View past winning numbers from the blockchain - Updated Nov 13, 2025</p>
         </div>
       </section>
 
