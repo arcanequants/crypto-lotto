@@ -86,13 +86,15 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
   const [hourlyDraws, setHourlyDraws] = useState<DrawResults[]>([]);
   const [dailyDraws, setDailyDraws] = useState<DrawResults[]>([]);
-  const [selectedTab, setSelectedTab] = useState<'hourly' | 'daily'>('hourly');
+  const [selectedTab, setSelectedTab] = useState<'all' | 'hourly' | 'daily'>('all');
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyLimit, setHistoryLimit] = useState(10);
 
   const contractAddress = process.env.NEXT_PUBLIC_LOTTERY_CONTRACT as `0x${string}`;
 
   useEffect(() => {
     loadDrawResults();
-  }, []);
+  }, [historyLimit]);
 
   const loadDrawResults = async () => {
     try {
@@ -116,10 +118,10 @@ export default function ResultsPage() {
         functionName: 'currentDailyDrawId'
       });
 
-      // Load last 10 hourly draws (including current if executed)
+      // Load hourly draws based on historyLimit
       const hourlyResults: DrawResults[] = [];
-      const startHourly = currentHourlyDrawId > 10n ? currentHourlyDrawId - 10n : 0n;
-      for (let i = currentHourlyDrawId; i >= startHourly && i >= 0n; i--) {
+      const startHourly = currentHourlyDrawId > BigInt(historyLimit) ? currentHourlyDrawId - BigInt(historyLimit) : 1n;
+      for (let i = currentHourlyDrawId; i >= startHourly && i >= 1n; i--) {
         try {
           const draw = await publicClient.readContract({
             address: contractAddress,
@@ -150,10 +152,10 @@ export default function ResultsPage() {
         }
       }
 
-      // Load last 10 daily draws (including current if executed)
+      // Load daily draws based on historyLimit
       const dailyResults: DrawResults[] = [];
-      const startDaily = currentDailyDrawId > 10n ? currentDailyDrawId - 10n : 0n;
-      for (let i = currentDailyDrawId; i >= startDaily && i >= 0n; i--) {
+      const startDaily = currentDailyDrawId > BigInt(historyLimit) ? currentDailyDrawId - BigInt(historyLimit) : 1n;
+      for (let i = currentDailyDrawId; i >= startDaily && i >= 1n; i--) {
         try {
           const draw = await publicClient.readContract({
             address: contractAddress,
@@ -502,8 +504,42 @@ export default function ResultsPage() {
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '20px'
+          gap: '15px',
+          flexWrap: 'wrap'
         }}>
+          <button
+            onClick={() => setSelectedTab('all')}
+            style={{
+              padding: '15px 40px',
+              background: selectedTab === 'all'
+                ? 'linear-gradient(135deg, #00f0ff, #ffd700)'
+                : 'rgba(255, 255, 255, 0.05)',
+              border: selectedTab === 'all'
+                ? '2px solid rgba(0, 240, 255, 0.6)'
+                : '2px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '12px',
+              color: selectedTab === 'all' ? 'white' : 'var(--light)',
+              fontFamily: "'Orbitron', sans-serif",
+              fontSize: '16px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}
+            onMouseOver={(e) => {
+              if (selectedTab !== 'all') {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (selectedTab !== 'all') {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+              }
+            }}
+          >
+            📊 All Draws
+          </button>
           <button
             onClick={() => setSelectedTab('hourly')}
             style={{
@@ -535,7 +571,7 @@ export default function ResultsPage() {
               }
             }}
           >
-            ⏰ Hourly Draws
+            ⏰ Hourly
           </button>
           <button
             onClick={() => setSelectedTab('daily')}
@@ -568,8 +604,58 @@ export default function ResultsPage() {
               }
             }}
           >
-            🌙 Daily Draws
+            🌙 Daily
           </button>
+        </div>
+
+        {/* History Controls */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '15px',
+          marginTop: '25px'
+        }}>
+          <span style={{
+            fontFamily: "'Orbitron', sans-serif",
+            fontSize: '14px',
+            color: 'var(--light)',
+            opacity: 0.8
+          }}>
+            Show last:
+          </span>
+          {[5, 10, 25, 50].map(limit => (
+            <button
+              key={limit}
+              onClick={() => setHistoryLimit(limit)}
+              style={{
+                padding: '8px 20px',
+                background: historyLimit === limit
+                  ? 'rgba(0, 240, 255, 0.2)'
+                  : 'rgba(255, 255, 255, 0.05)',
+                border: historyLimit === limit
+                  ? '2px solid var(--primary)'
+                  : '2px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
+                color: historyLimit === limit ? 'var(--primary)' : 'var(--light)',
+                fontFamily: "'Orbitron', sans-serif",
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {limit}
+            </button>
+          ))}
+          <span style={{
+            fontFamily: "'Orbitron', sans-serif",
+            fontSize: '14px',
+            color: 'var(--light)',
+            opacity: 0.8
+          }}>
+            draws
+          </span>
         </div>
       </section>
 
@@ -579,6 +665,60 @@ export default function ResultsPage() {
           <WinningNumbersSkeleton />
         ) : (
           <>
+            {selectedTab === 'all' && (
+              <>
+                {hourlyDraws.length > 0 || dailyDraws.length > 0 ? (
+                  <div>
+                    <h2 style={{
+                      textAlign: 'center',
+                      fontFamily: "'Orbitron', sans-serif",
+                      fontSize: '28px',
+                      background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      marginBottom: '40px',
+                      letterSpacing: '3px'
+                    }}>
+                      📊 ALL RECENT DRAWS
+                    </h2>
+
+                    {/* Combined draws sorted by drawTime */}
+                    {[...hourlyDraws, ...dailyDraws]
+                      .sort((a, b) => b.drawTime - a.drawTime)
+                      .map(draw => renderDrawCard(draw))}
+                  </div>
+                ) : (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '60px 40px',
+                    background: 'linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(5, 8, 17, 0.95))',
+                    border: '2px solid rgba(0, 240, 255, 0.3)',
+                    borderRadius: '20px'
+                  }}>
+                    <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎲</div>
+                    <h3 style={{
+                      fontFamily: "'Orbitron', sans-serif",
+                      fontSize: '24px',
+                      color: 'var(--primary)',
+                      marginBottom: '15px'
+                    }}>
+                      No Completed Draws Yet
+                    </h3>
+                    <p style={{
+                      color: 'var(--light)',
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '16px',
+                      lineHeight: 1.6,
+                      maxWidth: '500px',
+                      margin: '0 auto'
+                    }}>
+                      The lottery has just been deployed! Draws will appear here once they're executed. Buy tickets to participate in the next draw!
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
             {selectedTab === 'hourly' && (
               <>
                 {hourlyDraws.length > 0 ? (
