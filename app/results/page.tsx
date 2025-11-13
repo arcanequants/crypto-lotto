@@ -93,7 +93,23 @@ export default function ResultsPage() {
   const contractAddress = process.env.NEXT_PUBLIC_LOTTERY_CONTRACT as `0x${string}`;
 
   useEffect(() => {
+    console.log('[Results] useEffect triggered');
+    console.log('[Results] historyLimit:', historyLimit);
+    console.log('[Results] contractAddress:', contractAddress);
+
+    if (!contractAddress) {
+      console.error('[Results] ❌ Contract address is undefined!');
+      console.error('[Results] env vars:', {
+        LOTTERY_CONTRACT: process.env.NEXT_PUBLIC_LOTTERY_CONTRACT,
+        CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+        LOTTERY_DUAL_CRYPTO: process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO
+      });
+      setLoading(false);
+      return;
+    }
+
     loadDrawResults();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyLimit]);
 
   const loadDrawResults = async () => {
