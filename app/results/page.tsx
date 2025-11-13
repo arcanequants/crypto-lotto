@@ -83,6 +83,8 @@ interface DrawResults {
 }
 
 export default function ResultsPage() {
+  console.log('🎯 ResultsPage component rendering...');
+
   const [loading, setLoading] = useState(true);
   const [hourlyDraws, setHourlyDraws] = useState<DrawResults[]>([]);
   const [dailyDraws, setDailyDraws] = useState<DrawResults[]>([]);
@@ -91,6 +93,7 @@ export default function ResultsPage() {
   const [historyLimit, setHistoryLimit] = useState(10);
 
   const contractAddress = process.env.NEXT_PUBLIC_LOTTERY_CONTRACT as `0x${string}`;
+  console.log('🎯 Contract address initialized:', contractAddress);
 
   useEffect(() => {
     console.log('[Results] useEffect triggered');
