@@ -151,14 +151,37 @@ export default function ResultsPage() {
 
       for (let i = currentHourlyDrawId; i >= startHourly && i >= 1n; i--) {
         try {
-          const draw = await publicClient.readContract({
+          const drawData = await publicClient.readContract({
             address: contractAddress,
             abi: LOTTERY_ABI,
             functionName: 'getHourlyDraw',
             args: [i]
-          });
+          }) as any;
 
-          console.log(`[Results] Draw #${i}:`, {
+          // Log raw response to see data format
+          console.log(`[Results] Raw draw #${i}:`, drawData);
+          console.log(`[Results] Draw type:`, typeof drawData, Array.isArray(drawData) ? 'ARRAY' : 'OBJECT');
+
+          // Handle both array and object formats from Viem
+          // Array format: [drawId, drawTime, winningNumber, executed, totalTickets, winner, totalWinners, btc, eth, usdc, commitBlock, revealBlock, salesClosed]
+          // Object format: { drawId, drawTime, winningNumber, executed, ... }
+          const draw = Array.isArray(drawData) ? {
+            drawId: drawData[0],
+            drawTime: drawData[1],
+            winningNumber: drawData[2],
+            executed: drawData[3],
+            totalTickets: drawData[4],
+            winner: drawData[5],
+            totalWinners: drawData[6],
+            btcPrizeSnapshot: drawData[7],
+            ethPrizeSnapshot: drawData[8],
+            usdcPrizeSnapshot: drawData[9],
+            commitBlock: drawData[10],
+            revealBlock: drawData[11],
+            salesClosed: drawData[12]
+          } : drawData;
+
+          console.log(`[Results] Parsed draw #${i}:`, {
             executed: draw.executed,
             drawTime: draw.drawTime.toString(),
             winningNumber: draw.winningNumber,
@@ -192,12 +215,29 @@ export default function ResultsPage() {
       const startDaily = currentDailyDrawId > BigInt(historyLimit) ? currentDailyDrawId - BigInt(historyLimit) : 1n;
       for (let i = currentDailyDrawId; i >= startDaily && i >= 1n; i--) {
         try {
-          const draw = await publicClient.readContract({
+          const drawData = await publicClient.readContract({
             address: contractAddress,
             abi: LOTTERY_ABI,
             functionName: 'getDailyDraw',
             args: [i]
-          });
+          }) as any;
+
+          // Handle both array and object formats from Viem
+          const draw = Array.isArray(drawData) ? {
+            drawId: drawData[0],
+            drawTime: drawData[1],
+            winningNumber: drawData[2],
+            executed: drawData[3],
+            totalTickets: drawData[4],
+            winner: drawData[5],
+            totalWinners: drawData[6],
+            btcPrizeSnapshot: drawData[7],
+            ethPrizeSnapshot: drawData[8],
+            usdcPrizeSnapshot: drawData[9],
+            commitBlock: drawData[10],
+            revealBlock: drawData[11],
+            salesClosed: drawData[12]
+          } : drawData;
 
           // Show all executed draws (even with 0 tickets)
           if (draw.executed && draw.drawTime > 0n) {
