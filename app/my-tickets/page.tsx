@@ -10,6 +10,8 @@ import { base } from 'viem/chains';
 import { TicketCardSkeleton } from '@/components/Skeleton';
 import Link from 'next/link';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import lotteryContract from '@/lib/contracts/lottery-contract';
+import { DrawCountdown } from '@/components/DrawCountdown';
 
 const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_CONTRACT as `0x${string}`;
 const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
@@ -42,6 +44,15 @@ const LOTTERY_ABI = [
   }
 ] as const;
 
+interface DrawInfo {
+  drawId: number;
+  drawTime: bigint;
+  winningNumber: number;
+  executed: boolean;
+  salesClosed: boolean;
+  totalTickets: bigint;
+}
+
 interface BlockchainTicket {
   id: number;
   owner: string;
@@ -51,6 +62,8 @@ interface BlockchainTicket {
   hourlyClaimed: boolean;
   dailyClaimed: boolean;
   purchaseTime: number;
+  hourlyDrawInfo?: DrawInfo;
+  dailyDrawInfo?: DrawInfo;
 }
 
 export default function MyTicketsPage() {
@@ -121,6 +134,38 @@ export default function MyTicketsPage() {
 
           // Check if ticket is owned by the smart wallet
           if (owner.toLowerCase() === smartWalletAddress.toLowerCase()) {
+            // Fetch draw information for this ticket
+            let hourlyDrawInfo: DrawInfo | undefined;
+            let dailyDrawInfo: DrawInfo | undefined;
+
+            try {
+              const hourlyDraw = await lotteryContract.getHourlyDraw(hourlyDrawId);
+              hourlyDrawInfo = {
+                drawId: Number(hourlyDraw.drawId),
+                drawTime: hourlyDraw.drawTime,
+                winningNumber: Number(hourlyDraw.winningNumber),
+                executed: hourlyDraw.executed,
+                salesClosed: hourlyDraw.salesClosed,
+                totalTickets: hourlyDraw.totalTickets
+              };
+            } catch (err) {
+              console.error(`Error fetching hourly draw ${hourlyDrawId}:`, err);
+            }
+
+            try {
+              const dailyDraw = await lotteryContract.getDailyDraw(dailyDrawId);
+              dailyDrawInfo = {
+                drawId: Number(dailyDraw.drawId),
+                drawTime: dailyDraw.drawTime,
+                winningNumber: Number(dailyDraw.winningNumber),
+                executed: dailyDraw.executed,
+                salesClosed: dailyDraw.salesClosed,
+                totalTickets: dailyDraw.totalTickets
+              };
+            } catch (err) {
+              console.error(`Error fetching daily draw ${dailyDrawId}:`, err);
+            }
+
             userTickets.push({
               id: i,
               owner,
@@ -129,7 +174,9 @@ export default function MyTicketsPage() {
               dailyDrawId: Number(dailyDrawId),
               hourlyClaimed,
               dailyClaimed,
-              purchaseTime: Number(purchaseTime)
+              purchaseTime: Number(purchaseTime),
+              hourlyDrawInfo,
+              dailyDrawInfo
             });
           }
         } catch (err) {
@@ -534,8 +581,10 @@ export default function MyTicketsPage() {
 
                   {/* Hourly Draw Status */}
                   <div style={{
-                    background: 'linear-gradient(135deg, rgba(0, 200, 255, 0.1), rgba(0, 150, 255, 0.05))',
-                    border: '2px solid rgba(0, 200, 255, 0.3)',
+                    background: ticket.hourlyDrawInfo?.executed
+                      ? 'linear-gradient(135deg, rgba(0, 200, 255, 0.15), rgba(0, 150, 255, 0.08))'
+                      : 'linear-gradient(135deg, rgba(0, 200, 255, 0.1), rgba(0, 150, 255, 0.05))',
+                    border: `2px solid ${ticket.hourlyDrawInfo?.executed ? 'rgba(0, 200, 255, 0.5)' : 'rgba(0, 200, 255, 0.3)'}`,
                     borderRadius: '12px',
                     padding: '12px',
                     marginBottom: '10px'
@@ -553,19 +602,91 @@ export default function MyTicketsPage() {
                       <span>⚡ HOURLY DRAW</span>
                       <span style={{ opacity: 0.7, fontSize: '10px' }}>#{ticket.hourlyDrawId}</span>
                     </div>
-                    <div style={{
-                      fontSize: '11px',
-                      fontFamily: "'Inter', sans-serif",
-                      color: 'var(--light)'
-                    }}>
-                      <span style={{ opacity: 0.7 }}>⏳ Waiting for draw...</span>
-                    </div>
+
+                    {ticket.hourlyDrawInfo?.executed ? (
+                      // Draw executed - show winning number
+                      <div>
+                        <div style={{
+                          fontSize: '10px',
+                          fontFamily: "'Inter', sans-serif",
+                          color: 'var(--light)',
+                          opacity: 0.7,
+                          marginBottom: '6px'
+                        }}>
+                          Winning Number:
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px'
+                        }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: ticket.number === ticket.hourlyDrawInfo.winningNumber
+                              ? 'linear-gradient(135deg, #4ade80, #22c55e)'
+                              : 'linear-gradient(135deg, #64748b, #475569)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            fontFamily: "'Orbitron', sans-serif",
+                            color: 'white',
+                            boxShadow: ticket.number === ticket.hourlyDrawInfo.winningNumber
+                              ? '0 0 15px rgba(74, 222, 128, 0.6)'
+                              : 'none'
+                          }}>
+                            {ticket.hourlyDrawInfo.winningNumber.toString().padStart(2, '0')}
+                          </div>
+                          {ticket.number === ticket.hourlyDrawInfo.winningNumber ? (
+                            <span style={{
+                              fontSize: '12px',
+                              fontFamily: "'Orbitron', sans-serif",
+                              fontWeight: 700,
+                              color: '#4ade80'
+                            }}>
+                              🎉 YOU WON!
+                            </span>
+                          ) : (
+                            <span style={{
+                              fontSize: '11px',
+                              fontFamily: "'Inter', sans-serif",
+                              color: 'var(--light)',
+                              opacity: 0.6
+                            }}>
+                              Not a winner
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      // Draw not executed yet - show countdown
+                      <div style={{
+                        fontSize: '11px',
+                        fontFamily: "'Inter', sans-serif",
+                        color: 'var(--light)'
+                      }}>
+                        {ticket.hourlyDrawInfo ? (
+                          <DrawCountdown
+                            drawTime={ticket.hourlyDrawInfo.drawTime}
+                            executed={ticket.hourlyDrawInfo.executed}
+                            salesClosed={ticket.hourlyDrawInfo.salesClosed}
+                          />
+                        ) : (
+                          <span style={{ opacity: 0.7 }}>⏳ Loading draw info...</span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Daily Draw Status */}
                   <div style={{
-                    background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05))',
-                    border: '2px solid rgba(255, 215, 0, 0.3)',
+                    background: ticket.dailyDrawInfo?.executed
+                      ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.08))'
+                      : 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05))',
+                    border: `2px solid ${ticket.dailyDrawInfo?.executed ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 215, 0, 0.3)'}`,
                     borderRadius: '12px',
                     padding: '12px'
                   }}>
@@ -582,13 +703,83 @@ export default function MyTicketsPage() {
                       <span>💎 DAILY DRAW</span>
                       <span style={{ opacity: 0.7, fontSize: '10px' }}>#{ticket.dailyDrawId}</span>
                     </div>
-                    <div style={{
-                      fontSize: '11px',
-                      fontFamily: "'Inter', sans-serif",
-                      color: 'var(--light)'
-                    }}>
-                      <span style={{ opacity: 0.7 }}>⏳ Waiting for draw...</span>
-                    </div>
+
+                    {ticket.dailyDrawInfo?.executed ? (
+                      // Draw executed - show winning number
+                      <div>
+                        <div style={{
+                          fontSize: '10px',
+                          fontFamily: "'Inter', sans-serif",
+                          color: 'var(--light)',
+                          opacity: 0.7,
+                          marginBottom: '6px'
+                        }}>
+                          Winning Number:
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px'
+                        }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: ticket.number === ticket.dailyDrawInfo.winningNumber
+                              ? 'linear-gradient(135deg, #4ade80, #22c55e)'
+                              : 'linear-gradient(135deg, #64748b, #475569)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            fontFamily: "'Orbitron', sans-serif",
+                            color: 'white',
+                            boxShadow: ticket.number === ticket.dailyDrawInfo.winningNumber
+                              ? '0 0 15px rgba(74, 222, 128, 0.6)'
+                              : 'none'
+                          }}>
+                            {ticket.dailyDrawInfo.winningNumber.toString().padStart(2, '0')}
+                          </div>
+                          {ticket.number === ticket.dailyDrawInfo.winningNumber ? (
+                            <span style={{
+                              fontSize: '12px',
+                              fontFamily: "'Orbitron', sans-serif",
+                              fontWeight: 700,
+                              color: '#4ade80'
+                            }}>
+                              🎉 YOU WON!
+                            </span>
+                          ) : (
+                            <span style={{
+                              fontSize: '11px',
+                              fontFamily: "'Inter', sans-serif",
+                              color: 'var(--light)',
+                              opacity: 0.6
+                            }}>
+                              Not a winner
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      // Draw not executed yet - show countdown
+                      <div style={{
+                        fontSize: '11px',
+                        fontFamily: "'Inter', sans-serif",
+                        color: 'var(--light)'
+                      }}>
+                        {ticket.dailyDrawInfo ? (
+                          <DrawCountdown
+                            drawTime={ticket.dailyDrawInfo.drawTime}
+                            executed={ticket.dailyDrawInfo.executed}
+                            salesClosed={ticket.dailyDrawInfo.salesClosed}
+                          />
+                        ) : (
+                          <span style={{ opacity: 0.7 }}>⏳ Loading draw info...</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
