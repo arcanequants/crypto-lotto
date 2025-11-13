@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPublicClient, createWalletClient, http } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { base } from 'viem/chains';
 import { requireCronAuth } from '@/lib/security/cron';
+import lotteryContract from '@/lib/contracts/lottery-contract';
 
 /**
  * CRON JOB: Execute Daily Draw (STEP 2 of 2-step process)
@@ -42,40 +40,6 @@ import { requireCronAuth } from '@/lib/security/cron';
  *    - Add header: Authorization: Bearer YOUR_CRON_SECRET
  */
 
-const LOTTERY_ABI = [
-  {
-    name: 'executeDailyDraw',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [],
-    outputs: []
-  },
-  {
-    name: 'currentDailyDrawId',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    name: 'getDailyDraw',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'drawId', type: 'uint256' }],
-    outputs: [
-      { name: 'drawId', type: 'uint256' },
-      { name: 'drawTime', type: 'uint256' },
-      { name: 'winningNumber', type: 'uint8' },
-      { name: 'totalTickets', type: 'uint256' },
-      { name: 'totalPrize', type: 'uint256' },
-      { name: 'executed', type: 'bool' },
-      { name: 'commitBlock', type: 'uint256' },
-      { name: 'revealBlock', type: 'uint256' },
-      { name: 'salesClosed', type: 'bool' }
-    ]
-  }
-] as const;
-
 export async function GET(request: NextRequest) {
   try {
     // 1. Verify CRON authentication
@@ -85,39 +49,27 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('⏰ CRON JOB: Execute Daily Draw (STEP 2) - Starting...');
+    console.log('📋 Using centralized contract config:', lotteryContract.info);
 
-    // 2. Get contract address
-    const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO as `0x${string}`;
-    if (!LOTTERY_CONTRACT || LOTTERY_CONTRACT === '0x0000000000000000000000000000000000000000') {
-      throw new Error('NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO not configured');
-    }
+    // 2. Create clients using centralized config
+    const publicClient = lotteryContract.createPublicClient();
+    const walletClient = lotteryContract.createWalletClient();
 
-    // 3. Get Alchemy RPC URL
-    const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
-    const rpcUrl = `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+    // 3. Check current draw status (using helper function)
+    const currentDrawId = await lotteryContract.read('currentDailyDrawId') as bigint;
+    const drawData = await lotteryContract.getDailyDraw(currentDrawId);
 
-    // 4. Create public client
-    const publicClient = createPublicClient({
-      chain: base,
-      transport: http(rpcUrl)
-    });
-
-    // 5. Check current draw status
-    const currentDrawId = await publicClient.readContract({
-      address: LOTTERY_CONTRACT,
-      abi: LOTTERY_ABI,
-      functionName: 'currentDailyDrawId'
-    });
-
-    const draw = await publicClient.readContract({
-      address: LOTTERY_CONTRACT,
-      abi: LOTTERY_ABI,
-      functionName: 'getDailyDraw',
-      args: [currentDrawId]
-    });
-
-    // Destructure draw tuple with new fields
-    const [drawId, drawTime, winningNumber, totalTickets, totalPrize, executed, commitBlock, revealBlock, salesClosed] = draw;
+    // Extract fields (helper function already handles array/object format)
+    const {
+      drawId,
+      drawTime,
+      winningNumber,
+      executed,
+      totalTickets,
+      commitBlock,
+      revealBlock,
+      salesClosed
+    } = drawData;
 
     const currentBlock = await publicClient.getBlockNumber();
 
@@ -212,79 +164,37 @@ export async function GET(request: NextRequest) {
     console.log(`  - Current Block: ${currentBlock}`);
     console.log(`  - Will use blockhashes from blocks: ${revealBlock} to ${revealBlock + BigInt(4)}`);
 
-    // Get executor private key
-    const EXECUTOR_PRIVATE_KEY = process.env.WITHDRAWAL_EXECUTOR_PRIVATE_KEY as `0x${string}`;
-    if (!EXECUTOR_PRIVATE_KEY) {
-      throw new Error('WITHDRAWAL_EXECUTOR_PRIVATE_KEY not configured');
-    }
-
-    const account = privateKeyToAccount(EXECUTOR_PRIVATE_KEY);
-
-    const walletClient = createWalletClient({
-      account,
-      chain: base,
-      transport: http(rpcUrl)
-    });
-
-    // Get current nonce
-    const nonce = await publicClient.getTransactionCount({
-      address: account.address
-    });
-
-    console.log(`  - Executor address: ${account.address}`);
-    console.log(`  - Current nonce: ${nonce}`);
-
-    // Call executeDailyDraw() - uses 5 blockhashes internally
-    const hash = await walletClient.writeContract({
-      address: LOTTERY_CONTRACT,
-      abi: LOTTERY_ABI,
-      functionName: 'executeDailyDraw',
-      nonce,
+    // Execute draw using centralized helper
+    const { hash, receipt, success } = await lotteryContract.write('executeDailyDraw', [], {
       gas: BigInt(500000) // Higher gas limit for blockhash operations
     });
 
     console.log(`  - Using BLOCKHASH randomness (5 consecutive blocks) - FREE!`);
     console.log(`  - Transaction sent: ${hash}`);
-
-    // Wait for confirmation
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-    console.log(`  - Status: ${receipt.status === 'success' ? '✅ SUCCESS' : '❌ FAILED'}`);
+    console.log(`  - Status: ${success ? '✅ SUCCESS' : '❌ FAILED'}`);
     console.log(`  - Gas used: ${receipt.gasUsed}`);
 
-    if (receipt.status !== 'success') {
+    if (!success) {
       throw new Error('Transaction failed on-chain');
     }
 
     // 12. Get updated draw info
-    const updatedDraw = await publicClient.readContract({
-      address: LOTTERY_CONTRACT,
-      abi: LOTTERY_ABI,
-      functionName: 'getDailyDraw',
-      args: [currentDrawId]
-    });
-
-    const [, , newWinningNumber, newTotalTickets] = updatedDraw;
-
-    const newDrawId = await publicClient.readContract({
-      address: LOTTERY_CONTRACT,
-      abi: LOTTERY_ABI,
-      functionName: 'currentDailyDrawId'
-    });
+    const updatedDrawData = await lotteryContract.getDailyDraw(currentDrawId);
+    const newDrawId = await lotteryContract.read('currentDailyDrawId') as bigint;
 
     console.log('🎉 Daily draw executed successfully (STEP 2 complete)!');
     console.log(`  - Old Draw ID: ${currentDrawId}`);
     console.log(`  - New Draw ID: ${newDrawId}`);
-    console.log(`  - Winning Number: ${newWinningNumber}`);
-    console.log(`  - Total Tickets: ${newTotalTickets}`);
+    console.log(`  - Winning Number: ${updatedDrawData.winningNumber}`);
+    console.log(`  - Total Tickets: ${updatedDrawData.totalTickets}`);
 
     return NextResponse.json({
       success: true,
       message: 'Daily draw executed successfully (STEP 2 complete)',
       oldDrawId: Number(currentDrawId),
       newDrawId: Number(newDrawId),
-      winningNumber: Number(newWinningNumber),
-      totalTickets: Number(newTotalTickets),
+      winningNumber: Number(updatedDrawData.winningNumber),
+      totalTickets: Number(updatedDrawData.totalTickets),
       txHash: hash,
       gasUsed: receipt.gasUsed.toString(),
       blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
