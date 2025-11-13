@@ -138,24 +138,21 @@ export async function GET(request: NextRequest) {
     }
 
     // 10. Check if not too late (SmartBillions protection - within 250 blocks)
+    // NOTE: We let the contract handle auto-skip logic instead of blocking here
     const maxExecutionBlock = revealBlock + BigInt(250);
     if (currentBlock > maxExecutionBlock) {
-      console.log(`❌ TOO LATE - exceeded 250 block limit (SmartBillions protection)`);
+      console.log(`⚠️ TOO LATE - exceeded 250 block limit, but attempting anyway for auto-skip`);
       console.log(`  - Reveal Block: ${revealBlock}`);
       console.log(`  - Max Execution Block: ${maxExecutionBlock}`);
       console.log(`  - Current Block: ${currentBlock}`);
       console.log(`  - Blocks over limit: ${currentBlock - maxExecutionBlock}`);
+      console.log(`  - Contract should auto-skip this draw and move to next one`);
 
-      return NextResponse.json({
-        success: false,
-        error: 'Too late - exceeded 250 block limit',
-        drawId: Number(currentDrawId),
-        revealBlock: Number(revealBlock),
-        currentBlock: Number(currentBlock),
-        maxExecutionBlock: Number(maxExecutionBlock),
-        blocksOverLimit: Number(currentBlock - maxExecutionBlock),
-        hint: 'Draw cannot be executed - blockhashes no longer available. May need manual intervention.'
-      }, { status: 400 });
+      // DON'T return error - let contract handle auto-skip
+      // The contract v2.1.0 has auto-skip logic that will:
+      // 1. Detect draw is too late
+      // 2. Skip it and advance to next draw ID
+      // 3. Return success without executing random number generation
     }
 
     // 11. All checks passed - execute draw
