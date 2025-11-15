@@ -130,51 +130,16 @@ export async function collectDatabaseData() {
   try {
     const supabase = getSupabaseClient()
 
-    // Get total users (count unique wallets from tickets - Privy users)
-    const { data: allWallets } = await supabase
-      .from('tickets')
-      .select('user_wallet')
+    // Get user metrics using efficient RPC function
+    const { data: userMetrics, error: userError } = await supabase.rpc('get_user_metrics')
 
-    const uniqueWallets = new Set(allWallets?.map((t) => t.user_wallet.toLowerCase()) || [])
-    const totalUsers = uniqueWallets.size
-
-    // Get active users (last 7 days - wallets with tickets in last 7 days)
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
-    const { data: recentWallets } = await supabase
-      .from('tickets')
-      .select('user_wallet')
-      .gte('created_at', sevenDaysAgo.toISOString())
-
-    const activeWallets = new Set(recentWallets?.map((t) => t.user_wallet.toLowerCase()) || [])
-    const activeUsers = activeWallets.size
-
-    // Get new users today (wallets with first ticket today)
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-
-    const { data: todayWallets } = await supabase
-      .from('tickets')
-      .select('user_wallet, created_at')
-      .gte('created_at', todayStart.toISOString())
-
-    // Find wallets whose first ticket was today
-    const walletsFirstTicketToday = new Set<string>()
-    for (const ticket of todayWallets || []) {
-      const wallet = ticket.user_wallet.toLowerCase()
-      // Check if this wallet has any tickets before today
-      const { count: previousTickets } = await supabase
-        .from('tickets')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_wallet', ticket.user_wallet)
-        .lt('created_at', todayStart.toISOString())
-
-      if (!previousTickets || previousTickets === 0) {
-        walletsFirstTicketToday.add(wallet)
-      }
+    if (userError) {
+      console.error('Error getting user metrics:', userError)
     }
-    const newToday = walletsFirstTicketToday.size
+
+    const totalUsers = userMetrics?.total || 0
+    const activeUsers = userMetrics?.active || 0
+    const newToday = userMetrics?.new_today || 0
 
     // Get total tickets sold
     const { count: totalTickets } = await supabase
