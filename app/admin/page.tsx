@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import './admin.css'
+import SimpleTrendChart from '@/components/SimpleTrendChart'
 
 // This is the EMPIRE CONTROL CENTER - Alberto & Claude's Dashboard
 export default function AdminDashboard() {
@@ -11,11 +12,16 @@ export default function AdminDashboard() {
   const [lastUpdate, setLastUpdate] = useState('')
   const [hourlyCountdown, setHourlyCountdown] = useState('')
   const [dailyCountdown, setDailyCountdown] = useState('')
+  const [trends, setTrends] = useState<any>(null)
 
   useEffect(() => {
     fetchMetrics()
+    fetchTrends()
     // Refresh every 30 seconds
-    const interval = setInterval(fetchMetrics, 30000)
+    const interval = setInterval(() => {
+      fetchMetrics()
+      fetchTrends()
+    }, 30000)
     return () => clearInterval(interval)
   }, [])
 
@@ -69,6 +75,18 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Failed to fetch metrics:', error)
       setLoading(false)
+    }
+  }
+
+  async function fetchTrends() {
+    try {
+      const res = await fetch('/api/admin/trends?days=7')
+      const data = await res.json()
+      if (data.success) {
+        setTrends(data.trends)
+      }
+    } catch (error) {
+      console.error('Failed to fetch trends:', error)
     }
   }
 
@@ -714,6 +732,54 @@ export default function AdminDashboard() {
                   <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>$820</span>
                 </div>
               </div>
+            </div>
+
+            {/* TREND CHARTS */}
+            <div className="grid-2">
+              <div className="chart-card">
+                <div className="chart-title" style={{ marginBottom: '1.5rem' }}>📈 Revenue Trend (7 Days)</div>
+                {trends?.revenue ? (
+                  <SimpleTrendChart
+                    data={trends.revenue}
+                    color="#00F0FF"
+                    height={200}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>
+                    Loading trend data...
+                  </div>
+                )}
+              </div>
+
+              <div className="chart-card">
+                <div className="chart-title" style={{ marginBottom: '1.5rem' }}>👥 Users Trend (7 Days)</div>
+                {trends?.users ? (
+                  <SimpleTrendChart
+                    data={trends.users}
+                    color="#FFD700"
+                    height={200}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>
+                    Loading trend data...
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="chart-card">
+              <div className="chart-title" style={{ marginBottom: '1.5rem' }}>🎫 Tickets Sold Trend (7 Days)</div>
+              {trends?.tickets ? (
+                <SimpleTrendChart
+                  data={trends.tickets}
+                  color="#9333EA"
+                  height={200}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>
+                  Loading trend data...
+                </div>
+              )}
             </div>
           </div>
         )}
