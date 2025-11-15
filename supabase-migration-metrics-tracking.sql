@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS daily_metrics (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_daily_metrics_date ON daily_metrics(date DESC);
+CREATE INDEX IF NOT EXISTS idx_daily_metrics_date ON daily_metrics(date DESC);
 
 -- ============================================
 -- 2. PRODUCTS - Platform product catalog
@@ -96,8 +96,8 @@ CREATE TABLE IF NOT EXISTS product_metrics_daily (
   UNIQUE(product_id, date)
 );
 
-CREATE INDEX idx_product_metrics_product_date ON product_metrics_daily(product_id, date DESC);
-CREATE INDEX idx_product_metrics_date ON product_metrics_daily(date DESC);
+CREATE INDEX IF NOT EXISTS idx_product_metrics_product_date ON product_metrics_daily(product_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_product_metrics_date ON product_metrics_daily(date DESC);
 
 -- ============================================
 -- 4. CRON EXECUTIONS - Monitor automation
@@ -105,7 +105,6 @@ CREATE INDEX idx_product_metrics_date ON product_metrics_daily(date DESC);
 CREATE TABLE IF NOT EXISTS cron_executions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   job_name TEXT NOT NULL,
-  execution_time TIMESTAMP NOT NULL DEFAULT NOW(),
   status TEXT NOT NULL CHECK (status IN ('success', 'failed', 'timeout', 'skipped')),
   duration_ms INTEGER,
   error_message TEXT,
@@ -114,9 +113,9 @@ CREATE TABLE IF NOT EXISTS cron_executions (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_cron_executions_job_name ON cron_executions(job_name, execution_time DESC);
-CREATE INDEX idx_cron_executions_status ON cron_executions(status);
-CREATE INDEX idx_cron_executions_time ON cron_executions(execution_time DESC);
+CREATE INDEX IF NOT EXISTS idx_cron_executions_job_name ON cron_executions(job_name, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_cron_executions_status ON cron_executions(status);
+CREATE INDEX IF NOT EXISTS idx_cron_executions_time ON cron_executions(created_at DESC);
 
 -- ============================================
 -- 5. EVENT LOG - System alerts & events
@@ -137,10 +136,10 @@ CREATE TABLE IF NOT EXISTS event_log (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_event_log_created_at ON event_log(created_at DESC);
-CREATE INDEX idx_event_log_severity ON event_log(severity);
-CREATE INDEX idx_event_log_resolved ON event_log(resolved);
-CREATE INDEX idx_event_log_category ON event_log(category);
+CREATE INDEX IF NOT EXISTS idx_event_log_created_at ON event_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_event_log_severity ON event_log(severity);
+CREATE INDEX IF NOT EXISTS idx_event_log_resolved ON event_log(resolved);
+CREATE INDEX IF NOT EXISTS idx_event_log_category ON event_log(category);
 
 -- ============================================
 -- 6. USER ACTIVITY LOG - Retention tracking
@@ -154,9 +153,9 @@ CREATE TABLE IF NOT EXISTS user_activity_log (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_user_activity_log_user_id ON user_activity_log(user_id, created_at DESC);
-CREATE INDEX idx_user_activity_log_created_at ON user_activity_log(created_at DESC);
-CREATE INDEX idx_user_activity_log_type ON user_activity_log(activity_type);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_user_id ON user_activity_log(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_created_at ON user_activity_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_type ON user_activity_log(activity_type);
 
 -- ============================================
 -- 7. USER GEOLOCATIONS - Geographic tracking
@@ -179,9 +178,9 @@ CREATE TABLE IF NOT EXISTS user_geolocations (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_user_geolocations_country ON user_geolocations(country);
-CREATE INDEX idx_user_geolocations_region ON user_geolocations(region);
-CREATE INDEX idx_user_geolocations_country_code ON user_geolocations(country_code);
+CREATE INDEX IF NOT EXISTS idx_user_geolocations_country ON user_geolocations(country);
+CREATE INDEX IF NOT EXISTS idx_user_geolocations_region ON user_geolocations(region);
+CREATE INDEX IF NOT EXISTS idx_user_geolocations_country_code ON user_geolocations(country_code);
 
 -- ============================================
 -- 8. HELPER FUNCTIONS
@@ -231,21 +230,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_daily_metrics_updated_at ON daily_metrics;
 CREATE TRIGGER update_daily_metrics_updated_at
   BEFORE UPDATE ON daily_metrics
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_products_updated_at ON products;
 CREATE TRIGGER update_products_updated_at
   BEFORE UPDATE ON products
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_product_metrics_updated_at ON product_metrics_daily;
 CREATE TRIGGER update_product_metrics_updated_at
   BEFORE UPDATE ON product_metrics_daily
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_geolocations_updated_at ON user_geolocations;
 CREATE TRIGGER update_user_geolocations_updated_at
   BEFORE UPDATE ON user_geolocations
   FOR EACH ROW

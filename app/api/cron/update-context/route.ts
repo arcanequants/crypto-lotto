@@ -3,6 +3,7 @@
 
 import { NextResponse } from 'next/server'
 import { generateAllContext } from '@/lib/services/context-generator'
+import { withCronMonitoring } from '@/lib/services/cron-monitoring-service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -17,12 +18,19 @@ export async function GET(request: Request) {
 
     console.log('⏰ CRON: Updating Claude context files...')
 
-    const result = await generateAllContext()
+    // Run with monitoring
+    await withCronMonitoring('update-context', async () => {
+      const result = await generateAllContext()
+
+      if (!result) {
+        throw new Error('Context generation failed')
+      }
+    })
 
     return NextResponse.json({
       success: true,
       message: 'Context files updated successfully',
-      ...result,
+      timestamp: new Date().toISOString(),
     })
   } catch (error) {
     console.error('❌ Error updating context:', error)
