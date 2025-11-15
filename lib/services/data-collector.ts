@@ -4,7 +4,6 @@
 
 import { createLotteryPublicClient, CONTRACT_ADDRESS, CONTRACT_ABI } from '@/lib/contracts/lottery-contract'
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
 
 // Helper to get Supabase client (lazy initialization to avoid errors at module load)
 function getSupabaseClient() {
@@ -17,7 +16,7 @@ function getSupabaseClient() {
     )
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey)
+  return createClient(supabaseUrl, supabaseServiceKey)
 }
 
 // ============================================

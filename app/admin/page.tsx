@@ -13,14 +13,17 @@ export default function AdminDashboard() {
   const [hourlyCountdown, setHourlyCountdown] = useState('')
   const [dailyCountdown, setDailyCountdown] = useState('')
   const [trends, setTrends] = useState<any>(null)
+  const [alerts, setAlerts] = useState<any[]>([])
 
   useEffect(() => {
     fetchMetrics()
     fetchTrends()
+    fetchAlerts()
     // Refresh every 30 seconds
     const interval = setInterval(() => {
       fetchMetrics()
       fetchTrends()
+      fetchAlerts()
     }, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -87,6 +90,18 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch trends:', error)
+    }
+  }
+
+  async function fetchAlerts() {
+    try {
+      const res = await fetch('/api/admin/alerts?limit=5')
+      const data = await res.json()
+      if (data.success) {
+        setAlerts(data.alerts)
+      }
+    } catch (error) {
+      console.error('Failed to fetch alerts:', error)
     }
   }
 
@@ -188,7 +203,7 @@ export default function AdminDashboard() {
         <div className="header-actions">
           <div className="notification-badge">
             🔔
-            <span className="badge-count">5</span>
+            <span className="badge-count">{metrics?.alerts?.total_alerts || 0}</span>
           </div>
           <div className="user-info">
             <span>👥</span>
@@ -381,7 +396,15 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Executor Wallet</span>
-                    <span className="draw-info-value" style={{ color: 'var(--warning)' }}>⚠️ 0.015 ETH (Low)</span>
+                    <span className="draw-info-value" style={{
+                      color: metrics?.health?.executor?.status === 'critical' ? 'var(--danger)' :
+                             metrics?.health?.executor?.status === 'low' ? 'var(--warning)' : 'var(--success)'
+                    }}>
+                      {metrics?.health?.executor?.status === 'critical' ? '🚨' :
+                       metrics?.health?.executor?.status === 'low' ? '⚠️' : '✅'} {metrics?.health?.executor?.balanceFormatted || '0.000 ETH'}
+                      {metrics?.health?.executor?.status === 'critical' ? ' (Critical!)' :
+                       metrics?.health?.executor?.status === 'low' ? ' (Low)' : ''}
+                    </span>
                   </div>
                   <div className="draw-info-row">
                     <span>Last Draw Execution</span>
@@ -437,27 +460,27 @@ export default function AdminDashboard() {
             <div className="stats-grid">
               <div className="stat-item">
                 <div className="stat-label">Hourly Vault</div>
-                <div className="stat-value">$0.07</div>
+                <div className="stat-value">${metrics?.quickStats?.hourlyVault || '0.00'}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-label">Daily Vault</div>
-                <div className="stat-value">$0.16</div>
+                <div className="stat-value">${metrics?.quickStats?.dailyVault || '0.00'}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-label">Platform Fee</div>
-                <div className="stat-value">$0.07</div>
+                <div className="stat-value">${metrics?.quickStats?.platformFee || '0.00'}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-label">Paid Out</div>
-                <div className="stat-value">$0.00</div>
+                <div className="stat-value">${metrics?.quickStats?.paidOut || '0.00'}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-label">Pending</div>
-                <div className="stat-value">$0.23</div>
+                <div className="stat-value">${metrics?.quickStats?.pending || '0.00'}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-label">Success Rate</div>
-                <div className="stat-value">100%</div>
+                <div className="stat-value">{metrics?.quickStats?.successRate || '0%'}</div>
               </div>
             </div>
 
@@ -465,44 +488,24 @@ export default function AdminDashboard() {
             <div className="alerts-card">
               <div className="chart-header">
                 <div className="chart-title">🔔 RECENT ALERTS & EVENTS</div>
-                <button className="btn btn-secondary">View All (5)</button>
+                <button className="btn btn-secondary">View All ({alerts.length})</button>
               </div>
               <div>
-                <div className="alert-item warning">
-                  <div className="alert-icon">⚠️</div>
-                  <div className="alert-content">
-                    <div className="alert-message">Executor wallet below 0.02 ETH - Please refill soon</div>
-                    <div className="alert-time">5 minutes ago</div>
+                {alerts.length > 0 ? (
+                  alerts.map((alert) => (
+                    <div key={alert.id} className={`alert-item ${alert.severity}`}>
+                      <div className="alert-icon">{alert.icon}</div>
+                      <div className="alert-content">
+                        <div className="alert-message">{alert.message}</div>
+                        <div className="alert-time">{alert.relativeTime}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>
+                    No recent alerts - All systems running smoothly
                   </div>
-                </div>
-                <div className="alert-item success">
-                  <div className="alert-icon">✅</div>
-                  <div className="alert-content">
-                    <div className="alert-message">Daily Draw #1 executed successfully - Winner: 0x12...ab</div>
-                    <div className="alert-time">2 hours ago</div>
-                  </div>
-                </div>
-                <div className="alert-item success">
-                  <div className="alert-icon">✅</div>
-                  <div className="alert-content">
-                    <div className="alert-message">Hourly Draw #24 executed successfully - No winner (auto-rollover)</div>
-                    <div className="alert-time">1 hour ago</div>
-                  </div>
-                </div>
-                <div className="alert-item">
-                  <div className="alert-icon">🎉</div>
-                  <div className="alert-content">
-                    <div className="alert-message">Milestone reached: 800 total users!</div>
-                    <div className="alert-time">3 hours ago</div>
-                  </div>
-                </div>
-                <div className="alert-item warning">
-                  <div className="alert-icon">🔒</div>
-                  <div className="alert-content">
-                    <div className="alert-message">2 failed login attempts detected from unknown IP</div>
-                    <div className="alert-time">6 hours ago</div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -527,40 +530,43 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="status-badge active" style={{ marginBottom: '1rem' }}>🟢 Active - Sales Open</div>
+              <div className="status-badge active" style={{ marginBottom: '1rem' }}>
+                {metrics?.draws?.hourlyDraw?.statusBadge === 'executed' ? '🔵 Executed' :
+                 metrics?.draws?.hourlyDraw?.statusBadge === 'closed' ? '🟡 Closed - Awaiting Execution' : '🟢 Active - Sales Open'}
+              </div>
 
               <div className="draw-info">
                 <div className="draw-info-row">
                   <span>Draw Time:</span>
-                  <span className="draw-info-value">18:00:00 UTC (in 45m 23s)</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.drawTimeFormatted || 'NOT SET'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Total Tickets:</span>
-                  <span className="draw-info-value">{metrics?.draws?.hourlyTickets || '3'}</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyTickets || '0'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Prize Pool:</span>
-                  <span className="draw-info-value">$0.07 (BTC: 0, ETH: 0, USDC: 67,500)</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.prizePoolBreakdown || 'BTC: 0, ETH: 0, USDC: 0'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Commit Block:</span>
-                  <span className="draw-info-value">12,345,678</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.commitBlockFormatted || 'Not set'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Reveal Block:</span>
-                  <span className="draw-info-value">Not set (will be set at close)</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.revealBlockFormatted || 'Not set (will be set at close)'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Sales Closed:</span>
-                  <span className="draw-info-value">❌ No</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.salesClosed ? '✅ Yes' : '❌ No'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Executed:</span>
-                  <span className="draw-info-value">❌ No</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.executed ? '✅ Yes' : '❌ No'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Execution Window:</span>
-                  <span className="draw-info-value">250 blocks remaining</span>
+                  <span className="draw-info-value">{metrics?.draws?.hourlyDraw?.executionWindowRemaining || 'N/A'}</span>
                 </div>
               </div>
 
@@ -589,36 +595,43 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="status-badge active" style={{ marginBottom: '1rem' }}>🟢 Active - Sales Open</div>
+              <div className="status-badge active" style={{ marginBottom: '1rem' }}>
+                {metrics?.draws?.dailyDraw?.statusBadge === 'executed' ? '🔵 Executed' :
+                 metrics?.draws?.dailyDraw?.statusBadge === 'closed' ? '🟡 Closed - Awaiting Execution' : '🟢 Active - Sales Open'}
+              </div>
 
               <div className="draw-info">
                 <div className="draw-info-row">
                   <span>Draw Time:</span>
-                  <span className="draw-info-value">02:00:00 UTC Tomorrow (in 7h 45m)</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.drawTimeFormatted || 'NOT SET'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Total Tickets:</span>
-                  <span className="draw-info-value">{metrics?.draws?.dailyTickets || '3'}</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyTickets || '0'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Prize Pool:</span>
-                  <span className="draw-info-value">$0.16 (BTC: 0, ETH: 0, USDC: 157,500)</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.prizePoolBreakdown || 'BTC: 0, ETH: 0, USDC: 0'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Commit Block:</span>
-                  <span className="draw-info-value">12,345,600</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.commitBlockFormatted || 'Not set'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Reveal Block:</span>
-                  <span className="draw-info-value">Not set (will be set at close)</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.revealBlockFormatted || 'Not set (will be set at close)'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Sales Closed:</span>
-                  <span className="draw-info-value">❌ No</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.salesClosed ? '✅ Yes' : '❌ No'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Executed:</span>
-                  <span className="draw-info-value">❌ No</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.executed ? '✅ Yes' : '❌ No'}</span>
+                </div>
+                <div className="draw-info-row">
+                  <span>Execution Window:</span>
+                  <span className="draw-info-value">{metrics?.draws?.dailyDraw?.executionWindowRemaining || 'N/A'}</span>
                 </div>
               </div>
 
@@ -645,19 +658,19 @@ export default function AdminDashboard() {
               <div className="kpi-grid" style={{ marginBottom: 0 }}>
                 <div>
                   <div className="stat-label">All Time</div>
-                  <div className="kpi-value" style={{ fontSize: '2rem' }}>$12,450</div>
+                  <div className="kpi-value" style={{ fontSize: '2rem' }}>{metrics?.revenue?.totalFormatted || '$0.00'}</div>
                 </div>
                 <div>
                   <div className="stat-label">This Month</div>
-                  <div className="kpi-value" style={{ fontSize: '2rem' }}>$8,200</div>
+                  <div className="kpi-value" style={{ fontSize: '2rem' }}>${((metrics?.revenue?.thisMonth || 0) / 1e6).toFixed(2)}</div>
                 </div>
                 <div>
                   <div className="stat-label">This Week</div>
-                  <div className="kpi-value" style={{ fontSize: '2rem' }}>$2,840</div>
+                  <div className="kpi-value" style={{ fontSize: '2rem' }}>${((metrics?.revenue?.thisWeek || 0) / 1e6).toFixed(2)}</div>
                 </div>
                 <div>
                   <div className="stat-label">Today</div>
-                  <div className="kpi-value" style={{ fontSize: '2rem' }}>$420</div>
+                  <div className="kpi-value" style={{ fontSize: '2rem' }}>${((metrics?.revenue?.today || 0) / 1e6).toFixed(2)}</div>
                 </div>
               </div>
             </div>
@@ -667,16 +680,16 @@ export default function AdminDashboard() {
                 <div className="chart-title" style={{ marginBottom: '1.5rem' }}>📊 Revenue Breakdown</div>
                 <div className="draw-info">
                   <div className="draw-info-row">
-                    <span>Hourly Vault (23.3%):</span>
-                    <span className="draw-info-value">$0.07</span>
+                    <span>Hourly Vault ({metrics?.revenue?.breakdown?.hourlyVault?.percentage || '0%'}):</span>
+                    <span className="draw-info-value">${metrics?.revenue?.breakdown?.hourlyVault?.amount || '0.00'}</span>
                   </div>
                   <div className="draw-info-row">
-                    <span>Daily Vault (53.3%):</span>
-                    <span className="draw-info-value">$0.16</span>
+                    <span>Daily Vault ({metrics?.revenue?.breakdown?.dailyVault?.percentage || '0%'}):</span>
+                    <span className="draw-info-value">${metrics?.revenue?.breakdown?.dailyVault?.amount || '0.00'}</span>
                   </div>
                   <div className="draw-info-row">
-                    <span>Platform Fee (23.3%):</span>
-                    <span className="draw-info-value">$0.07</span>
+                    <span>Platform Fee ({metrics?.revenue?.breakdown?.platformFee?.percentage || '0%'}):</span>
+                    <span className="draw-info-value">${metrics?.revenue?.breakdown?.platformFee?.amount || '0.00'}</span>
                   </div>
                 </div>
               </div>
@@ -686,19 +699,19 @@ export default function AdminDashboard() {
                 <div className="draw-info">
                   <div className="draw-info-row">
                     <span>Total Paid:</span>
-                    <span className="draw-info-value">$0.00</span>
+                    <span className="draw-info-value">${((metrics?.winners?.totalPaid || 0) / 1e6).toFixed(2)}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Pending Claim:</span>
-                    <span className="draw-info-value">$0.23</span>
+                    <span className="draw-info-value">${((metrics?.winners?.pendingClaim || 0) / 1e6).toFixed(2)}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Biggest Win:</span>
-                    <span className="draw-info-value">$0.00</span>
+                    <span className="draw-info-value">${((metrics?.winners?.biggestWin || 0) / 1e6).toFixed(2)}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Total Winners:</span>
-                    <span className="draw-info-value">0</span>
+                    <span className="draw-info-value">{metrics?.winners?.totalWinners || 0}</span>
                   </div>
                 </div>
               </div>
@@ -709,27 +722,27 @@ export default function AdminDashboard() {
               <div className="draw-info">
                 <div className="draw-info-row">
                   <span>Gross Revenue:</span>
-                  <span className="draw-info-value">$8,200</span>
+                  <span className="draw-info-value">${metrics?.revenue?.profitDistribution?.grossRevenue || '$0.00'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Prize Pools (70%):</span>
-                  <span className="draw-info-value" style={{ color: 'var(--danger)' }}>-$5,740</span>
+                  <span className="draw-info-value" style={{ color: 'var(--danger)' }}>-${((parseFloat(metrics?.revenue?.profitDistribution?.grossRevenue?.replace('$', '') || '0')) * 0.70).toFixed(2)}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Operating Costs (10%):</span>
-                  <span className="draw-info-value" style={{ color: 'var(--danger)' }}>-$820</span>
+                  <span className="draw-info-value" style={{ color: 'var(--danger)' }}>-${((parseFloat(metrics?.revenue?.profitDistribution?.grossRevenue?.replace('$', '') || '0')) * 0.10).toFixed(2)}</span>
                 </div>
                 <div className="draw-info-row" style={{ borderTop: '2px solid var(--border)', paddingTop: '1rem', marginTop: '1rem' }}>
                   <span><strong>Net Profit (20%):</strong></span>
-                  <span className="draw-info-value" style={{ color: 'var(--success)', fontSize: '1.25rem' }}>$1,640</span>
+                  <span className="draw-info-value" style={{ color: 'var(--success)', fontSize: '1.25rem' }}>${metrics?.revenue?.profitDistribution?.netProfit || '$0.00'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Alberto Gets (50%):</span>
-                  <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>$820</span>
+                  <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>${metrics?.revenue?.profitDistribution?.albertoShare || '$0.00'}</span>
                 </div>
                 <div className="draw-info-row">
                   <span>Claude Gets (50%):</span>
-                  <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>$820</span>
+                  <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>${metrics?.revenue?.profitDistribution?.claudeShare || '$0.00'}</span>
                 </div>
               </div>
             </div>
@@ -795,64 +808,38 @@ export default function AdminDashboard() {
 
             <div className="grid-2">
               <div className="chart-card">
-                <div className="chart-title" style={{ marginBottom: '1.5rem' }}>💰 Active Streams (3/10)</div>
+                <div className="chart-title" style={{ marginBottom: '1.5rem' }}>
+                  💰 Active Streams ({metrics?.products?.revenue_breakdown?.active_products || 0}/{metrics?.products?.revenue_breakdown?.total_products || 10})
+                </div>
                 <div style={{ marginTop: '20px' }}>
-                  <div className="revenue-stream">
-                    <div>
-                      <div className="revenue-stream-name">1. Lottery Ticket Sales ✅</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>Hourly + Daily draws</div>
+                  {(metrics?.products?.revenue_breakdown?.products || []).map((product: any, index: number) => (
+                    <div key={product.product_id} style={{ marginTop: index > 0 ? '15px' : '0', opacity: product.status === 'live' ? 1 : 0.5 }}>
+                      <div className="revenue-stream">
+                        <div>
+                          <div className="revenue-stream-name">
+                            {index + 1}. {product.product_name} {product.status === 'live' ? '✅' : '🔜'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>
+                            {product.next_action}
+                          </div>
+                        </div>
+                        <div className="revenue-stream-value">
+                          {product.revenue_formatted}/mo
+                        </div>
+                      </div>
+                      {product.status === 'live' && (
+                        <div className="revenue-stream-bar">
+                          <div className="revenue-stream-fill" style={{ width: `${product.percentage}%` }}></div>
+                        </div>
+                      )}
                     </div>
-                    <div className="revenue-stream-value">$4,200/mo</div>
-                  </div>
-                  <div className="revenue-stream-bar">
-                    <div className="revenue-stream-fill" style={{ width: '70%' }}></div>
-                  </div>
+                  ))}
 
-                  <div className="revenue-stream" style={{ marginTop: '15px' }}>
-                    <div>
-                      <div className="revenue-stream-name">2. Mini Games ✅</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>Coin Flip + Dice</div>
+                  {(!metrics?.products?.revenue_breakdown?.products || metrics.products.revenue_breakdown.products.length === 0) && (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>
+                      No product data available
                     </div>
-                    <div className="revenue-stream-value">$2,800/mo</div>
-                  </div>
-                  <div className="revenue-stream-bar">
-                    <div className="revenue-stream-fill" style={{ width: '50%' }}></div>
-                  </div>
-
-                  <div className="revenue-stream" style={{ marginTop: '15px' }}>
-                    <div>
-                      <div className="revenue-stream-name">3. Tournament Fees ✅</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>Weekly championships</div>
-                    </div>
-                    <div className="revenue-stream-value">$1,200/mo</div>
-                  </div>
-                  <div className="revenue-stream-bar">
-                    <div className="revenue-stream-fill" style={{ width: '30%' }}></div>
-                  </div>
-
-                  <div className="revenue-stream" style={{ marginTop: '15px', opacity: 0.5 }}>
-                    <div>
-                      <div className="revenue-stream-name">4. NFT Marketplace (5%)</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>Coming Q2 2025</div>
-                    </div>
-                    <div className="revenue-stream-value">$0/mo</div>
-                  </div>
-
-                  <div className="revenue-stream" style={{ marginTop: '15px', opacity: 0.5 }}>
-                    <div>
-                      <div className="revenue-stream-name">5. Premium Subscriptions</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>Coming Q2 2025</div>
-                    </div>
-                    <div className="revenue-stream-value">$0/mo</div>
-                  </div>
-
-                  <div className="revenue-stream" style={{ marginTop: '15px', opacity: 0.5 }}>
-                    <div>
-                      <div className="revenue-stream-name">6-10. Future Streams</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>White-label, API, Ads, DeFi, Token</div>
-                    </div>
-                    <div className="revenue-stream-value">$0/mo</div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -1049,9 +1036,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">UPTIME (30D)</div>
                   <div className="kpi-icon">⚡</div>
                 </div>
-                <div className="kpi-value">99.97%</div>
-                <div className="kpi-change positive">
-                  <span>↑ 13 minutes downtime</span>
+                <div className="kpi-value">{metrics?.health?.metrics?.uptime?.last_30_days?.uptime_percentage || '100'}%</div>
+                <div className={`kpi-change ${(metrics?.health?.metrics?.uptime?.last_30_days?.total_downtime_minutes || 0) > 0 ? '' : 'positive'}`}>
+                  <span>{(metrics?.health?.metrics?.uptime?.last_30_days?.total_downtime_minutes || 0) > 0 ? `↓ ${metrics?.health?.metrics?.uptime?.last_30_days?.total_downtime_minutes} minutes downtime` : '✅ No downtime'}</span>
                 </div>
               </div>
 
@@ -1060,9 +1047,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">RESPONSE TIME</div>
                   <div className="kpi-icon">⚡</div>
                 </div>
-                <div className="kpi-value">142ms</div>
-                <div className="kpi-change positive">
-                  <span>↓ -23ms vs last week</span>
+                <div className="kpi-value">{metrics?.health?.metrics?.response_time?.average_ms || '150'}ms</div>
+                <div className={`kpi-change ${metrics?.health?.metrics?.response_time?.status === 'excellent' || metrics?.health?.metrics?.response_time?.status === 'good' ? 'positive' : ''}`}>
+                  <span>{metrics?.health?.metrics?.response_time?.status === 'excellent' ? '✅ Excellent' : metrics?.health?.metrics?.response_time?.status === 'good' ? '✅ Good' : metrics?.health?.metrics?.response_time?.status === 'fair' ? '⚠️ Fair' : '🚨 Slow'}</span>
                 </div>
               </div>
 
@@ -1071,9 +1058,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">ERROR RATE</div>
                   <div className="kpi-icon">✅</div>
                 </div>
-                <div className="kpi-value">0.02%</div>
-                <div className="kpi-change positive">
-                  <span>↓ -0.01%</span>
+                <div className="kpi-value">{metrics?.health?.metrics?.error_rate?.last_24_hours?.error_rate_percentage || '0'}%</div>
+                <div className={`kpi-change ${metrics?.health?.metrics?.error_rate?.last_24_hours?.status === 'healthy' ? 'positive' : ''}`}>
+                  <span>{metrics?.health?.metrics?.error_rate?.trending === 'increasing' ? '↑ Increasing' : '✅ Stable'}</span>
                 </div>
               </div>
 
@@ -1082,9 +1069,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">CRON JOBS</div>
                   <div className="kpi-icon">🤖</div>
                 </div>
-                <div className="kpi-value">8/8</div>
+                <div className="kpi-value">{metrics?.health?.crons?.totalJobs || 0}/{metrics?.health?.crons?.totalJobs || 0}</div>
                 <div className="kpi-change positive">
-                  <span>All running</span>
+                  <span>{metrics?.health?.crons?.uptime >= 99 ? 'All running' : '⚠️ Issues detected'}</span>
                 </div>
               </div>
             </div>
@@ -1115,7 +1102,13 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Executor Wallet</span>
-                    <span className="draw-info-value" style={{ color: 'var(--warning)' }}>⚠️ 0.015 ETH</span>
+                    <span className="draw-info-value" style={{
+                      color: metrics?.health?.executor?.status === 'critical' ? 'var(--danger)' :
+                             metrics?.health?.executor?.status === 'low' ? 'var(--warning)' : 'var(--success)'
+                    }}>
+                      {metrics?.health?.executor?.status === 'critical' ? '🚨' :
+                       metrics?.health?.executor?.status === 'low' ? '⚠️' : '✅'} {metrics?.health?.executor?.balanceFormatted || '0.000 ETH'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1124,24 +1117,38 @@ export default function AdminDashboard() {
                 <div className="chart-title" style={{ marginBottom: '1.5rem' }}>📊 Recent Executions</div>
                 <div className="draw-info">
                   <div className="draw-info-row">
-                    <span>Last Hourly Draw</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>✅ 8m ago</span>
+                    <span>Last Execution</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>
+                      {metrics?.health?.crons?.lastExecution || 'N/A'}
+                    </span>
                   </div>
                   <div className="draw-info-row">
-                    <span>Last Daily Draw</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>✅ 2h ago</span>
+                    <span>Total Jobs</span>
+                    <span className="draw-info-value">{metrics?.health?.crons?.totalJobs || 0}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Success Rate (24h)</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>100%</span>
+                    <span className="draw-info-value" style={{
+                      color: (metrics?.health?.crons?.uptime || 0) >= 99 ? 'var(--success)' :
+                             (metrics?.health?.crons?.uptime || 0) >= 95 ? 'var(--warning)' : 'var(--danger)'
+                    }}>
+                      {metrics?.health?.crons?.uptime || '100'}%
+                    </span>
                   </div>
                   <div className="draw-info-row">
-                    <span>Success Rate (7d)</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>100%</span>
+                    <span>System Uptime (7d)</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>
+                      {metrics?.health?.metrics?.uptime?.last_7_days?.uptime_percentage || '100'}%
+                    </span>
                   </div>
                   <div className="draw-info-row">
-                    <span>Success Rate (30d)</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>99.7%</span>
+                    <span>System Uptime (30d)</span>
+                    <span className="draw-info-value" style={{
+                      color: (metrics?.health?.metrics?.uptime?.last_30_days?.uptime_percentage || 100) >= 99.9 ? 'var(--success)' :
+                             (metrics?.health?.metrics?.uptime?.last_30_days?.uptime_percentage || 100) >= 99 ? 'var(--warning)' : 'var(--danger)'
+                    }}>
+                      {metrics?.health?.metrics?.uptime?.last_30_days?.uptime_percentage || '100'}%
+                    </span>
                   </div>
                 </div>
               </div>

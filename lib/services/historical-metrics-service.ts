@@ -3,7 +3,6 @@
 // This service powers the trend analysis in the dashboard
 
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
 
 // Helper to get Supabase client
 function getSupabaseClient() {
@@ -14,7 +13,7 @@ function getSupabaseClient() {
     throw new Error('Missing Supabase configuration')
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey)
+  return createClient(supabaseUrl, supabaseServiceKey)
 }
 
 // ============================================

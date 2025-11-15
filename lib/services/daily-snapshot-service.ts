@@ -3,7 +3,6 @@
 // This runs every day at midnight via CRON
 
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
 import { collectBlockchainData, collectDatabaseData } from './data-collector'
 import { syncDualLotteryMetrics } from './product-metrics-service'
 
@@ -16,7 +15,7 @@ function getSupabaseClient() {
     throw new Error('Missing Supabase configuration')
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey)
+  return createClient(supabaseUrl, supabaseServiceKey)
 }
 
 // ============================================

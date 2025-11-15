@@ -3,7 +3,6 @@
 // Powers the Platform Products and Revenue Streams sections
 
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
 
 // Helper to get Supabase client
 function getSupabaseClient() {
@@ -14,7 +13,7 @@ function getSupabaseClient() {
     throw new Error('Missing Supabase configuration')
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey)
+  return createClient(supabaseUrl, supabaseServiceKey)
 }
 
 // ============================================
@@ -365,4 +364,63 @@ export async function syncDualLotteryMetrics(date?: string): Promise<boolean> {
     transactions,
     costs_usdc: 0, // No direct costs for lottery
   })
+}
+
+/**
+ * Get revenue breakdown by product for Revenue Streams tab
+ * Returns total revenue contribution and percentage per product
+ */
+export async function getRevenueBreakdownByProduct(days: number = 30) {
+  try {
+    const metrics = await getAllProductsMetrics()
+
+    // Calculate total revenue across all products
+    const totalRevenue = metrics.reduce((sum, m) => sum + m.revenue_30d, 0)
+
+    // Build breakdown per product
+    const breakdown = metrics.map(m => {
+      const percentage = totalRevenue > 0 ? (m.revenue_30d / totalRevenue) * 100 : 0
+
+      return {
+        product_id: m.product_id,
+        product_name: m.product_name,
+        product_slug: m.product_slug,
+        status: m.status,
+        revenue: m.revenue_30d,
+        revenue_formatted: m.revenue_30d_formatted,
+        percentage: Number(percentage.toFixed(1)),
+        percentage_formatted: `${percentage.toFixed(1)}%`,
+        growth: m.mom_growth,
+        growth_formatted: m.mom_growth_formatted,
+        margin_percentage: m.margin_percentage,
+        next_action: m.next_action,
+      }
+    })
+
+    // Sort by revenue descending
+    breakdown.sort((a, b) => b.revenue - a.revenue)
+
+    return {
+      products: breakdown,
+      total_revenue: totalRevenue,
+      total_revenue_formatted: `$${(totalRevenue / 1e6).toFixed(2)}`,
+      active_products: breakdown.filter(p => p.status === 'live').length,
+      total_products: breakdown.length,
+      top_performer: breakdown[0] || null,
+      period_days: days,
+      timestamp: new Date().toISOString(),
+    }
+  } catch (error) {
+    console.error('Error calculating revenue breakdown:', error)
+    return {
+      products: [],
+      total_revenue: 0,
+      total_revenue_formatted: '$0.00',
+      active_products: 0,
+      total_products: 0,
+      top_performer: null,
+      period_days: days,
+      timestamp: new Date().toISOString(),
+    }
+  }
 }
