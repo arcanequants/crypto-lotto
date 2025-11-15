@@ -130,28 +130,51 @@ export async function collectDatabaseData() {
   try {
     const supabase = getSupabaseClient()
 
-    // Get total users
-    const { count: totalUsers } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
+    // Get total users (count unique wallets from tickets - Privy users)
+    const { data: allWallets } = await supabase
+      .from('tickets')
+      .select('user_wallet')
 
-    // Get active users (last 7 days)
+    const uniqueWallets = new Set(allWallets?.map((t) => t.user_wallet.toLowerCase()) || [])
+    const totalUsers = uniqueWallets.size
+
+    // Get active users (last 7 days - wallets with tickets in last 7 days)
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-    const { count: activeUsers } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .gte('last_seen', sevenDaysAgo.toISOString())
+    const { data: recentWallets } = await supabase
+      .from('tickets')
+      .select('user_wallet')
+      .gte('created_at', sevenDaysAgo.toISOString())
 
-    // Get new users today
+    const activeWallets = new Set(recentWallets?.map((t) => t.user_wallet.toLowerCase()) || [])
+    const activeUsers = activeWallets.size
+
+    // Get new users today (wallets with first ticket today)
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
 
-    const { count: newToday } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
+    const { data: todayWallets } = await supabase
+      .from('tickets')
+      .select('user_wallet, created_at')
       .gte('created_at', todayStart.toISOString())
+
+    // Find wallets whose first ticket was today
+    const walletsFirstTicketToday = new Set<string>()
+    for (const ticket of todayWallets || []) {
+      const wallet = ticket.user_wallet.toLowerCase()
+      // Check if this wallet has any tickets before today
+      const { count: previousTickets } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_wallet', ticket.user_wallet)
+        .lt('created_at', todayStart.toISOString())
+
+      if (!previousTickets || previousTickets === 0) {
+        walletsFirstTicketToday.add(wallet)
+      }
+    }
+    const newToday = walletsFirstTicketToday.size
 
     // Get total tickets sold
     const { count: totalTickets } = await supabase
@@ -231,7 +254,7 @@ export async function collectSystemHealth() {
     let dbStatus = 'healthy'
     try {
       const supabase = getSupabaseClient()
-      await supabase.from('users').select('id', { count: 'exact', head: true })
+      await supabase.from('tickets').select('id', { count: 'exact', head: true })
       dbStatus = 'healthy'
     } catch {
       dbStatus = 'error'
