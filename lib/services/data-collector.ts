@@ -167,9 +167,9 @@ export async function collectDatabaseData() {
     // Get total revenue from tickets
     const { data: ticketData } = await supabase
       .from('tickets')
-      .select('price_usdc')
+      .select('price_paid')
 
-    const totalRevenue = ticketData?.reduce((sum, t) => sum + (Number(t.price_usdc) || 0), 0) || 0
+    const totalRevenue = ticketData?.reduce((sum, t) => sum + (Number(t.price_paid) || 0), 0) || 0
 
     // Get winners count
     const { count: totalWinners } = await supabase
@@ -195,8 +195,8 @@ export async function collectDatabaseData() {
         today: ticketsToday || 0,
       },
       revenue: {
-        total: totalRevenue / 1e6, // Convert from USDC decimals
-        totalFormatted: `$${(totalRevenue / 1e6).toFixed(2)}`,
+        total: totalRevenue, // price_paid is already in USDC (DECIMAL type)
+        totalFormatted: `$${totalRevenue.toFixed(2)}`,
       },
       winners: {
         total: totalWinners || 0,
