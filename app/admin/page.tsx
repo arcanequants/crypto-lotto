@@ -61,7 +61,7 @@ export default function AdminDashboard() {
 
   async function fetchMetrics() {
     try {
-      const res = await fetch('/api/admin/metrics')
+      const res = await fetch('/api/admin/metrics-v2')
       const data = await res.json()
       setMetrics(data)
       setLoading(false)
@@ -211,9 +211,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">💰 TOTAL GMV</div>
                   <div className="kpi-icon">💵</div>
                 </div>
-                <div className="kpi-value">{metrics?.revenue?.totalFormatted || '$12,450'}</div>
-                <div className="kpi-change positive">
-                  <span>↑ +284%</span>
+                <div className="kpi-value">{metrics?.revenue?.totalFormatted || '$0.00'}</div>
+                <div className={`kpi-change ${metrics?.revenue?.momGrowth?.startsWith('-') ? 'negative' : 'positive'}`}>
+                  <span>{metrics?.revenue?.momGrowth || '+0%'}</span>
                   <span style={{ color: 'var(--text-dim)' }}>MoM</span>
                 </div>
               </div>
@@ -223,9 +223,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">👥 TOTAL USERS</div>
                   <div className="kpi-icon">👨‍👩‍👧‍👦</div>
                 </div>
-                <div className="kpi-value">{metrics?.users?.total || '847'}</div>
-                <div className="kpi-change positive">
-                  <span>↑ +156%</span>
+                <div className="kpi-value">{metrics?.users?.total || '0'}</div>
+                <div className={`kpi-change ${metrics?.users?.momGrowth?.startsWith('-') ? 'negative' : 'positive'}`}>
+                  <span>{metrics?.users?.momGrowth || '+0%'}</span>
                   <span style={{ color: 'var(--text-dim)' }}>MoM</span>
                 </div>
               </div>
@@ -235,10 +235,10 @@ export default function AdminDashboard() {
                   <div className="kpi-label">🎮 ACTIVE PRODUCTS</div>
                   <div className="kpi-icon">🎯</div>
                 </div>
-                <div className="kpi-value">3/10</div>
+                <div className="kpi-value">{metrics?.products?.live || 0}/{metrics?.products?.total || 10}</div>
                 <div className="kpi-change positive">
-                  <span>↑ +2</span>
-                  <span style={{ color: 'var(--text-dim)' }}>this month</span>
+                  <span>↑ +{metrics?.products?.live || 0}</span>
+                  <span style={{ color: 'var(--text-dim)' }}>live</span>
                 </div>
               </div>
 
@@ -247,10 +247,10 @@ export default function AdminDashboard() {
                   <div className="kpi-label">🤖 AUTOMATION</div>
                   <div className="kpi-icon">⚡</div>
                 </div>
-                <div className="kpi-value">65%</div>
+                <div className="kpi-value">{metrics?.health?.crons?.uptime || '0%'}</div>
                 <div className="kpi-change positive">
-                  <span>↑ +15%</span>
-                  <span style={{ color: 'var(--text-dim)' }}>this quarter</span>
+                  <span>Uptime</span>
+                  <span style={{ color: 'var(--text-dim)' }}>{metrics?.health?.crons?.totalJobs || 0} jobs</span>
                 </div>
               </div>
             </div>
@@ -326,7 +326,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Revenue Growth (MoM)</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>+284%</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.revenue?.momGrowth || '+0%'}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Gross Margin</span>
@@ -349,7 +349,9 @@ export default function AdminDashboard() {
                 <div className="draw-info">
                   <div className="draw-info-row">
                     <span>All Cron Jobs</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>✅ Running</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>
+                      {metrics?.health?.crons?.totalJobs > 0 ? '✅ Running' : '❌ No Jobs'}
+                    </span>
                   </div>
                   <div className="draw-info-row">
                     <span>Contract Status</span>
@@ -365,11 +367,11 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Last Draw Execution</span>
-                    <span className="draw-info-value">8 mins ago</span>
+                    <span className="draw-info-value">{metrics?.health?.crons?.lastExecution || 'N/A'}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Success Rate (24h)</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>100%</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.health?.crons?.uptime || '0%'}</span>
                   </div>
                 </div>
                 <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>View Full Health Report</button>
@@ -385,11 +387,11 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ marginBottom: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                    <span>Users (847/1,000)</span>
-                    <span style={{ color: 'var(--primary)' }}>85%</span>
+                    <span>Users ({metrics?.users?.total || 0}/1,000)</span>
+                    <span style={{ color: 'var(--primary)' }}>{Math.min(100, Math.round(((metrics?.users?.total || 0) / 1000) * 100))}%</span>
                   </div>
                   <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: '85%' }}></div>
+                    <div className="progress-fill" style={{ width: `${Math.min(100, Math.round(((metrics?.users?.total || 0) / 1000) * 100))}%` }}></div>
                   </div>
                 </div>
                 <div style={{ marginBottom: '1.5rem' }}>
@@ -403,11 +405,11 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                    <span>Products (3/5 live)</span>
-                    <span style={{ color: 'var(--warning)' }}>60%</span>
+                    <span>Products ({metrics?.products?.live || 0}/10 live)</span>
+                    <span style={{ color: 'var(--warning)' }}>{Math.round(((metrics?.products?.live || 0) / 10) * 100)}%</span>
                   </div>
                   <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: '60%' }}></div>
+                    <div className="progress-fill" style={{ width: `${Math.round(((metrics?.products?.live || 0) / 10) * 100)}%` }}></div>
                   </div>
                 </div>
               </div>
