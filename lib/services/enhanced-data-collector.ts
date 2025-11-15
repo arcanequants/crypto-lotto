@@ -10,6 +10,7 @@ import { getAllProductsMetrics, getRevenueBreakdownByProduct } from './product-m
 import { getSystemHealthMetrics, getSystemMetricsSummary } from './system-metrics-service'
 import { getSecurityMetrics } from './security-metrics-service'
 import { getAutomationMetrics } from './automation-metrics-service'
+import { getGeographicDistribution } from './geographic-distribution-service'
 
 // ============================================
 // ENHANCED AGGREGATION
@@ -37,6 +38,7 @@ export async function aggregateAllMetricsEnhanced() {
       revenueBreakdown,
       securityMetrics,
       automationMetrics,
+      geographicDistribution,
     ] = await Promise.all([
       collectBlockchainData(),
       collectDatabaseData(),
@@ -51,6 +53,7 @@ export async function aggregateAllMetricsEnhanced() {
       getRevenueBreakdownByProduct(30).catch(() => null),
       getSecurityMetrics().catch(() => null),
       getAutomationMetrics().catch(() => null),
+      getGeographicDistribution().catch(() => null),
     ])
 
     // Calculate derived metrics
@@ -322,6 +325,22 @@ export async function aggregateAllMetricsEnhanced() {
           status: 'healthy',
         },
         recommendations: [],
+      },
+
+      // NEW: Geographic distribution
+      geographic: geographicDistribution || {
+        total_users: 0,
+        regions: {
+          north_america: 0,
+          europe: 0,
+          asia: 0,
+          latin_america: 0,
+          africa: 0,
+          oceania: 0,
+        },
+        top_countries: [],
+        has_live_map: false,
+        timestamp: new Date().toISOString(),
       },
     }
   } catch (error) {

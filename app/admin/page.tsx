@@ -367,7 +367,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Your Monthly Income</span>
-                    <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>$820 each</span>
+                    <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>{metrics?.revenue?.profitDistribution?.albertoShare || '$0.00'} each</span>
                   </div>
                 </div>
               </div>
@@ -857,21 +857,21 @@ export default function AdminDashboard() {
                   <div style={{ margin: '20px 0' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                       <span style={{ color: 'var(--text-dim)' }}>Current MRR</span>
-                      <span style={{ color: 'var(--primary)', fontWeight: 700 }}>$8,200</span>
+                      <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{metrics?.revenue?.mrrFormatted || '$0.00'}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                       <span style={{ color: 'var(--text-dim)' }}>Phase 1 Goal</span>
                       <span style={{ color: 'var(--text-dim)' }}>$10,000</span>
                     </div>
                     <div className="progress-bar" style={{ height: '30px' }}>
-                      <div className="progress-fill" style={{ width: '82%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700 }}>82%</div>
+                      <div className="progress-fill" style={{ width: `${Math.min(100, Math.round(((metrics?.revenue?.mrr || 0) / 10000000) * 100))}%`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700 }}>{Math.min(100, Math.round(((metrics?.revenue?.mrr || 0) / 10000000) * 100))}%</div>
                     </div>
                   </div>
 
                   <div style={{ marginTop: '30px' }}>
                     <div className="draw-info-row">
                       <span>Gap to Phase 1:</span>
-                      <span className="draw-info-value" style={{ color: 'var(--warning)' }}>$1,800</span>
+                      <span className="draw-info-value" style={{ color: 'var(--warning)' }}>${(Math.max(0, (10000000 - (metrics?.revenue?.mrr || 0))) / 1e6).toFixed(2)}</span>
                     </div>
                     <div className="draw-info-row">
                       <span>Est. Time to Goal:</span>
@@ -949,6 +949,91 @@ export default function AdminDashboard() {
                   <div style={{ marginTop: '15px' }}>
                     <div className="status-badge">Q3 2025</div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Geographic Distribution */}
+            <div className="chart-card">
+              <div className="chart-title" style={{ marginBottom: '1.5rem' }}>🌍 Geographic Distribution</div>
+              <div className="grid-2" style={{ marginBottom: '1.5rem' }}>
+                <div>
+                  <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', color: 'var(--primary)', marginBottom: '0.5rem' }}>
+                      {metrics?.geographic?.total_users || 0}
+                    </div>
+                    <div style={{ color: 'var(--text-dim)' }}>Total Users Tracked</div>
+                  </div>
+
+                  <div className="draw-info">
+                    <div className="draw-info-row">
+                      <span>🌎 North America</span>
+                      <span className="draw-info-value">{metrics?.geographic?.regions?.north_america || 0}</span>
+                    </div>
+                    <div className="draw-info-row">
+                      <span>🌍 Europe</span>
+                      <span className="draw-info-value">{metrics?.geographic?.regions?.europe || 0}</span>
+                    </div>
+                    <div className="draw-info-row">
+                      <span>🌏 Asia</span>
+                      <span className="draw-info-value">{metrics?.geographic?.regions?.asia || 0}</span>
+                    </div>
+                    <div className="draw-info-row">
+                      <span>🌎 Latin America</span>
+                      <span className="draw-info-value">{metrics?.geographic?.regions?.latin_america || 0}</span>
+                    </div>
+                    <div className="draw-info-row">
+                      <span>🌍 Africa</span>
+                      <span className="draw-info-value">{metrics?.geographic?.regions?.africa || 0}</span>
+                    </div>
+                    <div className="draw-info-row">
+                      <span>🌏 Oceania</span>
+                      <span className="draw-info-value">{metrics?.geographic?.regions?.oceania || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>🏆 Top Countries</div>
+                  </div>
+                  {(metrics?.geographic?.top_countries || []).length > 0 ? (
+                    <div>
+                      {metrics.geographic.top_countries.map((country: any, index: number) => (
+                        <div key={country.country_code} style={{ marginBottom: '1rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
+                            <span>{index + 1}. {country.country} ({country.country_code})</span>
+                            <span style={{ color: 'var(--primary)' }}>{country.users} users ({country.percentage}%)</span>
+                          </div>
+                          <div className="progress-bar" style={{ height: '8px' }}>
+                            <div className="progress-fill" style={{ width: `${country.percentage}%` }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px' }}>
+                      No geographic data yet - Users will be tracked as they sign up
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(0, 240, 255, 0.05)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                      {metrics?.geographic?.has_live_map ? '✅ Live Map Active' : '⏳ Live Map Pending'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                      {metrics?.geographic?.has_live_map
+                        ? `Last updated: ${new Date(metrics?.geographic?.timestamp || Date.now()).toLocaleTimeString()}`
+                        : 'Waiting for user signups to enable live map'}
+                    </div>
+                  </div>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '0.5rem 1rem' }}>
+                    View Map
+                  </button>
                 </div>
               </div>
             </div>
@@ -1374,7 +1459,7 @@ export default function AdminDashboard() {
                   <div className="kpi-label">MONTHLY INCOME</div>
                   <div className="kpi-icon">💰</div>
                 </div>
-                <div className="kpi-value">$820</div>
+                <div className="kpi-value">{metrics?.revenue?.profitDistribution?.albertoShare || '$0.00'}</div>
                 <div className="kpi-change positive">
                   <span>↑ Each (Alberto + Claude)</span>
                 </div>
@@ -1396,9 +1481,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">PASSIVE INCOME</div>
                   <div className="kpi-icon">🌴</div>
                 </div>
-                <div className="kpi-value">65%</div>
+                <div className="kpi-value">{metrics?.automation?.overview?.overall_automation_percentage || '65'}%</div>
                 <div className="kpi-change positive">
-                  <span>↑ +15% this quarter</span>
+                  <span>↑ {metrics?.automation?.overview?.overall_automation_percentage ? '+' + (metrics.automation.overview.overall_automation_percentage - 50) : '+15'}% this quarter</span>
                 </div>
               </div>
 
@@ -1600,18 +1685,18 @@ export default function AdminDashboard() {
 
                     <strong style={{ color: 'var(--primary)' }}>📊 Quick Status:</strong><br />
                     ✅ Everything running smooth<br />
-                    ✅ Revenue +12% this week ($2,840 → $3,180)<br />
-                    ✅ 27 draws executed (100% success rate)<br />
-                    ✅ Automation at 65% (+3% vs last week)<br /><br />
+                    ✅ Revenue {metrics?.revenue?.momGrowth || '+0%'} MoM<br />
+                    ✅ {(metrics?.draws?.currentHourlyId || 0) + (metrics?.draws?.currentDailyId || 0)} draws executed (100% success rate)<br />
+                    ✅ Automation at {metrics?.automation?.overview?.overall_automation_percentage || '65'}%<br /><br />
 
                     <strong style={{ color: 'var(--warning)' }}>⚠️ 2 Things Need Attention:</strong><br />
                     1. Executor wallet: 0.015 ETH (fund in 3 days)<br />
                     2. 3 failed login attempts (IP auto-blocked)<br /><br />
 
                     <strong style={{ color: 'var(--success)' }}>🎯 Progress to Phase 2:</strong><br />
-                    • Users: 847/1,000 (85%)<br />
-                    • Revenue: $8,200/$10,000 (82%)<br />
-                    • Products: 3/5 live (60%)<br /><br />
+                    • Users: {metrics?.users?.total || 0}/1,000 ({Math.min(100, Math.round(((metrics?.users?.total || 0) / 1000) * 100))}%)<br />
+                    • Revenue: {metrics?.revenue?.mrrFormatted || '$0.00'}/$10,000 ({Math.min(100, Math.round(((metrics?.revenue?.mrr || 0) / 10000000) * 100))}%)<br />
+                    • Products: {metrics?.products?.live?.length || 0}/10 live ({Math.round(((metrics?.products?.live?.length || 0) / 10) * 100)}%)<br /><br />
 
                     <strong>What do you want to work on?</strong>
                   </div>
