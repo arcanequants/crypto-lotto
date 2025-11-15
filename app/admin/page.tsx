@@ -280,10 +280,10 @@ export default function AdminDashboard() {
                   <div className="kpi-label">🤖 AUTOMATION</div>
                   <div className="kpi-icon">⚡</div>
                 </div>
-                <div className="kpi-value">{metrics?.health?.crons?.uptime || '0%'}</div>
+                <div className="kpi-value">{metrics?.automation?.overview?.overall_automation_percentage || metrics?.kpis?.automationPercentage || '65'}%</div>
                 <div className="kpi-change positive">
-                  <span>Uptime</span>
-                  <span style={{ color: 'var(--text-dim)' }}>{metrics?.health?.crons?.totalJobs || 0} jobs</span>
+                  <span>Automated</span>
+                  <span style={{ color: 'var(--text-dim)' }}>{metrics?.health?.crons?.total_jobs || 0} jobs</span>
                 </div>
               </div>
             </div>
@@ -382,8 +382,11 @@ export default function AdminDashboard() {
                 <div className="draw-info">
                   <div className="draw-info-row">
                     <span>All Cron Jobs</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>
-                      {metrics?.health?.crons?.totalJobs > 0 ? '✅ Running' : '❌ No Jobs'}
+                    <span className="draw-info-value" style={{
+                      color: metrics?.health?.crons?.overall_status === 'healthy' ? 'var(--success)' :
+                             metrics?.health?.crons?.overall_status === 'degraded' ? 'var(--warning)' : 'var(--danger)'
+                    }}>
+                      {metrics?.health?.crons?.total_jobs > 0 ? `${metrics.health.crons.healthy}/${metrics.health.crons.total_jobs} Running` : '❌ No Jobs'}
                     </span>
                   </div>
                   <div className="draw-info-row">
@@ -412,7 +415,12 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Success Rate (24h)</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.health?.crons?.uptime || '0%'}</span>
+                    <span className="draw-info-value" style={{
+                      color: (metrics?.automation?.cron_jobs?.success_rate || 0) >= 99 ? 'var(--success)' :
+                             (metrics?.automation?.cron_jobs?.success_rate || 0) >= 95 ? 'var(--warning)' : 'var(--danger)'
+                    }}>
+                      {metrics?.automation?.cron_jobs?.success_rate || '100'}%
+                    </span>
                   </div>
                 </div>
                 <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>View Full Health Report</button>
@@ -1069,9 +1077,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">CRON JOBS</div>
                   <div className="kpi-icon">🤖</div>
                 </div>
-                <div className="kpi-value">{metrics?.health?.crons?.totalJobs || 0}/{metrics?.health?.crons?.totalJobs || 0}</div>
+                <div className="kpi-value">{metrics?.health?.crons?.healthy || 0}/{metrics?.health?.crons?.total_jobs || 0}</div>
                 <div className="kpi-change positive">
-                  <span>{metrics?.health?.crons?.uptime >= 99 ? 'All running' : '⚠️ Issues detected'}</span>
+                  <span>{metrics?.health?.crons?.overall_status === 'healthy' ? 'All running' : '⚠️ Issues detected'}</span>
                 </div>
               </div>
             </div>
@@ -1124,15 +1132,15 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Total Jobs</span>
-                    <span className="draw-info-value">{metrics?.health?.crons?.totalJobs || 0}</span>
+                    <span className="draw-info-value">{metrics?.health?.crons?.total_jobs || 0}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Success Rate (24h)</span>
                     <span className="draw-info-value" style={{
-                      color: (metrics?.health?.crons?.uptime || 0) >= 99 ? 'var(--success)' :
-                             (metrics?.health?.crons?.uptime || 0) >= 95 ? 'var(--warning)' : 'var(--danger)'
+                      color: (metrics?.automation?.cron_jobs?.success_rate || 100) >= 99 ? 'var(--success)' :
+                             (metrics?.automation?.cron_jobs?.success_rate || 100) >= 95 ? 'var(--warning)' : 'var(--danger)'
                     }}>
-                      {metrics?.health?.crons?.uptime || '100'}%
+                      {metrics?.automation?.cron_jobs?.success_rate || '100'}%
                     </span>
                   </div>
                   <div className="draw-info-row">
