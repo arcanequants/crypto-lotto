@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/execute-daily-draw",
       "schedule": "5 2 * * *"
+    },
+    {
+      "path": "/api/cron/update-context",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
