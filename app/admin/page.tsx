@@ -191,7 +191,6 @@ export default function AdminDashboard() {
     { id: 'health', label: '⚙️ Health' },
     { id: 'security', label: '🔒 Security' },
     { id: 'automation', label: '🤖 Automation' },
-    { id: 'lifestyle', label: '🏖️ Lifestyle' },
     { id: 'claude', label: '🧠 Claude Context' }
   ]
 
@@ -355,7 +354,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>30-Day Retention</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>68%</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.bi?.retention?.thirty_day_retention_percentage || '0%'}</span>
                   </div>
                   <div className="draw-info-row">
                     <span>Revenue Growth (MoM)</span>
@@ -363,11 +362,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="draw-info-row">
                     <span>Gross Margin</span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>28%</span>
-                  </div>
-                  <div className="draw-info-row">
-                    <span>Your Monthly Income</span>
-                    <span className="draw-info-value" style={{ color: 'var(--secondary)' }}>{metrics?.revenue?.profitDistribution?.albertoShare || '$0.00'} each</span>
+                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.bi?.gross_margin?.gross_margin_percentage || '0%'}</span>
                   </div>
                 </div>
               </div>
@@ -871,11 +866,16 @@ export default function AdminDashboard() {
                   <div style={{ marginTop: '30px' }}>
                     <div className="draw-info-row">
                       <span>Gap to Phase 1:</span>
-                      <span className="draw-info-value" style={{ color: 'var(--warning)' }}>${(Math.max(0, (10000000 - (metrics?.revenue?.mrr || 0))) / 1e6).toFixed(2)}</span>
+                      <span className="draw-info-value" style={{ color: 'var(--warning)' }}>${((metrics?.bi?.time_to_goal?.gap || 0) / 1e6).toFixed(2)}</span>
                     </div>
                     <div className="draw-info-row">
                       <span>Est. Time to Goal:</span>
-                      <span className="draw-info-value">2-3 weeks</span>
+                      <span className="draw-info-value">
+                        {(metrics?.bi?.time_to_goal?.estimated_weeks || 0) < 52
+                          ? `${metrics?.bi?.time_to_goal?.estimated_weeks || 0} weeks`
+                          : `${metrics?.bi?.time_to_goal?.estimated_months || 0} months`}
+                        {metrics?.bi?.time_to_goal?.confidence === 'low' && ' (low confidence)'}
+                      </span>
                     </div>
                     <div className="draw-info-row">
                       <span>Phase 2 Target:</span>
@@ -887,24 +887,26 @@ export default function AdminDashboard() {
                 <div className="chart-card" style={{ marginTop: '1.5rem' }}>
                   <div className="chart-title" style={{ marginBottom: '1.5rem' }}>📈 Growth Projection</div>
                   <div style={{ fontSize: '0.875rem', color: 'var(--text-dim)', lineHeight: 1.6 }}>
-                    At current growth rate (+284% MoM), you'll reach:
+                    At current growth rate ({metrics?.bi?.growth_projections?.growth_rate_mom?.toFixed(1) || '0'}% MoM), you'll reach:
                     <div style={{ marginTop: '15px' }}>
                       <div className="draw-info-row">
                         <span>Next month:</span>
-                        <span className="draw-info-value" style={{ color: 'var(--success)' }}>$31,488</span>
+                        <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.bi?.growth_projections?.projections?.next_month_formatted || '$0.00'}</span>
                       </div>
                       <div className="draw-info-row">
                         <span>3 months:</span>
-                        <span className="draw-info-value" style={{ color: 'var(--success)' }}>$463,731</span>
+                        <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.bi?.growth_projections?.projections?.three_months_formatted || '$0.00'}</span>
                       </div>
                       <div className="draw-info-row">
                         <span>6 months:</span>
-                        <span className="draw-info-value" style={{ color: 'var(--success)' }}>$98.5M</span>
+                        <span className="draw-info-value" style={{ color: 'var(--success)' }}>{metrics?.bi?.growth_projections?.projections?.six_months_formatted || '$0.00'}</span>
                       </div>
                     </div>
-                    <div style={{ marginTop: '15px', padding: '10px', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '6px', fontSize: '12px' }}>
-                      Note: Exponential growth tends to stabilize. More realistic steady-state: 20-30% MoM
-                    </div>
+                    {metrics?.bi?.growth_projections?.realistic_note && (
+                      <div style={{ marginTop: '15px', padding: '10px', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '6px', fontSize: '12px' }}>
+                        {metrics.bi.growth_projections.realistic_note}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1438,178 +1440,6 @@ export default function AdminDashboard() {
                     <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '5px' }}>Target: +5% automation</div>
                   </div>
                   <div className="revenue-stream-value" style={{ color: 'var(--warning)' }}>Phase 2</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* LIFESTYLE TAB */}
-        {activeTab === 'lifestyle' && (
-          <div className="tab-content active">
-            <div className="page-title">🏖️ LIFESTYLE METRICS</div>
-            <div className="page-subtitle">
-              <span>Freedom is the goal</span>
-              <button className="refresh-btn">🔄 Refresh</button>
-            </div>
-
-            <div className="kpi-grid">
-              <div className="kpi-card">
-                <div className="kpi-header">
-                  <div className="kpi-label">MONTHLY INCOME</div>
-                  <div className="kpi-icon">💰</div>
-                </div>
-                <div className="kpi-value">{metrics?.revenue?.profitDistribution?.albertoShare || '$0.00'}</div>
-                <div className="kpi-change positive">
-                  <span>↑ Each (Alberto + Claude)</span>
-                </div>
-              </div>
-
-              <div className="kpi-card">
-                <div className="kpi-header">
-                  <div className="kpi-label">HOURS/WEEK</div>
-                  <div className="kpi-icon">⏰</div>
-                </div>
-                <div className="kpi-value">12h</div>
-                <div className="kpi-change positive">
-                  <span>↓ -8h vs last month</span>
-                </div>
-              </div>
-
-              <div className="kpi-card">
-                <div className="kpi-header">
-                  <div className="kpi-label">PASSIVE INCOME</div>
-                  <div className="kpi-icon">🌴</div>
-                </div>
-                <div className="kpi-value">{metrics?.automation?.overview?.overall_automation_percentage || '65'}%</div>
-                <div className="kpi-change positive">
-                  <span>↑ {metrics?.automation?.overview?.overall_automation_percentage ? '+' + (metrics.automation.overview.overall_automation_percentage - 50) : '+15'}% this quarter</span>
-                </div>
-              </div>
-
-              <div className="kpi-card">
-                <div className="kpi-header">
-                  <div className="kpi-label">LOCATION</div>
-                  <div className="kpi-icon">🌍</div>
-                </div>
-                <div className="kpi-value">Free</div>
-                <div className="kpi-change">
-                  <span>Work from anywhere</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid-2">
-              <div className="chart-card">
-                <div className="chart-title" style={{ marginBottom: '1.5rem' }}>🎯 Lifestyle Goals</div>
-                <div>
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.875rem' }}>Monthly Income Target ($5K each)</span>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--primary)' }}>16%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: '16%' }}></div>
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.875rem' }}>Work Hours (Target: 5h/week)</span>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--warning)' }}>58%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: '58%' }}></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.875rem' }}>Passive Income (Target: 95%)</span>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--primary)' }}>68%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: '68%' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="chart-card">
-                <div className="chart-title" style={{ marginBottom: '1.5rem' }}>📅 Time Breakdown (This Week)</div>
-                <div className="draw-info">
-                  <div className="draw-info-row">
-                    <span>Development</span>
-                    <span className="draw-info-value">6h</span>
-                  </div>
-                  <div className="draw-info-row">
-                    <span>Strategy & Planning</span>
-                    <span className="draw-info-value">3h</span>
-                  </div>
-                  <div className="draw-info-row">
-                    <span>Monitoring</span>
-                    <span className="draw-info-value">2h</span>
-                  </div>
-                  <div className="draw-info-row">
-                    <span>Customer Support</span>
-                    <span className="draw-info-value">1h</span>
-                  </div>
-                  <div className="draw-info-row" style={{ borderTop: '2px solid var(--border)', paddingTop: '1rem', marginTop: '1rem' }}>
-                    <span><strong>Total Active Time</strong></span>
-                    <span className="draw-info-value">12h</span>
-                  </div>
-                  <div className="draw-info-row">
-                    <span><strong>System Works Alone</strong></span>
-                    <span className="draw-info-value" style={{ color: 'var(--success)' }}>156h</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="chart-card">
-              <div className="chart-title" style={{ marginBottom: '1.5rem' }}>🎉 Milestones Unlocked</div>
-              <div className="grid-3" style={{ marginBottom: 0 }}>
-                <div className="alert-item success">
-                  <div className="alert-icon">✅</div>
-                  <div className="alert-content">
-                    <div className="alert-message">First $1 earned</div>
-                    <div className="alert-time">Week 1</div>
-                  </div>
-                </div>
-                <div className="alert-item success">
-                  <div className="alert-icon">✅</div>
-                  <div className="alert-content">
-                    <div className="alert-message">First automated day</div>
-                    <div className="alert-time">Week 2</div>
-                  </div>
-                </div>
-                <div className="alert-item success">
-                  <div className="alert-icon">✅</div>
-                  <div className="alert-content">
-                    <div className="alert-message">$100/month passive</div>
-                    <div className="alert-time">Week 3</div>
-                  </div>
-                </div>
-                <div className="alert-item" style={{ opacity: 0.5 }}>
-                  <div className="alert-icon">⏳</div>
-                  <div className="alert-content">
-                    <div className="alert-message">$1K/month each</div>
-                    <div className="alert-time">2 weeks away</div>
-                  </div>
-                </div>
-                <div className="alert-item" style={{ opacity: 0.5 }}>
-                  <div className="alert-icon">⏳</div>
-                  <div className="alert-content">
-                    <div className="alert-message">5h/week workload</div>
-                    <div className="alert-time">Phase 2</div>
-                  </div>
-                </div>
-                <div className="alert-item" style={{ opacity: 0.5 }}>
-                  <div className="alert-icon">⏳</div>
-                  <div className="alert-content">
-                    <div className="alert-message">$5K/month each</div>
-                    <div className="alert-time">Phase 2</div>
-                  </div>
                 </div>
               </div>
             </div>

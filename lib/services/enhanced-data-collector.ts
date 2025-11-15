@@ -11,6 +11,7 @@ import { getSystemHealthMetrics, getSystemMetricsSummary } from './system-metric
 import { getSecurityMetrics } from './security-metrics-service'
 import { getAutomationMetrics } from './automation-metrics-service'
 import { getGeographicDistribution } from './geographic-distribution-service'
+import { getAllBIMetrics } from './business-intelligence-service'
 
 // ============================================
 // ENHANCED AGGREGATION
@@ -83,6 +84,16 @@ export async function aggregateAllMetricsEnhanced() {
     const netProfit = monthlyRevenue * 0.20  // 20% profit margin
     const albertoShare = netProfit * 0.50
     const claudeShare = netProfit * 0.50
+
+    // Calculate Business Intelligence metrics
+    const growthRateMoM = parseFloat((growthMetrics.revenue?.growth_percentage || '+0%').replace('%', '').replace('+', ''))
+    const totalPrizePools = hourlyPrizePool + dailyPrizePool
+    const biMetrics = await getAllBIMetrics(
+      mrr,
+      growthRateMoM,
+      totalRevenue,
+      totalPrizePools * 1e6 // Convert back to USDC units
+    ).catch(() => null)
 
     return {
       timestamp: new Date().toISOString(),
@@ -341,6 +352,51 @@ export async function aggregateAllMetricsEnhanced() {
         top_countries: [],
         has_live_map: false,
         timestamp: new Date().toISOString(),
+      },
+
+      // NEW: Business Intelligence metrics
+      bi: biMetrics || {
+        growth_projections: {
+          current_mrr: 0,
+          growth_rate_mom: 0,
+          projections: {
+            next_month: 0,
+            three_months: 0,
+            six_months: 0,
+            next_month_formatted: '$0.00',
+            three_months_formatted: '$0.00',
+            six_months_formatted: '$0.00',
+          },
+          realistic_note: '',
+        },
+        time_to_goal: {
+          current_mrr: 0,
+          target_mrr: 10000000,
+          gap: 10000000,
+          monthly_growth_rate: 0,
+          estimated_months: 999,
+          estimated_weeks: 999,
+          estimated_date: new Date().toISOString(),
+          confidence: 'low' as const,
+        },
+        retention: {
+          thirty_day_retention: 0,
+          thirty_day_retention_percentage: '0%',
+          total_users_30_days_ago: 0,
+          returned_users: 0,
+          new_users_last_30_days: 0,
+        },
+        gross_margin: {
+          gross_revenue: 0,
+          total_costs: 0,
+          gross_margin: 0,
+          gross_margin_percentage: '0%',
+          breakdown: {
+            prize_pools: 0,
+            gas_fees: 0,
+            platform_fees: 0,
+          },
+        },
       },
     }
   } catch (error) {
