@@ -235,9 +235,9 @@ export default function AdminDashboard() {
                   <div className="kpi-label">🎮 ACTIVE PRODUCTS</div>
                   <div className="kpi-icon">🎯</div>
                 </div>
-                <div className="kpi-value">{metrics?.products?.live || 0}/{metrics?.products?.total || 10}</div>
+                <div className="kpi-value">{metrics?.products?.live?.length || 0}/{metrics?.products?.all?.length || 10}</div>
                 <div className="kpi-change positive">
-                  <span>↑ +{metrics?.products?.live || 0}</span>
+                  <span>↑ +{metrics?.products?.live?.length || 0}</span>
                   <span style={{ color: 'var(--text-dim)' }}>live</span>
                 </div>
               </div>
@@ -405,11 +405,11 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                    <span>Products ({metrics?.products?.live || 0}/10 live)</span>
-                    <span style={{ color: 'var(--warning)' }}>{Math.round(((metrics?.products?.live || 0) / 10) * 100)}%</span>
+                    <span>Products ({metrics?.products?.live?.length || 0}/10 live)</span>
+                    <span style={{ color: 'var(--warning)' }}>{Math.round(((metrics?.products?.live?.length || 0) / 10) * 100)}%</span>
                   </div>
                   <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${Math.round(((metrics?.products?.live || 0) / 10) * 100)}%` }}></div>
+                    <div className="progress-fill" style={{ width: `${Math.round(((metrics?.products?.live?.length || 0) / 10) * 100)}%` }}></div>
                   </div>
                 </div>
               </div>
