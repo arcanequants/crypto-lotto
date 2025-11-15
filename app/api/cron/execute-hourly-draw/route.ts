@@ -3,6 +3,7 @@ import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { requireCronAuth } from '@/lib/security/cron';
+import { withCronMonitoring } from '@/lib/services/cron-monitoring-service';
 
 // Force dynamic rendering - prevents Next.js from caching this route
 export const dynamic = 'force-dynamic';
@@ -86,20 +87,22 @@ const LOTTERY_ABI = [
 ] as const;
 
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Verify CRON authentication
-    const authResponse = requireCronAuth(request);
-    if (authResponse) {
-      return authResponse; // Unauthorized
-    }
+  // 1. Verify CRON authentication FIRST (before monitoring wrapper)
+  const authResponse = requireCronAuth(request);
+  if (authResponse) {
+    return authResponse; // Unauthorized
+  }
 
-    console.log('⏰ CRON JOB: Execute Hourly Draw (STEP 2) - Starting...');
+  // 2. Wrap entire execution in monitoring
+  return withCronMonitoring('execute-hourly-draw', async () => {
+    try {
+      console.log('⏰ CRON JOB: Execute Hourly Draw (STEP 2) - Starting...');
 
-    // 2. Get contract address
-    const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO as `0x${string}`;
-    if (!LOTTERY_CONTRACT || LOTTERY_CONTRACT === '0x0000000000000000000000000000000000000000') {
-      throw new Error('NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO not configured');
-    }
+      // 2. Get contract address
+      const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO as `0x${string}`;
+      if (!LOTTERY_CONTRACT || LOTTERY_CONTRACT === '0x0000000000000000000000000000000000000000') {
+        throw new Error('NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO not configured');
+      }
 
     // 3. Get Alchemy RPC URL
     const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
@@ -287,40 +290,41 @@ export async function GET(request: NextRequest) {
     console.log(`  - Winning Number: ${newWinningNumber}`);
     console.log(`  - Total Tickets: ${newTotalTickets}`);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Hourly draw executed successfully (STEP 2 complete)',
-      oldDrawId: Number(currentDrawId),
-      newDrawId: Number(newDrawId),
-      winningNumber: Number(newWinningNumber),
-      totalTickets: Number(newTotalTickets),
-      txHash: hash,
-      gasUsed: receipt.gasUsed.toString(),
-      blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
-    });
+      return NextResponse.json({
+        success: true,
+        message: 'Hourly draw executed successfully (STEP 2 complete)',
+        oldDrawId: Number(currentDrawId),
+        newDrawId: Number(newDrawId),
+        winningNumber: Number(newWinningNumber),
+        totalTickets: Number(newTotalTickets),
+        txHash: hash,
+        gasUsed: receipt.gasUsed.toString(),
+        blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
+      });
 
-  } catch (error: any) {
-    console.error('❌ Error executing hourly draw:', error);
+    } catch (error: any) {
+      console.error('❌ Error executing hourly draw:', error);
 
-    // Check if it's a revert error with a specific message
-    let errorMessage = error.message;
-    if (error.message.includes('Too early')) {
-      errorMessage = 'Too early - must wait 5 blocks after reveal block';
-    } else if (error.message.includes('Too late')) {
-      errorMessage = 'Too late - beyond 256 block limit (SmartBillions protection)';
-    } else if (error.message.includes('Sales not closed')) {
-      errorMessage = 'Sales not closed - call close-hourly-draw first';
-    } else if (error.message.includes('Hash') && error.message.includes('not available')) {
-      errorMessage = 'Blockhash not available - may need to retry';
+      // Check if it's a revert error with a specific message
+      let errorMessage = error.message;
+      if (error.message.includes('Too early')) {
+        errorMessage = 'Too early - must wait 5 blocks after reveal block';
+      } else if (error.message.includes('Too late')) {
+        errorMessage = 'Too late - beyond 256 block limit (SmartBillions protection)';
+      } else if (error.message.includes('Sales not closed')) {
+        errorMessage = 'Sales not closed - call close-hourly-draw first';
+      } else if (error.message.includes('Hash') && error.message.includes('not available')) {
+        errorMessage = 'Blockhash not available - may need to retry';
+      }
+
+      return NextResponse.json(
+        {
+          error: 'Failed to execute hourly draw',
+          details: errorMessage,
+          fullError: error.message
+        },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json(
-      {
-        error: 'Failed to execute hourly draw',
-        details: errorMessage,
-        fullError: error.message
-      },
-      { status: 500 }
-    );
-  }
+  });
 }

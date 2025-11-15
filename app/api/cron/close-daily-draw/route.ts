@@ -3,6 +3,7 @@ import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 import { requireCronAuth } from '@/lib/security/cron';
+import { withCronMonitoring } from '@/lib/services/cron-monitoring-service';
 
 /**
  * CRON JOB: Close Daily Draw (STEP 1 of 2-step process)
@@ -74,14 +75,16 @@ const LOTTERY_ABI = [
 ] as const;
 
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Verify CRON authentication
-    const authResponse = requireCronAuth(request);
-    if (authResponse) {
-      return authResponse; // Unauthorized
-    }
+  // 1. Verify CRON authentication FIRST
+  const authResponse = requireCronAuth(request);
+  if (authResponse) {
+    return authResponse; // Unauthorized
+  }
 
-    console.log('⏰ CRON JOB: Close Daily Draw (STEP 1) - Starting...');
+  // 2. Wrap entire execution in monitoring
+  return withCronMonitoring('close-daily-draw', async () => {
+    try {
+      console.log('⏰ CRON JOB: Close Daily Draw (STEP 1) - Starting...');
 
     // 2. Get contract address
     const LOTTERY_CONTRACT = process.env.NEXT_PUBLIC_LOTTERY_DUAL_CRYPTO as `0x${string}`;
@@ -236,26 +239,27 @@ export async function GET(request: NextRequest) {
     console.log(`  - Sales Closed: ${newSalesClosed}`);
     console.log(`  - Next Step: Wait ~5 minutes (25 blocks), then call execute-daily-draw`);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Daily draw closed successfully (STEP 1 complete)',
-      drawId: Number(currentDrawId),
-      commitBlock: Number(newCommitBlock),
-      revealBlock: Number(newRevealBlock),
-      salesClosed: true,
-      txHash: hash,
-      gasUsed: receipt.gasUsed.toString(),
-      nextStep: 'Wait ~5 minutes, then call execute-daily-draw'
-    });
+      return NextResponse.json({
+        success: true,
+        message: 'Daily draw closed successfully (STEP 1 complete)',
+        drawId: Number(currentDrawId),
+        commitBlock: Number(newCommitBlock),
+        revealBlock: Number(newRevealBlock),
+        salesClosed: true,
+        txHash: hash,
+        gasUsed: receipt.gasUsed.toString(),
+        nextStep: 'Wait ~5 minutes, then call execute-daily-draw'
+      });
 
-  } catch (error: any) {
-    console.error('❌ Error closing daily draw:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to close daily draw',
-        details: error.message
-      },
-      { status: 500 }
-    );
-  }
+    } catch (error: any) {
+      console.error('❌ Error closing daily draw:', error);
+      return NextResponse.json(
+        {
+          error: 'Failed to close daily draw',
+          details: error.message
+        },
+        { status: 500 }
+      );
+    }
+  });
 }

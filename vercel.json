@@ -20,6 +20,10 @@
     {
       "path": "/api/cron/update-context",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/daily-snapshot",
+      "schedule": "0 0 * * *"
     }
   ]
 }

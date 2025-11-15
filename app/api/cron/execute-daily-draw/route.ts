@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireCronAuth } from '@/lib/security/cron';
 import lotteryContract from '@/lib/contracts/lottery-contract';
+import { withCronMonitoring } from '@/lib/services/cron-monitoring-service';
 
 /**
  * CRON JOB: Execute Daily Draw (STEP 2 of 2-step process)
@@ -41,15 +42,17 @@ import lotteryContract from '@/lib/contracts/lottery-contract';
  */
 
 export async function GET(request: NextRequest) {
-  try {
-    // 1. Verify CRON authentication
-    const authResponse = requireCronAuth(request);
-    if (authResponse) {
-      return authResponse; // Unauthorized
-    }
+  // 1. Verify CRON authentication FIRST
+  const authResponse = requireCronAuth(request);
+  if (authResponse) {
+    return authResponse; // Unauthorized
+  }
 
-    console.log('⏰ CRON JOB: Execute Daily Draw (STEP 2) - Starting...');
-    console.log('📋 Using centralized contract config:', lotteryContract.info);
+  // 2. Wrap entire execution in monitoring
+  return withCronMonitoring('execute-daily-draw', async () => {
+    try {
+      console.log('⏰ CRON JOB: Execute Daily Draw (STEP 2) - Starting...');
+      console.log('📋 Using centralized contract config:', lotteryContract.info);
 
     // 2. Create clients using centralized config
     const publicClient = lotteryContract.createPublicClient();
@@ -185,40 +188,41 @@ export async function GET(request: NextRequest) {
     console.log(`  - Winning Number: ${updatedDrawData.winningNumber}`);
     console.log(`  - Total Tickets: ${updatedDrawData.totalTickets}`);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Daily draw executed successfully (STEP 2 complete)',
-      oldDrawId: Number(currentDrawId),
-      newDrawId: Number(newDrawId),
-      winningNumber: Number(updatedDrawData.winningNumber),
-      totalTickets: Number(updatedDrawData.totalTickets),
-      txHash: hash,
-      gasUsed: receipt.gasUsed.toString(),
-      blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
-    });
+      return NextResponse.json({
+        success: true,
+        message: 'Daily draw executed successfully (STEP 2 complete)',
+        oldDrawId: Number(currentDrawId),
+        newDrawId: Number(newDrawId),
+        winningNumber: Number(updatedDrawData.winningNumber),
+        totalTickets: Number(updatedDrawData.totalTickets),
+        txHash: hash,
+        gasUsed: receipt.gasUsed.toString(),
+        blocksUsed: `${revealBlock} to ${revealBlock + BigInt(4)}`
+      });
 
-  } catch (error: any) {
-    console.error('❌ Error executing daily draw:', error);
+    } catch (error: any) {
+      console.error('❌ Error executing daily draw:', error);
 
-    // Check if it's a revert error with a specific message
-    let errorMessage = error.message;
-    if (error.message.includes('Too early')) {
-      errorMessage = 'Too early - must wait 5 blocks after reveal block';
-    } else if (error.message.includes('Too late')) {
-      errorMessage = 'Too late - beyond 256 block limit (SmartBillions protection)';
-    } else if (error.message.includes('Sales not closed')) {
-      errorMessage = 'Sales not closed - call close-daily-draw first';
-    } else if (error.message.includes('Hash') && error.message.includes('not available')) {
-      errorMessage = 'Blockhash not available - may need to retry';
+      // Check if it's a revert error with a specific message
+      let errorMessage = error.message;
+      if (error.message.includes('Too early')) {
+        errorMessage = 'Too early - must wait 5 blocks after reveal block';
+      } else if (error.message.includes('Too late')) {
+        errorMessage = 'Too late - beyond 256 block limit (SmartBillions protection)';
+      } else if (error.message.includes('Sales not closed')) {
+        errorMessage = 'Sales not closed - call close-daily-draw first';
+      } else if (error.message.includes('Hash') && error.message.includes('not available')) {
+        errorMessage = 'Blockhash not available - may need to retry';
+      }
+
+      return NextResponse.json(
+        {
+          error: 'Failed to execute daily draw',
+          details: errorMessage,
+          fullError: error.message
+        },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json(
-      {
-        error: 'Failed to execute daily draw',
-        details: errorMessage,
-        fullError: error.message
-      },
-      { status: 500 }
-    );
-  }
+  });
 }
