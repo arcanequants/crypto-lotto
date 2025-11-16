@@ -1,11 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, CheckCircle2, XCircle, RefreshCw, Activity, Database, Zap, Wallet } from 'lucide-react'
 
 interface HealthData {
   timestamp: string
@@ -23,6 +18,7 @@ export default function AdminHealthPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
+  const [activeTab, setActiveTab] = useState('overview')
 
   const fetchHealthData = async () => {
     try {
@@ -51,9 +47,9 @@ export default function AdminHealthPage() {
 
   if (loading && !healthData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '24px', marginBottom: '16px' }}>⟳</div>
           <p>Loading health data...</p>
         </div>
       </div>
@@ -62,419 +58,431 @@ export default function AdminHealthPage() {
 
   if (error && !healthData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-500">
-              <XCircle className="w-5 h-5" />
-              Error Loading Health Data
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <Button onClick={fetchHealthData} className="w-full">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{
+          border: '1px solid #ef4444',
+          borderRadius: '8px',
+          padding: '24px',
+          maxWidth: '500px',
+          backgroundColor: '#fff'
+        }}>
+          <h2 style={{ color: '#ef4444', marginBottom: '16px' }}>⚠ Error Loading Health Data</h2>
+          <p style={{ marginBottom: '16px', color: '#666' }}>{error}</p>
+          <button
+            onClick={fetchHealthData}
+            style={{
+              width: '100%',
+              padding: '8px 16px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }
 
   if (!healthData) return null
 
+  const getStatusColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'healthy': return '#22c55e'
+      case 'degraded': return '#eab308'
+      case 'warning': return '#f97316'
+      case 'critical': return '#ef4444'
+      default: return '#6b7280'
+    }
+  }
+
+  const getStatusBgColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'healthy': return '#f0fdf4'
+      case 'degraded': return '#fefce8'
+      case 'warning': return '#fff7ed'
+      case 'critical': return '#fef2f2'
+      default: return '#f9fafb'
+    }
+  }
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 className="text-3xl font-bold">System Health Report</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold', marginBottom: '8px' }}>System Health Report</h1>
+          <p style={{ color: '#666', fontSize: '14px' }}>
             Last updated: {new Date(healthData.timestamp).toLocaleString()}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
             onClick={() => setAutoRefresh(!autoRefresh)}
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '4px',
+              backgroundColor: 'white',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
           >
-            {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
-          </Button>
-          <Button onClick={fetchHealthData} size="sm">
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+            {autoRefresh ? '✓ Auto-refresh ON' : 'Auto-refresh OFF'}
+          </button>
+          <button
+            onClick={fetchHealthData}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            {loading ? '⟳ ' : '↻ '}Refresh
+          </button>
         </div>
       </div>
 
       {/* Overall Status */}
-      <Card className={getStatusColor(healthData.overall_status)}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {getStatusIcon(healthData.overall_status)}
-            Overall System Status: {healthData.overall_status.toUpperCase()}
-          </CardTitle>
-        </CardHeader>
-      </Card>
+      <div style={{
+        border: `2px solid ${getStatusColor(healthData.overall_status)}`,
+        borderRadius: '8px',
+        padding: '20px',
+        marginBottom: '24px',
+        backgroundColor: getStatusBgColor(healthData.overall_status)
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>
+          Overall System Status: {healthData.overall_status.toUpperCase()}
+        </h2>
+      </div>
 
       {/* Alerts */}
       {healthData.alerts && healthData.alerts.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold">Active Alerts</h2>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'semibold', marginBottom: '16px' }}>Active Alerts</h2>
           {healthData.alerts.map((alert: any, idx: number) => (
-            <Card key={idx} className={getAlertColor(alert.severity)}>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {alert.title}
-                </CardTitle>
-                <CardDescription>{alert.message}</CardDescription>
-              </CardHeader>
-            </Card>
+            <div
+              key={idx}
+              style={{
+                border: `1px solid ${alert.severity === 'critical' ? '#ef4444' : '#eab308'}`,
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '8px',
+                backgroundColor: alert.severity === 'critical' ? '#fef2f2' : '#fefce8'
+              }}
+            >
+              <h3 style={{ fontWeight: '600', marginBottom: '4px' }}>⚠ {alert.title}</h3>
+              <p style={{ color: '#666', fontSize: '14px' }}>{alert.message}</p>
+            </div>
           ))}
         </div>
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="crons">Cron Jobs</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="raw">Raw Data</TabsTrigger>
-        </TabsList>
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid #e5e7eb' }}>
+          {['overview', 'crons', 'system', 'events', 'raw'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                backgroundColor: activeTab === tab ? '#f3f4f6' : 'transparent',
+                borderBottom: activeTab === tab ? '2px solid #3b82f6' : 'none',
+                cursor: 'pointer',
+                fontWeight: activeTab === tab ? '600' : '400',
+                textTransform: 'capitalize'
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {/* Tab Content */}
+      <div style={{ minHeight: '400px' }}>
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {activeTab === 'overview' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
             {/* Revenue */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  Total Revenue
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{healthData.metrics.revenue.totalFormatted}</div>
-                <p className="text-xs text-muted-foreground">Platform + Prizes</p>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>💰 Total Revenue</h3>
+              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.metrics.revenue.totalFormatted}</div>
+              <p style={{ fontSize: '12px', color: '#999' }}>Platform + Prizes</p>
+            </div>
 
             {/* Users */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{healthData.metrics.users.total}</div>
-                <p className="text-xs text-muted-foreground">
-                  Active: {healthData.metrics.users.active}
-                </p>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>👥 Total Users</h3>
+              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.metrics.users.total}</div>
+              <p style={{ fontSize: '12px', color: '#999' }}>Active: {healthData.metrics.users.active}</p>
+            </div>
 
             {/* Tickets */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{healthData.metrics.tickets.total}</div>
-                <p className="text-xs text-muted-foreground">
-                  H: {healthData.metrics.tickets.hourly} | D: {healthData.metrics.tickets.daily}
-                </p>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>🎫 Total Tickets</h3>
+              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.metrics.tickets.total}</div>
+              <p style={{ fontSize: '12px', color: '#999' }}>
+                H: {healthData.metrics.tickets.hourly} | D: {healthData.metrics.tickets.daily}
+              </p>
+            </div>
 
             {/* Executor Balance */}
-            <Card className={healthData.system.executor.low_balance_warning ? 'border-red-500' : ''}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Wallet className="w-4 h-4" />
-                  Executor Balance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{healthData.system.executor.balance_formatted}</div>
-                <p className="text-xs text-muted-foreground">
-                  {healthData.system.executor.low_balance_warning ? 'LOW BALANCE!' : 'OK'}
-                </p>
-              </CardContent>
-            </Card>
+            <div style={{
+              border: `1px solid ${healthData.system.executor.low_balance_warning ? '#ef4444' : '#e5e7eb'}`,
+              borderRadius: '8px',
+              padding: '16px',
+              backgroundColor: healthData.system.executor.low_balance_warning ? '#fef2f2' : 'white'
+            }}>
+              <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>👛 Executor Balance</h3>
+              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.system.executor.balance_formatted}</div>
+              <p style={{ fontSize: '12px', color: healthData.system.executor.low_balance_warning ? '#ef4444' : '#999' }}>
+                {healthData.system.executor.low_balance_warning ? 'LOW BALANCE!' : 'OK'}
+              </p>
+            </div>
           </div>
-        </TabsContent>
+        )}
 
         {/* Cron Jobs Tab */}
-        <TabsContent value="crons" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cron Jobs Status</CardTitle>
-              <CardDescription>
+        {activeTab === 'crons' && (
+          <div>
+            <div style={{ marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Cron Jobs Status</h3>
+              <p style={{ color: '#666', fontSize: '14px' }}>
                 {healthData.crons.healthy} healthy, {healthData.crons.degraded} degraded, {healthData.crons.down} down
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {healthData.crons.jobs.map((job: any) => (
-                  <div key={job.job_name} className="flex items-center justify-between p-3 border rounded">
-                    <div>
-                      <div className="font-medium">{job.job_name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Last: {job.last_execution ? new Date(job.last_execution).toLocaleString() : 'Never'}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant={getJobStatusVariant(job.status)}>{job.status}</Badge>
-                      <div className="text-sm text-muted-foreground mt-1">
-                        Uptime: {job.uptime_percentage}% ({job.total_executions} runs)
-                      </div>
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {healthData.crons.jobs.map((job: any) => (
+                <div key={job.job_name} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '16px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  backgroundColor: 'white'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>{job.job_name}</div>
+                    <div style={{ fontSize: '14px', color: '#666' }}>
+                      Last: {job.last_execution ? new Date(job.last_execution).toLocaleString() : 'Never'}
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{
+                      padding: '4px 12px',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      backgroundColor: job.status === 'healthy' ? '#dcfce7' : job.status === 'degraded' ? '#fef3c7' : '#fee2e2',
+                      color: job.status === 'healthy' ? '#166534' : job.status === 'degraded' ? '#854d0e' : '#991b1b'
+                    }}>
+                      {job.status}
+                    </span>
+                    <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                      Uptime: {job.uptime_percentage}% ({job.total_executions} runs)
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-          {/* Recent Failures */}
-          {healthData.crons.recent_failures && healthData.crons.recent_failures.length > 0 && (
-            <Card className="border-red-500">
-              <CardHeader>
-                <CardTitle className="text-red-500">Recent Failures (Last 24h)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+            {/* Recent Failures */}
+            {healthData.crons.recent_failures && healthData.crons.recent_failures.length > 0 && (
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '12px', color: '#ef4444' }}>
+                  Recent Failures (Last 24h)
+                </h3>
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                   {healthData.crons.recent_failures.map((failure: any) => (
-                    <div key={failure.id} className="p-3 border border-red-200 rounded">
-                      <div className="font-medium">{failure.job_name}</div>
-                      <div className="text-sm text-muted-foreground">
+                    <div key={failure.id} style={{
+                      padding: '12px',
+                      border: '1px solid #fca5a5',
+                      borderRadius: '8px',
+                      marginBottom: '8px',
+                      backgroundColor: '#fef2f2'
+                    }}>
+                      <div style={{ fontWeight: '600' }}>{failure.job_name}</div>
+                      <div style={{ fontSize: '14px', color: '#666' }}>
                         {new Date(failure.execution_time).toLocaleString()}
                       </div>
                       {failure.error_message && (
-                        <div className="text-sm text-red-500 mt-1">{failure.error_message}</div>
+                        <div style={{ fontSize: '14px', color: '#ef4444', marginTop: '4px' }}>
+                          {failure.error_message}
+                        </div>
                       )}
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* System Tab */}
-        <TabsContent value="system" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {activeTab === 'system' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
             {/* Database */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  Database
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Status</span>
-                    <Badge variant={healthData.system.database.status === 'healthy' ? 'default' : 'destructive'}>
-                      {healthData.system.database.status}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Configured</span>
-                    <span>{healthData.environment.supabase_configured ? 'Yes' : 'No'}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>🗄️ Database</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Status</span>
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  backgroundColor: healthData.system.database.status === 'healthy' ? '#dcfce7' : '#fee2e2',
+                  color: healthData.system.database.status === 'healthy' ? '#166534' : '#991b1b'
+                }}>
+                  {healthData.system.database.status}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Configured</span>
+                <span>{healthData.environment.supabase_configured ? 'Yes' : 'No'}</span>
+              </div>
+            </div>
 
             {/* RPC */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  Base RPC
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Status</span>
-                    <Badge variant={healthData.system.rpc.status === 'healthy' ? 'default' : 'destructive'}>
-                      {healthData.system.rpc.status}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Block Number</span>
-                    <span>{healthData.system.rpc.block_number.toLocaleString()}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>⚡ Base RPC</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Status</span>
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  backgroundColor: healthData.system.rpc.status === 'healthy' ? '#dcfce7' : '#fee2e2',
+                  color: healthData.system.rpc.status === 'healthy' ? '#166534' : '#991b1b'
+                }}>
+                  {healthData.system.rpc.status}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Block Number</span>
+                <span>{healthData.system.rpc.block_number.toLocaleString()}</span>
+              </div>
+            </div>
 
             {/* Contract */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Smart Contract</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Status</span>
-                    <Badge>{healthData.system.contract.status}</Badge>
-                  </div>
-                  <div className="text-sm break-all">
-                    <span className="text-muted-foreground">Address:</span><br />
-                    <code className="text-xs">{healthData.system.contract.address}</code>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>📜 Smart Contract</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Status</span>
+                <span>{healthData.system.contract.status}</span>
+              </div>
+              <div style={{ fontSize: '12px', wordBreak: 'break-all' }}>
+                <span style={{ color: '#666' }}>Address:</span><br />
+                <code style={{ fontSize: '10px' }}>{healthData.system.contract.address}</code>
+              </div>
+            </div>
 
             {/* Environment */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Environment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Environment</span>
-                    <Badge variant="outline">{healthData.environment.vercel_env}</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Region</span>
-                    <span>{healthData.environment.vercel_region}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Node Version</span>
-                    <span>{healthData.environment.node_version}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>🌍 Environment</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Environment</span>
+                <span style={{
+                  padding: '2px 8px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '4px',
+                  fontSize: '12px'
+                }}>
+                  {healthData.environment.vercel_env}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Region</span>
+                <span>{healthData.environment.vercel_region}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Node Version</span>
+                <span>{healthData.environment.node_version}</span>
+              </div>
+            </div>
           </div>
-        </TabsContent>
+        )}
 
         {/* Events Tab */}
-        <TabsContent value="events" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Events</CardTitle>
-              <CardDescription>
+        {activeTab === 'events' && (
+          <div>
+            <div style={{ marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Recent Events</h3>
+              <p style={{ color: '#666', fontSize: '14px' }}>
                 Last 50 system events | Unresolved: {healthData.events.total_unresolved}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {healthData.events.recent && healthData.events.recent.length > 0 ? (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {healthData.events.recent.map((event: any) => (
-                    <div key={event.id} className="p-3 border rounded">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium">{event.title}</div>
-                          <div className="text-sm text-muted-foreground">{event.description}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {new Date(event.created_at).toLocaleString()}
-                          </div>
+              </p>
+            </div>
+
+            {healthData.events.recent && healthData.events.recent.length > 0 ? (
+              <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                {healthData.events.recent.map((event: any) => (
+                  <div key={event.id} style={{
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    marginBottom: '8px',
+                    backgroundColor: 'white'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                      <div>
+                        <div style={{ fontWeight: '600' }}>{event.title}</div>
+                        <div style={{ fontSize: '14px', color: '#666' }}>{event.description}</div>
+                        <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                          {new Date(event.created_at).toLocaleString()}
                         </div>
-                        <Badge variant={getSeverityVariant(event.severity)}>{event.severity}</Badge>
                       </div>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        backgroundColor: event.severity === 'critical' || event.severity === 'error' ? '#fee2e2' : event.severity === 'warning' ? '#fef3c7' : '#dbeafe',
+                        color: event.severity === 'critical' || event.severity === 'error' ? '#991b1b' : event.severity === 'warning' ? '#854d0e' : '#1e40af'
+                      }}>
+                        {event.severity}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">No events logged yet</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ textAlign: 'center', color: '#999', padding: '48px 0' }}>No events logged yet</p>
+            )}
+          </div>
+        )}
 
         {/* Raw Data Tab */}
-        <TabsContent value="raw" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Raw JSON Data</CardTitle>
-              <CardDescription>Complete health report for debugging</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <pre className="text-xs bg-muted p-4 rounded overflow-x-auto max-h-[600px] overflow-y-auto">
-                {JSON.stringify(healthData, null, 2)}
-              </pre>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {activeTab === 'raw' && (
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Raw JSON Data</h3>
+            <p style={{ color: '#666', fontSize: '14px', marginBottom: '16px' }}>
+              Complete health report for debugging
+            </p>
+            <pre style={{
+              fontSize: '12px',
+              backgroundColor: '#f9fafb',
+              padding: '16px',
+              borderRadius: '8px',
+              overflowX: 'auto',
+              maxHeight: '600px',
+              overflowY: 'auto',
+              border: '1px solid #e5e7eb'
+            }}>
+              {JSON.stringify(healthData, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
     </div>
   )
-}
-
-function getStatusColor(status: string): string {
-  switch (status.toLowerCase()) {
-    case 'healthy':
-      return 'border-green-500 bg-green-50'
-    case 'degraded':
-      return 'border-yellow-500 bg-yellow-50'
-    case 'warning':
-      return 'border-orange-500 bg-orange-50'
-    case 'critical':
-      return 'border-red-500 bg-red-50'
-    default:
-      return 'border-gray-500 bg-gray-50'
-  }
-}
-
-function getStatusIcon(status: string) {
-  switch (status.toLowerCase()) {
-    case 'healthy':
-      return <CheckCircle2 className="w-6 h-6 text-green-500" />
-    case 'degraded':
-    case 'warning':
-      return <AlertCircle className="w-6 h-6 text-yellow-500" />
-    case 'critical':
-      return <XCircle className="w-6 h-6 text-red-500" />
-    default:
-      return <AlertCircle className="w-6 h-6 text-gray-500" />
-  }
-}
-
-function getAlertColor(severity: string): string {
-  switch (severity.toLowerCase()) {
-    case 'critical':
-      return 'border-red-500 bg-red-50'
-    case 'warning':
-      return 'border-yellow-500 bg-yellow-50'
-    case 'info':
-      return 'border-blue-500 bg-blue-50'
-    default:
-      return 'border-gray-500 bg-gray-50'
-  }
-}
-
-function getJobStatusVariant(status: string): 'default' | 'destructive' | 'secondary' {
-  switch (status.toLowerCase()) {
-    case 'healthy':
-      return 'default'
-    case 'degraded':
-      return 'secondary'
-    case 'down':
-      return 'destructive'
-    default:
-      return 'secondary'
-  }
-}
-
-function getSeverityVariant(severity: string): 'default' | 'destructive' | 'secondary' {
-  switch (severity.toLowerCase()) {
-    case 'critical':
-    case 'error':
-      return 'destructive'
-    case 'warning':
-      return 'secondary'
-    default:
-      return 'default'
-  }
 }
