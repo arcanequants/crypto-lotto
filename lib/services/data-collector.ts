@@ -231,9 +231,21 @@ export async function collectSystemHealth() {
     // Check contract verification (simplified - would need API call to Basescan)
     const contractStatus = 'verified'
 
-    // Get executor wallet balance from environment variable
+    // Get executor wallet balance
+    // Try NEXT_PUBLIC_EXECUTOR_WALLET first, fallback to deriving from WITHDRAWAL_EXECUTOR_PRIVATE_KEY
     let executorBalance = 0
-    const executorAddress = process.env.NEXT_PUBLIC_EXECUTOR_WALLET
+    let executorAddress = process.env.NEXT_PUBLIC_EXECUTOR_WALLET
+
+    // If not set, derive from private key
+    if (!executorAddress && process.env.WITHDRAWAL_EXECUTOR_PRIVATE_KEY) {
+      try {
+        const { privateKeyToAccount } = await import('viem/accounts')
+        const account = privateKeyToAccount(process.env.WITHDRAWAL_EXECUTOR_PRIVATE_KEY as `0x${string}`)
+        executorAddress = account.address
+      } catch (error) {
+        console.error('Error deriving address from private key:', error)
+      }
+    }
 
     if (executorAddress) {
       try {
@@ -244,7 +256,7 @@ export async function collectSystemHealth() {
         executorBalance = 0
       }
     } else {
-      console.warn('NEXT_PUBLIC_EXECUTOR_WALLET not configured - executor balance will show as 0')
+      console.warn('No executor wallet configured - executor balance will show as 0')
     }
 
     return {
