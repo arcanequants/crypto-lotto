@@ -147,6 +147,9 @@ export async function collectDatabaseData() {
       .select('*', { count: 'exact', head: true })
 
     // Get tickets sold today
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+
     const { count: ticketsToday } = await supabase
       .from('tickets')
       .select('*', { count: 'exact', head: true })
