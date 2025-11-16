@@ -231,18 +231,20 @@ export async function collectSystemHealth() {
     // Check contract verification (simplified - would need API call to Basescan)
     const contractStatus = 'verified'
 
-    // Get executor wallet balance
+    // Get executor wallet balance from environment variable
     let executorBalance = 0
-    // Hardcoded executor address (public info, safe to include)
-    const executorAddress = (process.env.NEXT_PUBLIC_EXECUTOR_WALLET ||
-      '0x778F6CF70bCe995d25f7De728cD54198BA892e1a') as `0x${string}`
+    const executorAddress = process.env.NEXT_PUBLIC_EXECUTOR_WALLET
 
-    try {
-      const balance = await publicClient.getBalance({ address: executorAddress })
-      executorBalance = Number(balance) / 1e18 // Convert from wei to ETH
-    } catch (error) {
-      console.error('Error getting executor balance:', error)
-      executorBalance = 0
+    if (executorAddress) {
+      try {
+        const balance = await publicClient.getBalance({ address: executorAddress as `0x${string}` })
+        executorBalance = Number(balance) / 1e18 // Convert from wei to ETH
+      } catch (error) {
+        console.error('Error getting executor balance:', error)
+        executorBalance = 0
+      }
+    } else {
+      console.warn('NEXT_PUBLIC_EXECUTOR_WALLET not configured - executor balance will show as 0')
     }
 
     return {
