@@ -159,7 +159,7 @@ export default function AdminHealthPage() {
         marginBottom: '24px',
         backgroundColor: getStatusBgColor(healthData.overall_status)
       }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#000' }}>
           Overall System Status: {healthData.overall_status.toUpperCase()}
         </h2>
       </div>
@@ -167,7 +167,7 @@ export default function AdminHealthPage() {
       {/* Alerts */}
       {healthData.alerts && healthData.alerts.length > 0 && (
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'semibold', marginBottom: '16px' }}>Active Alerts</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 'semibold', marginBottom: '16px', color: '#000' }}>Active Alerts</h2>
           {healthData.alerts.map((alert: any, idx: number) => (
             <div
               key={idx}
@@ -179,7 +179,7 @@ export default function AdminHealthPage() {
                 backgroundColor: alert.severity === 'critical' ? '#fef2f2' : '#fefce8'
               }}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '4px' }}>⚠ {alert.title}</h3>
+              <h3 style={{ fontWeight: '600', marginBottom: '4px', color: '#000' }}>⚠ {alert.title}</h3>
               <p style={{ color: '#666', fontSize: '14px' }}>{alert.message}</p>
             </div>
           ))}
@@ -200,7 +200,8 @@ export default function AdminHealthPage() {
                 borderBottom: activeTab === tab ? '2px solid #3b82f6' : 'none',
                 cursor: 'pointer',
                 fontWeight: activeTab === tab ? '600' : '400',
-                textTransform: 'capitalize'
+                textTransform: 'capitalize',
+                color: '#000'
               }}
             >
               {tab}
@@ -257,7 +258,7 @@ export default function AdminHealthPage() {
         {activeTab === 'crons' && (
           <div>
             <div style={{ marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Cron Jobs Status</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Cron Jobs Status</h3>
               <p style={{ color: '#666', fontSize: '14px' }}>
                 {healthData.crons.healthy} healthy, {healthData.crons.degraded} degraded, {healthData.crons.down} down
               </p>
@@ -275,7 +276,7 @@ export default function AdminHealthPage() {
                   backgroundColor: 'white'
                 }}>
                   <div>
-                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>{job.job_name}</div>
+                    <div style={{ fontWeight: '600', marginBottom: '4px', color: '#000' }}>{job.job_name}</div>
                     <div style={{ fontSize: '14px', color: '#666' }}>
                       Last: {job.last_execution ? new Date(job.last_execution).toLocaleString() : 'Never'}
                     </div>
@@ -314,7 +315,7 @@ export default function AdminHealthPage() {
                       marginBottom: '8px',
                       backgroundColor: '#fef2f2'
                     }}>
-                      <div style={{ fontWeight: '600' }}>{failure.job_name}</div>
+                      <div style={{ fontWeight: '600', color: '#000' }}>{failure.job_name}</div>
                       <div style={{ fontSize: '14px', color: '#666' }}>
                         {new Date(failure.execution_time).toLocaleString()}
                       </div>
@@ -336,9 +337,9 @@ export default function AdminHealthPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
             {/* Database */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>🗄️ Database</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#000' }}>🗄️ Database</h3>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>Status</span>
+                <span style={{ color: '#000' }}>Status</span>
                 <span style={{
                   padding: '2px 8px',
                   borderRadius: '4px',
@@ -350,16 +351,16 @@ export default function AdminHealthPage() {
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Configured</span>
-                <span>{healthData.environment.supabase_configured ? 'Yes' : 'No'}</span>
+                <span style={{ color: '#000' }}>Configured</span>
+                <span style={{ color: '#000' }}>{healthData.environment.supabase_configured ? 'Yes' : 'No'}</span>
               </div>
             </div>
 
             {/* RPC */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>⚡ Base RPC</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#000' }}>⚡ Base RPC</h3>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>Status</span>
+                <span style={{ color: '#000' }}>Status</span>
                 <span style={{
                   padding: '2px 8px',
                   borderRadius: '4px',
@@ -371,45 +372,46 @@ export default function AdminHealthPage() {
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Block Number</span>
-                <span>{healthData.system.rpc.block_number.toLocaleString()}</span>
+                <span style={{ color: '#000' }}>Block Number</span>
+                <span style={{ color: '#000' }}>{healthData.system.rpc.block_number.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Contract */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>📜 Smart Contract</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#000' }}>📜 Smart Contract</h3>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>Status</span>
-                <span>{healthData.system.contract.status}</span>
+                <span style={{ color: '#000' }}>Status</span>
+                <span style={{ color: '#000' }}>{healthData.system.contract.status}</span>
               </div>
               <div style={{ fontSize: '12px', wordBreak: 'break-all' }}>
                 <span style={{ color: '#666' }}>Address:</span><br />
-                <code style={{ fontSize: '10px' }}>{healthData.system.contract.address}</code>
+                <code style={{ fontSize: '10px', color: '#000' }}>{healthData.system.contract.address}</code>
               </div>
             </div>
 
             {/* Environment */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>🌍 Environment</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#000' }}>🌍 Environment</h3>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>Environment</span>
+                <span style={{ color: '#000' }}>Environment</span>
                 <span style={{
                   padding: '2px 8px',
                   border: '1px solid #e5e7eb',
                   borderRadius: '4px',
-                  fontSize: '12px'
+                  fontSize: '12px',
+                  color: '#000'
                 }}>
                   {healthData.environment.vercel_env}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>Region</span>
-                <span>{healthData.environment.vercel_region}</span>
+                <span style={{ color: '#000' }}>Region</span>
+                <span style={{ color: '#000' }}>{healthData.environment.vercel_region}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Node Version</span>
-                <span>{healthData.environment.node_version}</span>
+                <span style={{ color: '#000' }}>Node Version</span>
+                <span style={{ color: '#000' }}>{healthData.environment.node_version}</span>
               </div>
             </div>
           </div>
@@ -419,7 +421,7 @@ export default function AdminHealthPage() {
         {activeTab === 'events' && (
           <div>
             <div style={{ marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Recent Events</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Recent Events</h3>
               <p style={{ color: '#666', fontSize: '14px' }}>
                 Last 50 system events | Unresolved: {healthData.events.total_unresolved}
               </p>
@@ -437,7 +439,7 @@ export default function AdminHealthPage() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                       <div>
-                        <div style={{ fontWeight: '600' }}>{event.title}</div>
+                        <div style={{ fontWeight: '600', color: '#000' }}>{event.title}</div>
                         <div style={{ fontSize: '14px', color: '#666' }}>{event.description}</div>
                         <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
                           {new Date(event.created_at).toLocaleString()}
@@ -465,7 +467,7 @@ export default function AdminHealthPage() {
         {/* Raw Data Tab */}
         {activeTab === 'raw' && (
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Raw JSON Data</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Raw JSON Data</h3>
             <p style={{ color: '#666', fontSize: '14px', marginBottom: '16px' }}>
               Complete health report for debugging
             </p>
@@ -477,7 +479,8 @@ export default function AdminHealthPage() {
               overflowX: 'auto',
               maxHeight: '600px',
               overflowY: 'auto',
-              border: '1px solid #e5e7eb'
+              border: '1px solid #e5e7eb',
+              color: '#000'
             }}>
               {JSON.stringify(healthData, null, 2)}
             </pre>
