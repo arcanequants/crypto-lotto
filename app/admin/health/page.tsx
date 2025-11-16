@@ -1,4 +1,5 @@
 'use client'
+// System Health Report - Updated 2025-11-15
 
 import { useEffect, useState } from 'react'
 
@@ -216,21 +217,21 @@ export default function AdminHealthPage() {
             {/* Revenue */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
               <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>💰 Total Revenue</h3>
-              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.metrics.revenue.totalFormatted}</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>{healthData.metrics.revenue.totalFormatted}</div>
               <p style={{ fontSize: '12px', color: '#999' }}>Platform + Prizes</p>
             </div>
 
             {/* Users */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
               <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>👥 Total Users</h3>
-              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.metrics.users.total}</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>{healthData.metrics.users.total}</div>
               <p style={{ fontSize: '12px', color: '#999' }}>Active: {healthData.metrics.users.active}</p>
             </div>
 
             {/* Tickets */}
             <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: 'white' }}>
               <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>🎫 Total Tickets</h3>
-              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.metrics.tickets.total}</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>{healthData.metrics.tickets.total}</div>
               <p style={{ fontSize: '12px', color: '#999' }}>
                 H: {healthData.metrics.tickets.hourly} | D: {healthData.metrics.tickets.daily}
               </p>
@@ -244,7 +245,7 @@ export default function AdminHealthPage() {
               backgroundColor: healthData.system.executor.low_balance_warning ? '#fef2f2' : 'white'
             }}>
               <h3 style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>👛 Executor Balance</h3>
-              <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{healthData.system.executor.balance_formatted}</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>{healthData.system.executor.balance_formatted}</div>
               <p style={{ fontSize: '12px', color: healthData.system.executor.low_balance_warning ? '#ef4444' : '#999' }}>
                 {healthData.system.executor.low_balance_warning ? 'LOW BALANCE!' : 'OK'}
               </p>
