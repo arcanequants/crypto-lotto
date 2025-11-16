@@ -418,7 +418,9 @@ export default function AdminDashboard() {
                     </span>
                   </div>
                 </div>
-                <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>View Full Health Report</button>
+                <a href="/admin/health" style={{ textDecoration: 'none' }}>
+                  <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>View Full Health Report</button>
+                </a>
               </div>
 
               <div className="draw-card">

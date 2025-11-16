@@ -55,6 +55,11 @@ export async function GET() {
       .gte('execution_time', twentyFourHoursAgo.toISOString())
       .order('execution_time', { ascending: false })
 
+    // Get total tickets from database
+    const { count: totalTickets } = await supabase
+      .from('tickets')
+      .select('*', { count: 'exact', head: true })
+
     // Environment info
     const environment = {
       node_version: process.version,
@@ -99,7 +104,7 @@ export async function GET() {
         revenue: metrics.revenue,
         users: metrics.users,
         tickets: {
-          total: metrics.draws.hourlyTickets + metrics.draws.dailyTickets,
+          total: totalTickets || 0,
           hourly: metrics.draws.hourlyTickets,
           daily: metrics.draws.dailyTickets,
         },
